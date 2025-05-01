@@ -1,0 +1,8 @@
+numpy>=1.23.0,<1.27
+matplotlib>=3.7.0,<3.9
+scikit-learn>=1.2.0,<1.5
+tensorflow>=2.13.0,<2.16
+kagglehub>=0.1.5,<0.2
+
+# Optional for demo app
+streamlit>=1.25.0,<1.33
