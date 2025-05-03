@@ -35,3 +35,4 @@ df['label'] = y_encoded
 csv_output_path = '/Sanjeev/VNIT_CLASSES/FINAL_PROJECT/DATASET/program_output/mapped_data.csv'
 df.to_csv(csv_output_path, index=False)
 print(f"CSV file saved to: {csv_output_path}")
+

@@ -1,0 +1,42 @@
+This implementation includes:
+1. A **ResNet-1D architecture** with skip connections for spatial feature extraction
+2. **BiLSTM** layer for temporal dynamics modeling
+3. **Attention mechanism** to focus on discriminative time windows
+4. **AdamW optimizer** with cosine learning rate decay
+5. **Mixup augmentation** for regularization
+6. **5-fold cross-validation** for robust evaluation
+7. Comprehensive training pipeline with visualization
+8. Model saving functionality
+
+Key Features:
+- Implements the proposed hybrid architecture
+- Uses batch normalization for stable training
+- Includes dropout for regularization
+- Supports flexible input shapes
+- Implements learning rate scheduling
+- Provides visualization of training metrics
+- Saves models for each fold
+
+To use this program:
+1. Ensure your CSI data is in the correct format (samples × 100 × 30)
+2. Adjust the batch size (32-64) based on your laptop's memory
+3. The program will automatically perform 5-fold cross-validation
+4. Training results will be saved as plots
+5. Trained models will be saved for each fold
+
+The program follows best practices for deep learning:
+- Proper model architecture design
+- Regularization techniques
+- Learning rate scheduling
+- Cross-validation
+- Performance monitoring
+- Model checkpointing
+
+You can further customize the hyperparameters by adjusting:
+- Learning rate
+- Batch size
+- Number of epochs
+- Model architecture (filters, layers)
+- Regularization strength
+
+This implementation provides a solid foundation for your HAR system using CSI data.
