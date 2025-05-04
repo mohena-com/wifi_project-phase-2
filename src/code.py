@@ -6,12 +6,15 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
+from config_reader import ConfigReader
 
 # Configure logging
-def setup_logging():
+def setup_logging(cfg):
     """Setup logging configuration"""
     # Create logs directory if it doesn't exist
-    log_dir = Path('/Sanjeev/VNIT_CLASSES/FINAL_PROJECT/logs')
+    
+    log_dir_path = cfg.get('log_save_path')
+    log_dir = Path(log_dir_path)
     log_dir.mkdir(parents=True, exist_ok=True)
     
     # Create log file with timestamp
@@ -45,16 +48,21 @@ def setup_logging():
     logging.info(f"Logging initialized. Log file: {log_file}")
     return log_file
 
+# Load configuration
+config_path = Path(__file__).parent.parent / 'config' / 'har_config.properties'
+config = ConfigReader(config_path)
+logging.info(f'Configuration loaded from: {config_path}')
+
 # Setup logging
-log_file = setup_logging()
+log_file = setup_logging(config)
 
 # ---- Load CSI features ----
-features_path = '/Sanjeev/VNIT_CLASSES/FINAL_PROJECT/DATASET/data/CSI_data_S01.npz'
+features_path = config.get('features_path')
 csi_data = np.load(features_path)['arr_0']  # shape: (num_samples, num_features)
 logging.info(f"Loaded CSI features from: {features_path}")
 
 # ---- Load activity labels ----
-labels_npz_path = '/Sanjeev/VNIT_CLASSES/FINAL_PROJECT/DATASET/data/output/label/CSI_label_S01.npz'
+labels_npz_path = config.get('labels_path')
 label_data = np.load(labels_npz_path)
 logging.info(f"Label NPZ keys: {label_data.files}")  # Should show ['arr_0']
 
@@ -81,7 +89,8 @@ feature_columns = [f'feature_{i+1}' for i in range(csi_data.shape[1])]
 df = pd.DataFrame(csi_data, columns=feature_columns)
 df['label'] = y_encoded
 
-csv_output_path = '/Sanjeev/VNIT_CLASSES/FINAL_PROJECT/DATASET/program_output/mapped_data.csv'
+# Get CSV output path from config
+csv_output_path = config.get('csv_output_path')
 os.makedirs(os.path.dirname(csv_output_path), exist_ok=True)
 df.to_csv(csv_output_path, index=False)
 logging.info(f"CSV file saved to: {csv_output_path}")

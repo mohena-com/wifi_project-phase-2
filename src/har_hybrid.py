@@ -331,7 +331,7 @@ class TrainingProgressLogger(tf.keras.callbacks.Callback):
     
     def on_epoch_begin(self, epoch, logs=None):
         self.logger.info(f"\n{'='*50}")
-        self.logger.info(f"Starting Fold {epoch + 1}/5 at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        self.logger.info(f"Starting Epoch {epoch + 1}/5 at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.logger.info(f"{'='*50}")
         self.batch_count = 0
     
