@@ -90,13 +90,21 @@ def setup_logging(config):
     logging.info(f"Logging initialized. Log file: {log_file}")
     return log_file
 
-def setup_environment(config):
+def setup_environment():
     """Setup environment and detect if running in Google Colab."""
+    config = None
+    print(f'0. setup_environment')
     try:
         from google.colab import drive
         IN_COLAB = True
+        print(f'1. IN_COLAB:{IN_COLAB}')
+
         logging.info("Running in Google Colab")
-        
+        config_path = Path(__file__).parent.parent / 'config' / 'har_config_collab.properties'
+        print(f'2. config_path:{config_path}')
+        logging.info(f'Configuration loaded from: {config_path}')
+        config = ConfigReader(config_path)
+
         # Mount Google Drive
         drive.mount('/content/drive')
         
@@ -124,6 +132,10 @@ def setup_environment(config):
                 
     except ImportError:
         IN_COLAB = False
+        config_path = Path(__file__).parent.parent / 'config' / 'har_config.properties'
+        logging.info(f'Configuration loaded from: {config_path}')
+        config = ConfigReader(config_path)
+
         logging.info("Running locally")
         base_path = config.get_path('local_data_path')
         
@@ -136,8 +148,8 @@ def setup_environment(config):
                 logging.info(f"- {gpu.name}")
         else:
             logging.warning("No GPU devices found")
-    
-    return IN_COLAB, base_path
+
+    return IN_COLAB, base_path, config
 
 def load_csi_data(base_path, in_colab, config):
     """Load all CSI data and labels from the dataset directory."""
@@ -579,19 +591,13 @@ def plot_evaluation_metrics(fold_histories, y_true, y_pred, encoder, config, X_d
     plt.close()
 
 def main():
-    # Load configuration
-    config_path = Path(__file__).parent.parent / 'config' / 'har_config.properties'
-    config = ConfigReader(config_path)
-    logging.info(f'Configuration loaded from: {config_path}')
-    
+    # Setup environment and get base path
+    IN_COLAB, base_path, config = setup_environment()
+    logging.info(f'Environment setup - IN_COLAB: {IN_COLAB}, base_path: {base_path}')
     # Setup logging
     log_file = setup_logging(config)
     logging.info(f'Logging started. Log file: {log_file}')
-    
-    # Setup environment and get base path
-    IN_COLAB, base_path = setup_environment(config)
-    logging.info(f'Environment setup - IN_COLAB: {IN_COLAB}, base_path: {base_path}')
-    
+
     # Load and preprocess data
     X, y = load_csi_data(base_path, IN_COLAB, config)
     logging.info(f'Data loaded - X shape: {X.shape}, y shape: {y.shape}')
