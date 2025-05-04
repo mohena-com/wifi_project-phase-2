@@ -9,7 +9,7 @@ labels_path=/content/drive/MyDrive/Intellipaat-sem3/wifi_project/FINAL_PROJECT/D
 input_shape=90,1
 num_classes=10
 batch_size=64
-epochs=3
+epochs=10
 learning_rate=0.0003
 dropout_rate=0.5
 
