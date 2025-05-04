@@ -373,16 +373,39 @@ class TrainingProgressLogger(tf.keras.callbacks.Callback):
 def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, batch_size=64):
     """Train the model with the given data and parameters."""
     # Prepare callbacks
+    print(f'Total Epochs : {epochs}')
+    print(f'batch_size : {batch_size}')
+
     lr_scheduler = LearningRateScheduler(
         lambda epoch: cosine_decay_with_warmup(epoch, epochs))
     
     # Create model save directory
-    model_save_dir = Path(config.get('model_save_path'))
-    model_save_dir.mkdir(parents=True, exist_ok=True)
-    
+    from pathlib import Path
+    model_save_dir = None
+    try:
+        model_save_path = config.get('model_save_path')
+        print(f"0. model_save_path: {model_save_path}")
+        if not model_save_path:
+            raise ValueError("Error: 'model_save_path' is missing or invalid!")
+
+        model_save_dir = Path(model_save_path)
+        print(f"0. model_save_dir: {model_save_dir}")
+
+        model_save_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"0. model_save_dir: {model_save_dir}")
+    except Exception as e:
+        print(f"Error: {e}")
+
     # Only save best models if configured
     callbacks = [lr_scheduler]
-    if config.get_bool('save_fold_models', default=True):
+
+    data = config.get('save_fold_models', True)  # Step 1: Get the data
+    print(f"1. save_fold_models: {data}")
+    save_fold_models = bool(data)  # Step 2: Convert to boolean
+    print(f"2. save_fold_models: {save_fold_models}")
+
+    if save_fold_models:
         checkpoint = ModelCheckpoint(
             str(model_save_dir / f'best_model_fold_{fold + 1}.keras'),
             monitor='val_accuracy',
@@ -391,11 +414,17 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
             verbose=0  # Don't print checkpoint messages
         )
         callbacks.append(checkpoint)
-    
+        print(f"3. checkpoint: {checkpoint}")
+
     # Create training progress logger
     log_file = Path(config.get('log_save_path')) / f'training_progress_fold_{fold + 1}.log'
+    print(f"4. log_file: {log_file}")
+
     progress_logger = TrainingProgressLogger(log_file)
+    print(f"5. progress_logger: {progress_logger}")
+
     callbacks.append(progress_logger)
+    print(f"6. callbacks.append ")
 
     # Training with mixup
     history = model.fit(
@@ -406,6 +435,7 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
         callbacks=callbacks,
         verbose=0  # Don't print training progress
     )
+    print(f"7. history: {history}")
 
     return history
 
@@ -656,6 +686,7 @@ def main():
         model_path = Path(config.get('model_save_path')) / f'har_model_fold_{fold + 1}.keras'
         model.save(str(model_path))
         logging.info(f"Model saved to: {model_path}")
+
     
     # Calculate total training time
     total_end_time = time.time()
