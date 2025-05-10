@@ -1,60 +1,18 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-import logging
 import os
-import sys
-from pathlib import Path
-from datetime import datetime
-from config_reader import ConfigReader
+from environment import setup_environment
+from environment import setup_logging
+import logging
 
-# Configure logging
-def setup_logging(cfg):
-    """Setup logging configuration"""
-    # Create logs directory if it doesn't exist
-    
-    log_dir_path = cfg.get('log_save_path')
-    log_dir = Path(log_dir_path)
-    log_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create log file with timestamp
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    log_file = log_dir / f'data_processing_{timestamp}.log'
-    
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(stream=sys.stdout)  # Console handler
-        ]
-    )
-    
-    # Set console handler to only show WARNING and above
-    console_handler = logging.StreamHandler(stream=sys.stdout)
-    console_handler.setLevel(logging.WARNING)
-    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    
-    # Get the root logger and remove existing handlers
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers[:]:
-        root_logger.removeHandler(handler)
-    
-    # Add our custom handlers
-    root_logger.addHandler(logging.FileHandler(log_file))
-    root_logger.addHandler(console_handler)
-    
-    logging.info(f"Logging initialized. Log file: {log_file}")
-    return log_file
-
-# Load configuration
-config_path = Path(__file__).parent.parent / 'config' / 'har_config.properties'
-config = ConfigReader(config_path)
-logging.info(f'Configuration loaded from: {config_path}')
-
+# Setup environment and get base path
+IN_COLAB, base_path, config = setup_environment()
+print(f'main : config : {config}')
+logging.info(f'Environment setup - IN_COLAB: {IN_COLAB}, base_path: {base_path}')
 # Setup logging
 log_file = setup_logging(config)
+logging.info(f'Logging started. Log file: {log_file}')
 
 # ---- Load CSI features ----
 features_path = config.get('features_path')
