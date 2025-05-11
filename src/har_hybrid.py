@@ -357,6 +357,14 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
     print(f'    0. Total Epochs : {epochs}')
     print(f'    1. batch_size : {batch_size}')
 
+    # Debug: Print initial model weights
+    print("\nInitial Model Weights:")
+    for layer in model.layers:
+        if layer.weights:
+            print(f"Layer {layer.name}:")
+            for weight in layer.weights:
+                print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
+
     # Calculate total batches
     total_samples = len(x_train)
     batches_per_epoch = (total_samples + batch_size - 1) // batch_size  # Ceiling division
@@ -378,7 +386,7 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
         monitor='val_accuracy',
         save_best_only=True,
         mode='max',
-        verbose=0  # Don't print checkpoint messages
+        verbose=1  # Changed to 1 to show checkpoint messages
     )
     callbacks.append(checkpoint)
     print(f"    3. CHECKPOINT: {checkpoint}")
@@ -400,9 +408,22 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
         epochs=epochs,
         validation_data=(x_val, y_val),
         callbacks=callbacks,
-        verbose=0  # Don't print training progress
+        verbose=1  # Changed to 1 to show training progress
     )
     print(f"    7. history: {history}")
+
+    # Debug: Print final model weights
+    print("\nFinal Model Weights:")
+    for layer in model.layers:
+        if layer.weights:
+            print(f"Layer {layer.name}:")
+            for weight in layer.weights:
+                print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
+
+    # Debug: Print model summary
+    print("\nModel Summary:")
+    model.summary()
+
     print('TRAIN MODEL END')
 
     return history
@@ -572,10 +593,7 @@ def main():
         stratify=y_encoded
     )
     logging.info(f'Data split - Train/Val shape: {X_train_val.shape}, Test shape: {X_test.shape}')
-    # Free memory
-    #del X, y, y_encoded, y_data
 
-    #gc.collect()
     # Initialize cross-validation
     kf = KFold(n_splits=config.get_int('n_splits'), 
                shuffle=True, 
@@ -604,13 +622,18 @@ def main():
             metrics=['accuracy', 'categorical_accuracy']
         )
         logging.info('Model created and compiled')
+
+        # Debug: Print model architecture before training
+        print("\nModel Architecture before training:")
+        model.summary()
+
         # Train the model
         history = train_model(x_train, y_train, x_val, y_val, model, fold, config,
                             epochs=config.get_int('epochs'),
                             batch_size=config.get_int('batch_size'))
         fold_histories.append(history.history)
         # Evaluate on test set
-        test_results = model.evaluate(X_test, y_test, verbose=0)
+        test_results = model.evaluate(X_test, y_test, verbose=1)  # Changed to verbose=1
         test_metrics.append({
             'fold': fold + 1,
             'test_loss': test_results[0],
@@ -623,9 +646,21 @@ def main():
         logging.info(f"Fold {fold + 1} completed in: {fold_duration:.2f} seconds")
         logging.info(f"Fold {fold + 1} completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         logging.info(f"Test results - Loss: {test_results[0]:.4f}, Accuracy: {test_results[1]:.4f}, Categorical Accuracy: {test_results[2]:.4f}")
+        
         # Save the model
         model_path = Path(config.get('model_save_path')) / f'har_model_fold_{fold + 1}.keras'
+        
+        # Debug: Print model size before saving
+        if model_path.exists():
+            model_size = os.path.getsize(str(model_path))
+            print(f"\nModel size before saving: {model_size / (1024*1024):.2f} MB")
+        
         model.save(str(model_path))
+        
+        # Debug: Print model size after saving
+        model_size = os.path.getsize(str(model_path))
+        print(f"Model size after saving: {model_size / (1024*1024):.2f} MB")
+        
         logging.info(f"Model saved to: {model_path}")
         # Get predictions for current fold's model on test set
         y_pred = model.predict(X_test)

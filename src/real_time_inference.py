@@ -172,11 +172,16 @@ def main():
     parser.add_argument('base_path', help='Base path for the project')
     parser.add_argument('project_name', help='Project name')
     parser.add_argument('config_file', help='Configuration file name')
+    parser.add_argument('in_colab', type=str, help='Whether running in Google Colab (True/False)')
     args = parser.parse_args()
+    
+    # Convert in_colab string to boolean
+    in_colab = args.in_colab.lower() == 'true'
     
     # Setup logging
     log_file = setup_logging(f"{args.base_path}/logs")
     logging.info(f"Logging initialized. Log file: {log_file}")
+    logging.info(f"Running in Colab: {in_colab}")
     
     # Load configuration
     config = ConfigReader(f"{args.base_path}/{args.project_name}/config/{args.config_file}")
@@ -205,6 +210,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-#python src/real_time_inference.py /Sanjeev/VNIT_CLASSES/FINAL_PROJECT wifi_project har_config.properties
+#python real_time_inference.py /Sanjeev/VNIT_CLASSES/FINAL_PROJECT wifi_project har_config.properties False
 
-#python src/real_time_inference.py /Sanjeev/VNIT_CLASSES/FINAL_PROJECT wifi_project har_config.properties
