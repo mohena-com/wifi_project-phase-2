@@ -150,6 +150,8 @@ def process_test_data(model, test_data, test_labels, config):
 def find_best_model(model_save_dir):
     """Find the best model across all folds based on validation accuracy."""
     try:
+        logging.error(f"model_save_dir {model_save_dir}")
+
         # Get all model files
         model_files = list(Path(model_save_dir).glob('best_model_fold_*.keras'))
         if not model_files:
@@ -159,8 +161,7 @@ def find_best_model(model_save_dir):
         fold_numbers = [int(str(f).split('_')[-1].split('.')[0]) for f in model_files]
         best_fold = max(fold_numbers)
         best_model_path = model_save_dir / f'best_model_fold_{best_fold}.keras'
-        
-        logging.info(f"Found best model from fold {best_fold}")
+        logging.error(f"best_model_path {best_model_path}")
         return best_model_path
     except Exception as e:
         logging.error(f"Error finding best model: {e}")
@@ -212,3 +213,4 @@ if __name__ == "__main__":
 
 #python real_time_inference.py /Sanjeev/VNIT_CLASSES/FINAL_PROJECT wifi_project har_config.properties False
 
+# python3.11 real_time_inference.py /Users/sanjeev/VNIT/FINAL_PROJECT wifi_project har_config.properties False

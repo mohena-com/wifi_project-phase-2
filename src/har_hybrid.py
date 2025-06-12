@@ -1,88 +1,85 @@
+# --- GLOBAL CONFIGURATION (Place at very top of script) ---
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TF C++ logs
+import math
+
+import tensorflow as tf
+
+# Disable device op logging
+tf.debugging.set_log_device_placement(False)
+
+# Silence TF's Python logger
+tf.get_logger().setLevel('FATAL')
+
+# General imports (outside device scope)
 import gc
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras import layers, models, optimizers
-from sklearn.model_selection import KFold, train_test_split
-from sklearn.preprocessing import LabelEncoder
-import matplotlib.pyplot as plt
-from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
-import math
-import os
-from pathlib import Path
-from sklearn.metrics import confusion_matrix, r2_score, mean_squared_error, mean_absolute_percentage_error
-import seaborn as sns
-import pandas as pd
-import argparse
-import sys
-from config_reader import ConfigReader
-from datetime import datetime
-import time
 import logging
 import warnings
-from environment import setup_environment, parse_args
+import time
+import sys
+from pathlib import Path
+from datetime import datetime
 
-# Suppress TensorFlow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow CPU info messages
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Disable oneDNN custom operations
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import confusion_matrix, r2_score, mean_squared_error, mean_absolute_percentage_error
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+
+from tensorflow.keras import layers, models, optimizers
+from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
+#from tensorflow.keras.optimizers.legacy import AdamW
+#from keras.optimizers.legacy import AdamW
+from tensorflow.keras.optimizers import AdamW
+
+from config_reader import ConfigReader
+from environment import setup_environment, parse_args
+from test_gpu_1 import set_gpu_memory_growth
+
+device = set_gpu_memory_growth()
+
+# Suppress TensorFlow internal warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
-logging.getLogger('tensorflow').setLevel(logging.ERROR)
-
-#python /content/drive/MyDrive/Intellipaat-sem3/wifi_project/FINAL_PROJECT/wifi_project/src/har_hybrid.py /content/drive/MyDrive/Intellipaat-sem3/wifi_project/FINAL_PROJECT/wifi_project/config/har_config_collab.properties True
-
-#python har_hybrid.py /Sanjeev/VNIT_CLASSES/FINAL_PROJECT wifi_project har_config.properties False
 
 
-# Configure logging
 def setup_logging(log_dir):
     """Setup logging configuration"""
-    # Get log directory from config and convert to absolute path
-    log_dir = Path(log_dir)
-    log_dir = log_dir.resolve()  # Convert to absolute path
-
-    # Create log file with timestamp
+    log_dir = Path(log_dir).resolve()
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     log_file = log_dir / f'har_training_{timestamp}.log'
-    
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(stream=sys.stdout)  # Console handler
-        ]
-    )
-    
-    # Set console handler to only show WARNING and above
-    console_handler = logging.StreamHandler(stream=sys.stdout)
-    console_handler.setLevel(logging.WARNING)
-    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    
-    # Get the root logger and remove existing handlers
+
+    # Remove any previous handlers
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
-    
-    # Add our custom handlers
-    root_logger.addHandler(logging.FileHandler(log_file))
+
+    # File and console handlers
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setLevel(logging.FATAL)
+    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
-    
-    # Configure TensorFlow logging
+
+    # Separate loggers if needed
     tf_logger = logging.getLogger('tensorflow')
-    tf_logger.addHandler(logging.FileHandler(log_file))
-    tf_logger.setLevel(logging.INFO)
-    
-    # Configure training progress logging
+    tf_logger.setLevel(logging.FATAL)
+    tf_logger.addHandler(file_handler)
+
     progress_logger = logging.getLogger('training_progress')
-    progress_logger.addHandler(logging.FileHandler(log_file))
     progress_logger.setLevel(logging.INFO)
-    
-    # Configure TensorFlow CPU feature guard messages
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # Show all messages
-    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
-    
+    progress_logger.addHandler(file_handler)
+
     logging.info(f"Logging initialized. Log file: {log_file}")
     print(f'    ENVIRONMENT SETUP COMPLETE')
 
@@ -259,12 +256,14 @@ def create_hybrid_model(input_shape, num_classes, config):
 
 # Mixup Augmentation
 def mixup_data(x, y, alpha=0.2):
-    batch_size = tf.shape(x)[0]
-    indices = tf.random.shuffle(tf.range(batch_size))
-
-    lam = np.random.beta(alpha, alpha)
-    x_mixed = lam * x + (1 - lam) * tf.gather(x, indices)
-    y_mixed = lam * y + (1 - lam) * tf.gather(y, indices)
+    x_mixed = None
+    y_mixed = None
+    with tf.device(device):
+        batch_size = tf.shape(x)[0]
+        indices = tf.random.shuffle(tf.range(batch_size))
+        lam = np.random.beta(alpha, alpha)
+        x_mixed = lam * x + (1 - lam) * tf.gather(x, indices)
+        y_mixed = lam * y + (1 - lam) * tf.gather(y, indices)
 
     return x_mixed, y_mixed
 
@@ -359,11 +358,12 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
 
     # Debug: Print initial model weights
     print("\nInitial Model Weights:")
-    for layer in model.layers:
-        if layer.weights:
-            print(f"Layer {layer.name}:")
-            for weight in layer.weights:
-                print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
+    with tf.device(device):
+        for layer in model.layers:
+            if layer.weights:
+                print(f"Layer {layer.name}:")
+                for weight in layer.weights:
+                    print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
 
     # Calculate total batches
     total_samples = len(x_train)
@@ -414,11 +414,12 @@ def train_model(x_train, y_train, x_val, y_val, model, fold, config, epochs=5, b
 
     # Debug: Print final model weights
     print("\nFinal Model Weights:")
-    for layer in model.layers:
-        if layer.weights:
-            print(f"Layer {layer.name}:")
-            for weight in layer.weights:
-                print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
+    with tf.device(device):
+        for layer in model.layers:
+            if layer.weights:
+                print(f"Layer {layer.name}:")
+                for weight in layer.weights:
+                    print(f"  Shape: {weight.shape}, Mean: {tf.reduce_mean(weight).numpy():.4f}")
 
     # Debug: Print model summary
     print("\nModel Summary:")
@@ -557,6 +558,9 @@ def plot_evaluation_metrics(fold_histories, y_true, y_pred, encoder, config, X_d
 
 def main():
     print(f"TRAINING PROCESS INITIATED")
+    with tf.device(device):
+        print(f"GPU IS :{tf.config.list_physical_devices('GPU')}")
+
     # Parse command-line arguments
     argv_1, argv_2, argv_3, argv_4 = parse_args()
     log_file = setup_logging(f"{argv_1}/logs")
@@ -584,7 +588,9 @@ def main():
     # Reshape data for the model
     input_shape = config.get_tuple('input_shape')
     X = X.reshape(-1, *input_shape)
-    y_data = tf.keras.utils.to_categorical(y_encoded)
+    y_data = None
+    with tf.device(device):
+        y_data = tf.keras.utils.to_categorical(y_encoded)
     logging.info(f'Data reshaped - New X shape: {X.shape}')
     # Split data
     test_size = config.get_float('test_size')
@@ -616,11 +622,13 @@ def main():
         y_train, y_val = y_train_val[train_idx], y_train_val[val_idx]
         # Create and compile model
         model = create_hybrid_model(input_shape, num_classes, config)
-        model.compile(
-            optimizer=tf.keras.optimizers.AdamW(learning_rate=config.get_float('learning_rate')),
-            loss='categorical_crossentropy',
-            metrics=['accuracy', 'categorical_accuracy']
-        )
+
+        with tf.device(device):
+            model.compile(
+                optimizer=AdamW(learning_rate=config.get_float('learning_rate')),
+                loss='categorical_crossentropy',
+                metrics=['accuracy', 'categorical_accuracy']
+            )
         logging.info('Model created and compiled')
 
         # Debug: Print model architecture before training
@@ -672,7 +680,8 @@ def main():
         logging.info(f"Plots saved for fold {fold + 1}")
         # Free up memory after each fold
         del x_train, x_val, y_train, y_val, y_pred, y_pred_classes, y_true, history, test_results
-        tf.keras.backend.clear_session()
+        with tf.device(device):
+            tf.keras.backend.clear_session()
         gc.collect()
     # Free up memory after cross-validation
    # del X_train_val, X_test, y_train_val, y_test
