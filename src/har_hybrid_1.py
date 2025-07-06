@@ -46,7 +46,8 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 #python /content/drive/MyDrive/Intellipaat-sem3/wifi_project/FINAL_PROJECT/wifi_project/src/har_hybrid.py /content/drive/MyDrive/Intellipaat-sem3/wifi_project/FINAL_PROJECT/wifi_project/config/har_config_collab.properties True
 
-#python3.11 har_hybrid.py /users/sanjeev/VNIT/FINAL_PROJECT wifi_project har_config.properties False
+#python3.11 har_hybrid.py /Users/sanjeev/VNIT/FINAL_PRJ_PHASE2 wifi_project-phase-2 har_config.properties False
+
 
 
 # Configure logging
