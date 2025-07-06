@@ -16,7 +16,8 @@
 # conda activate har-gpu-env
 
 # Core scientific and numeric libraries
-numpy==1.24.3             # Fast array operations and math routines
+# numpy==1.24.3             # Fast array operations and math routines
+numpy==1.25.0
 pandas==2.0.3             # Data manipulation and analysis
 
 # TensorFlow setup for Apple Silicon
