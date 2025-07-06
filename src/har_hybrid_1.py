@@ -30,8 +30,12 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 # Make sure this is off:
 tf.debugging.set_log_device_placement(False)
 
-device = set_gpu_memory_growth()
+# device = set_gpu_memory_growth()
 
+for device in tf.config.list_physical_devices():
+    print(device)
+
+print(f"    00. DEVICE SETUP COMPLETE: {device}")
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 warnings.filterwarnings('ignore', category=DeprecationWarning)
