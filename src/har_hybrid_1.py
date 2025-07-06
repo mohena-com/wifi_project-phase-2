@@ -34,8 +34,9 @@ tf.debugging.set_log_device_placement(False)
 
 for device in tf.config.list_physical_devices():
     print(device)
-
-print(f"    00. DEVICE SETUP COMPLETE: {device}")
+    
+gpu_device = '/GPU:0'
+print(f"    00. DEVICE SETUP COMPLETE: {gpu_device}")
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 warnings.filterwarnings('ignore', category=DeprecationWarning)
