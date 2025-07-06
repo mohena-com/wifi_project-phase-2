@@ -1,14 +1,36 @@
-numpy==1.24.3
-pandas==2.0.3
-#tensorflow==2.15.0
-tensorflow-macos==2.15.0
-tensorflow-metal==1.1.0
-scikit-learn==1.3.0
-matplotlib==3.7.2
-seaborn==0.12.2
-pathlib==1.0.1
-tqdm==4.66.1
-h5py==3.9.0
-scipy==1.11.3
-joblib==1.3.2
-seaborn==0.12.2
+# numpy==1.24.3
+# pandas==2.0.3
+# tensorflow-macos==2.15.0
+# tensorflow-metal==1.1.0
+# scikit-learn==1.3.0
+# matplotlib==3.7.2
+# seaborn==0.12.2
+# pathlib==1.0.1
+# tqdm==4.66.1
+# h5py==3.9.0
+# scipy==1.11.3
+# joblib==1.3.2
+# seaborn==0.12.2
+
+# Core scientific and numeric libraries
+numpy==1.24.3             # Fast array operations and math routines
+pandas==2.0.3             # Data manipulation and analysis
+
+# TensorFlow setup for Apple Silicon
+tensorflow-macos==2.15.0  # Base TensorFlow build optimized for macOS
+tensorflow-metal==1.1.0   # Metal plugin to enable GPU acceleration on Apple Silicon
+
+# Machine learning and modeling
+scikit-learn==1.3.0       # Popular ML toolkit for classification, regression, etc.
+joblib==1.3.2             # Efficient serialization for parallel processing
+
+# Visualization tools
+matplotlib==3.7.2         # Plotting and data visualization
+seaborn==0.12.2           # Statistical plots built on top of matplotlib
+
+# Utility and data handling
+pathlib==1.0.1            # Object-oriented filesystem paths
+tqdm==4.66.1              # Progress bar for loops and downloads
+h5py==3.9.0               # Read/write support for HDF5 binary data format
+scipy==1.11.3             # Scientific computations and advanced math functions
+
