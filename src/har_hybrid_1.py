@@ -36,6 +36,7 @@ for device in tf.config.list_physical_devices():
     print(device)
     
 gpu_device = '/GPU:0'
+device = gpu_device
 print(f"    00. DEVICE SETUP COMPLETE: {gpu_device}")
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
