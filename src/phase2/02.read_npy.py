@@ -7,7 +7,7 @@ y = np.load("/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/wifi-csi-2gb-dataset_g
 
 print("X type:", type(X))
 print("X length (#files parsed):", len(X))
-print("First entry shape:", X[0].shape)   # shape (N_packets, 180)
+print("First entry  :", X[0] )   # shape (N_packets, 180)
 print("y shape:", y.shape)
 print("Unique labels:", np.unique(y))
 
