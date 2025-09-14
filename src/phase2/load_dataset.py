@@ -6,7 +6,46 @@ import pandas as pd
 from pathlib import Path
 
 # ----------------------------
-# Helper: Parse CSI string like '2+23i'
+# Your tested helpers
+# ----------------------------
+def parse_complex(s):
+    # Converts '15+15i' or '15-15i' to Python complex
+    s = s.replace('+-', '-')
+    s = s.replace('-+', '-')
+    s = s.replace('i', 'j')
+    return complex(s)
+
+def load_csv_as_batch(file, look_back):
+    """
+    Loads a CSV file and converts CSI values into normalized magnitudes.
+    Builds look_back-length windows for temporal modeling.
+    Returns: (X_batch, y_batch)
+    """
+    with open(file, 'r') as f:
+        lines = f.readlines()[1:]  # Skip header
+    data = []
+    for line in lines:
+        row = line.strip().split(',')
+        row_complex = [parse_complex(val) for val in row if val]
+        data.append(row_complex)
+    data = np.array(data)
+    if data.size == 0:
+        return np.zeros((1, look_back, 1)), np.zeros((1,))
+    data_mag = np.abs(data)
+    # Normalize
+    data_mag = (data_mag - np.min(data_mag)) / (np.max(data_mag) - np.min(data_mag) + 1e-8)
+    X_batch, y_batch = [], []
+    for i in range(len(data_mag) - look_back):
+        X_batch.append(data_mag[i:i+look_back])
+        y_batch.append(np.mean(data_mag[i+look_back]))  # placeholder target
+    X_batch = np.array(X_batch)
+    y_batch = np.array(y_batch)
+    if X_batch.size == 0:
+        return np.zeros((1, look_back, 1)), np.zeros((1,))
+    return X_batch, y_batch
+
+# ----------------------------
+# Real+Imag parser (for ResNet+LSTM with 2 channels)
 # ----------------------------
 def parse_complex_str(s):
     if pd.isna(s): return 0+0j
@@ -19,9 +58,6 @@ def parse_complex_str(s):
             return complex(m.group(1) + m.group(2))
         return 0+0j
 
-# ----------------------------
-# Parse one CSV file into (N, 180) array
-# ----------------------------
 def parse_csi_file(path: Path):
     df = pd.read_csv(path, engine="python")
     csi_cols = [c for c in df.columns if c.lower().startswith("csi")]
@@ -36,45 +72,45 @@ def parse_csi_file(path: Path):
     return csi_realimag
 
 # ----------------------------
-# Main dataset builder
+# Dataset builder for nested folder structure
 # ----------------------------
-def build_gait_dataset(data_dir, save_dir="dataset_out"):
-    data_dir = Path(data_dir)
+def build_gait_dataset(base_dir, save_dir="dataset_out"):
+    base_dir = Path(base_dir)
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
-
-    # find gait (C03) files
-    files = [f for f in data_dir.glob("*.csv") if "C03" in f.name]
 
     X, y = [], []
     label_map = {}
     label_counter = 0
 
-    for f in files:
-        subj_match = re.search(r"S\d+", f.name)
-        if not subj_match:
-            continue
-        subj_id = subj_match.group(0)  # e.g. S01
-        if subj_id not in label_map:
-            label_map[subj_id] = label_counter
-            label_counter += 1
+    # Traverse environments and subjects
+    for env_dir in sorted(base_dir.glob("Environment*")):
+        for subj_dir in sorted(env_dir.glob("Subject*")):
+            subj_name = subj_dir.name  # e.g. "Subject 1"
+            if subj_name not in label_map:
+                label_map[subj_name] = label_counter
+                label_counter += 1
 
-        try:
-            arr = parse_csi_file(f)
-            X.append(arr)
-            y.append(label_map[subj_id])
-            print(f"Parsed {f.name}: shape {arr.shape}, label={label_map[subj_id]}")
-        except Exception as e:
-            print(f"❌ Error parsing {f.name}: {e}")
+            # Pick only gait (C03) files
+            for f in subj_dir.glob("*.csv"):
+                if "C03" not in f.name:
+                    continue
+                try:
+                    arr = parse_csi_file(f)
+                    X.append(arr)
+                    y.append(label_map[subj_name])
+                    print(f"Parsed {f}: shape {arr.shape}, label={label_map[subj_name]}")
+                except Exception as e:
+                    print(f"❌ Error parsing {f}: {e}")
 
-    # save outputs
-    np.save(save_dir / "X.npy", np.array(X, dtype=object))  # object array (var-length seqs)
+    # Save combined dataset
+    np.save(save_dir / "X.npy", np.array(X, dtype=object))  # object array (var-length sequences)
     np.save(save_dir / "y.npy", np.array(y))
     with open(save_dir / "label_map.json", "w") as f:
         json.dump(label_map, f, indent=2)
 
     print("\n✅ Dataset built:")
-    print(f"  Files parsed: {len(X)}")
+    print(f"  Total files parsed: {len(X)}")
     print(f"  Subjects: {label_map}")
     print(f"  Saved to: {save_dir}")
 
@@ -82,4 +118,9 @@ def build_gait_dataset(data_dir, save_dir="dataset_out"):
 # Example usage
 # ----------------------------
 if __name__ == "__main__":
-    build_gait_dataset(data_dir="/mnt/data", save_dir="/mnt/data/gait_dataset")
+    build_gait_dataset(
+        base_dir="/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/wifi-csi-2gb-dataset",
+        save_dir="/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/wifi-csi-2gb-dataset_gait"
+    )
+
+
