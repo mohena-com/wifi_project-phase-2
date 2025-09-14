@@ -72,6 +72,41 @@ def parse_csi_file(path: Path):
     csi_realimag = np.concatenate([csi_matrix.real, csi_matrix.imag], axis=1)
     return csi_realimag
 
+def parse_csi_file_with_metadata(path: Path):
+    # Load the whole CSV file
+    df = pd.read_csv(path, engine="python")
+    
+    # Extract the CSI columns
+    csi_cols = [c for c in df.columns if c.lower().startswith("csi")]
+    rows, num = len(df), len(csi_cols)
+
+    # Parse CSI columns into complex matrix
+    csi_matrix = np.zeros((rows, num), dtype=np.complex128)
+    for i, c in enumerate(csi_cols):
+        col = df[c].astype(str).values
+        parsed = [parse_complex_str(x) for x in col]
+        csi_matrix[:, i] = parsed
+
+    # Stack real and imaginary parts
+    csi_realimag = np.concatenate([csi_matrix.real, csi_matrix.imag], axis=1)
+
+    # Extract other metadata columns as numpy arrays (if they exist)
+    meta_columns = ['timestamp_low', 'bfee_count', 'Nrx', 'Ntx', 'rssi_a', 'rssi_b', 'rssi_c', 
+                    'noise', 'agc', 'perm_1', 'perm_2', 'perm_3', 'rate']
+    meta_data = {}
+    for col in meta_columns:
+        if col in df.columns:
+            meta_data[col] = df[col].values
+        else:
+            meta_data[col] = None  # or np.zeros(rows) if preferred
+
+    # Return dictionary with both metadata and CSI data
+    return {
+        'metadata': meta_data,     # dict of numpy arrays for metadata fields
+        'csi_realimag': csi_realimag  # numpy array with real and imag CSI values
+    }
+
+
 # ----------------------------
 # Dataset builder for nested folder structure
 # ----------------------------
@@ -97,10 +132,10 @@ def build_gait_dataset(base_dir, save_dir="dataset_out"):
                 if "C03" not in f.name:
                     continue
                 try:
-                    arr = parse_csi_file(f)
+                    arr = parse_csi_file_with_metadata(f) #parse_csi_file(f)
                     X.append(arr)
                     y.append(label_map[subj_name])
-                    print(f"Parsed {f}: shape {arr.shape}, label={label_map[subj_name]}")
+                    print(f"Parsed {f}: shape {arr.shape}, label={label_map[subj_name]}, {arr}")
                 except Exception as e:
                     print(f"❌ Error parsing {f}: {e}")
 
