@@ -12,7 +12,7 @@ print("y shape:", y.shape)
 print("Unique labels:", np.unique(y))
 
 # Inspect first sample
-print("First sample array snippet:\n", X[0][, :10])  # first 5 packets, first 10 features
+print("First sample array snippet:\n", X[0][0:5, :10])  # first 5 packets, first 10 features
 print("First label:", y[0])
 
 # Load label map
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 sample = X[0]               # (N_packets, 180)
 plt.imshow(np.abs(sample.T), aspect='auto', cmap='viridis')
-plt.colorbar()
+plt.colorbar()v   
 plt.title("CSI magnitude (Subject " + str(y[0]) + ")")
 plt.xlabel("Packets")
 plt.ylabel("Subcarrier*Antennas (180)")
