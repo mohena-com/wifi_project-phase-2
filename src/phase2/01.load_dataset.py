@@ -86,6 +86,7 @@ def parse_csi_file_with_metadata(path: Path):
         col = df[c].astype(str).values
         parsed = [parse_complex_str(x) for x in col]
         csi_matrix[:, i] = parsed
+        print(f"Parsed real {parsed.real}: {parsed.imag}: {parsed.imaginary} ...")
 
     # Stack real and imaginary parts
     csi_realimag = np.concatenate([csi_matrix.real, csi_matrix.imag], axis=1)
