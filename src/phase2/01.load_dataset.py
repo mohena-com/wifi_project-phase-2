@@ -135,7 +135,7 @@ def build_gait_dataset(base_dir, save_dir="dataset_out"):
                     arr = parse_csi_file_with_metadata(f) #parse_csi_file(f)
                     X.append(arr)
                     y.append(label_map[subj_name])
-                    print(f"Parsed {f}: shape {arr.shape}, label={label_map[subj_name]}, {arr}")
+                    print(f"Parsed {f}: , label={label_map[subj_name]},Arr={arr}")
                 except Exception as e:
                     print(f"❌ Error parsing {f}: {e}")
 
