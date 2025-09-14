@@ -12,7 +12,7 @@ print("y shape:", y.shape)
 print("Unique labels:", np.unique(y))
 
 # Inspect first sample
-print("0. First sample array snippet:\n", X[0][0:5, :10])  # first 5 packets, first 10 features
+#print("0. First sample array snippet:\n", X[0][0:5, :10])  # first 5 packets, first 10 features
 print("1. First sample array snippet:\n", X[0] )  # first 5 packets, first 10 features
 
 print("First label:", y[0])
