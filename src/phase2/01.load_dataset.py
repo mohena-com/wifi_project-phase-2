@@ -5,9 +5,10 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-# ----------------------------
-# Your tested helpers
-# ----------------------------
+# ---------------------------------------------------------------------
+# one time execution of this file is needed for creating .npy files.
+# .npy files are created for X and y variables separately
+# ---------------------------------------------------------------------
 def parse_complex(s):
     # Converts '15+15i' or '15-15i' to Python complex
     s = s.replace('+-', '-')
