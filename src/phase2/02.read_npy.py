@@ -22,7 +22,7 @@ with open("/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/wifi-csi-2gb-dataset_gai
     label_map = json.load(f)
 print("Label map:", label_map)
 
-
+'''
 import matplotlib.pyplot as plt
 
 sample = X[0]               # (N_packets, 180)
@@ -32,3 +32,5 @@ plt.title("CSI magnitude (Subject " + str(y[0]) + ")")
 plt.xlabel("Packets")
 plt.ylabel("Subcarrier*Antennas (180)")
 plt.savefig('packets.png')
+
+'''
