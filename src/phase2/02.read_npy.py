@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 sample = X[0]               # (N_packets, 180)
 plt.imshow(np.abs(sample.T), aspect='auto', cmap='viridis')
-plt.colorbar()v   
+plt.colorbar()  
 plt.title("CSI magnitude (Subject " + str(y[0]) + ")")
 plt.xlabel("Packets")
 plt.ylabel("Subcarrier*Antennas (180)")
