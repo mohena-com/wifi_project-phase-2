@@ -13,7 +13,7 @@ def load_csv_as_batch_split_complex(filename):
         columns = reader.fieldnames
         complex_cols = [col for col in columns if col.startswith('csi_')]
         numeric_cols = [col for col in columns if not col.startswith('csi_')]
-
+    
         # Build new column names: real columns + csi_xxx_r + csi_xxx_i
         new_columns = numeric_cols.copy()
         for col in complex_cols:
