@@ -1,0 +1,18 @@
+No.,Study Title,Datasets,Activities ,Participants,Line-of-Sight (LoS),Non Line of Sight(Nlos),Size,Algorithm,Improvement
+,"WiMANS: A Benchmark Dataset forWiFi-based Multi-user Activity Sensing https://arxiv.org/abs/2402.09430
+
+https://github.com/huangshk/WiMANS",,,,,,,,
+,"https://ieee-dataport.org/documents/csi-bfi-har-wi-fi-datasets-human-activity-recognition
+
+https://github.com/kfoysalhaque/SiMWiSense/blob/master/SiMWiSense.pdf
+
+Simultaneous Multi-subject classification ",Channel State Information (CSI) and Beamforming Feedback Information (BFI)  ,"CSI : 20 
+BFI : Miltiple ","CSI : 6 (Single Subject)
+BFI : 3 Participants (Multi Subject) performing disctinct Actions Concurrently",Y,Y,"CSI : 500GB
+BFI: 700 GB",FREL- Feature Reusble Embedding Learning,85% over CNN and 20% of FSEL - Few-shot embedding Learning 
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
