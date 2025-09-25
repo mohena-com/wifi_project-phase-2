@@ -3,12 +3,58 @@ import re
 import csv
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, classification_report, precision_score, recall_score, f1_score
+from torch.utils.data import random_split
+from config_reader import ConfigReader 
 
 ###########################################
 # Step 1: CSV parsing (your version, adapted)
 ###########################################
+
+cr = ConfigReader("csi_id_config.properties")
+
+from datetime import datetime
+
+# Get the current date and time
+now = datetime.now()
+# Format and print only the time
+current_time = now.strftime("%Y%m%d_%H%M%S")
+
+print("Start : Current Time =", current_time)
+
+base_dir = cr.get("local_data_path")
+plot_path = f"{cr.get('output_path')}/{current_time}/plots"
+log_path = f"{cr.get('output_path')}/{current_time}/logs"
+
+print(" Plot path:", plot_path)
+print(" log path:", log_path)
+
+os.makedirs(plot_path, exist_ok=True)
+os.makedirs(log_path, exist_ok=True)
+
+import logging
+log_filename = f"{log_path}/run_{current_time}.log"
+logging.basicConfig(
+    filename=log_filename,
+    filemode='w',
+    format='%(asctime)s %(levelname)s: %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger()
+
+# Example usage:
+logger.info("Execution started.")
+ 
+
+# For errors or warnings:
+# logger.error("An error occurred")
+# logger.warning("This is a warning"
+ 
+# You can still use print for console output if needed, but logger will save all logs to the file.
+
 def parse_complex(s):
     if s is None or s.strip() == "":
         return 0.0 + 0.0j  # treat missing values as 0
@@ -30,7 +76,7 @@ def extract_S_A_numbers(filename):
     return None, None
 
 def load_csv_as_numpy(filename):
-    print("B_00. Loading:", filename)
+    logger.info(f"B_00. Loading:{ filename}")
     with open(filename, 'r', newline='') as f:
         reader = csv.DictReader(f)
         cols = reader.fieldnames
@@ -57,9 +103,9 @@ def load_csv_as_numpy(filename):
         
         X_meta = np.array(X_meta, dtype=np.float32)  # (T, 12)
         X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
-        print(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
+        logger.info(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
         
-        print(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
+        logger.info(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
         y = {"subject": subj, "activity": act}
         return X_meta, X_csi, y, meta_cols, csi_cols
 
@@ -87,18 +133,18 @@ class WifiCSIDataset(Dataset):
         i = 0
         for f in file_list:
             X_meta, X_csi, _, _, _ = load_csv_as_numpy(f)
-            print(f"A_00_{i}. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
+            logger.info(f"A_00_{i}. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             all_meta.append(X_meta)
             all_csi.append(X_csi)
             i = i+1
         
-        print(f"A_01. all_meta: {(len(all_meta[0]))} all_csi: {len(all_csi)}")
+        logger.info(f"A_01. all_meta: {(len(all_meta[0]))} all_csi: {len(all_csi)}")
 
         all_meta = np.vstack(all_meta)
         all_csi = np.vstack(all_csi)
         self.scaler_meta.fit(all_meta)
         self.scaler_csi.fit(all_csi)
-        print(f"A_02. all_meta: {all_meta.shape} all_csi: {all_csi.shape}")
+        logger.info(f"A_02. all_meta: {all_meta.shape} all_csi: {all_csi.shape}")
 
         # Second pass: windowed sequences
         for f in file_list:
@@ -124,6 +170,7 @@ class WifiCSIDataset(Dataset):
             "csi_seq": torch.tensor(csi_seq, dtype=torch.float32),   # (W, 99)
             "label": torch.tensor(subject_label, dtype=torch.long)   # shape: ()
         }
+
 import torch.nn as nn
 
 class CSILSTMNet(nn.Module):
@@ -145,39 +192,33 @@ class CSILSTMNet(nn.Module):
         out = self.fc(combined)  # (B, num_classes)
         return out
 
-import matplotlib.pyplot as plt
-
 ###########################################
 # Step 3: Example usage
 ###########################################
 if __name__ == "__main__":
-     
-    base_dir = "/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/temp"
-    #    Usage:
-    #base_dir = "/Users/sanjeev/VNIT/FINAL_PRJ_PHASE2/DATASET/wifi-csi-2gb-dataset"
+
 
     import glob
     import os
 
     # Correct glob pattern to find files with 'C03' in name and .csv extension recursively
-    filelist = glob.glob(os.path.join(base_dir, '**', '*C03*.csv'), recursive=True)
-
-    print("Found CSV files:", len(filelist))
+    gait_filenme = cr.get("file_name_for_gait")
+    filelist = glob.glob(os.path.join(base_dir, '**', gait_filenme), recursive=True)
+    logger.info(f"Found CSV files: { len(filelist)}")
  
     dataset = WifiCSIDataset(filelist, window_size=128, stride=64)
-    print(f"A. dataset: length : {dataset.__len__()}  ")
+    logger.info(f"A. dataset: length : {dataset.__len__()}  ")
     k = 0
     for d in dataset:
-        print(f"B. {k}. Sample shapes:", d["metadata_seq"].shape, d["csi_seq"].shape, d["label"].shape)
-        print(f"C. {k}. Sample label:", d["metadata_seq"])
+        logger.info(f"B. {k}. Sample shapes: {d['metadata_seq'].shape}, { d['csi_seq'].shape}, {d['label'].shape}")
+        logger.debug(f"C. {k}. Sample label: {d['metadata_seq']}")
         k = k + 1 
 
     loader = DataLoader(dataset, batch_size=16, shuffle=True)
-
     batch = next(iter(loader))
-    print("D. metadata_seq:", batch["metadata_seq"].shape)  # (B, W, 12)
-    print("E. csi_seq:", batch["csi_seq"].shape)            # (B, W, 99)
-    print("F. label:", batch["label"].shape)                # (B,)
+    logger.info(f"D. metadata_seq: { batch['metadata_seq'].shape}")  # (B, W, 12)
+    logger.info(f"E. csi_seq:{ batch['csi_seq'].shape}")            # (B, W, 99)
+    logger.info(f"F. label:{ batch['label'].shape}")                # (B,)
 
     import torch.optim as optim
 
@@ -186,15 +227,11 @@ if __name__ == "__main__":
         csi_input_size=batch["csi_seq"].shape[2],
         meta_input_size=batch["metadata_seq"].shape[2],
         window_size=batch["metadata_seq"].shape[1],
-        num_classes=30  # adjust as needed
+        num_classes=31  # adjust as needed
     )
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-
-    from torch.utils.data import random_split, DataLoader
-    import matplotlib.pyplot as plt
 
     # Split dataset into train and test sets (e.g., 80% train, 20% test)
     train_size = int(0.8 * len(dataset))
@@ -204,13 +241,17 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
-    num_epochs = 5
+    num_epochs = cr.get_int("epochs")
     train_losses = []
     test_losses = []
     train_accuracies = []
     test_accuracies = []
-
+    
+    import time
     for epoch in range(num_epochs):
+
+        start_time = time.time()
+
         # Training
         model.train()
         running_loss = 0.0
@@ -253,8 +294,10 @@ if __name__ == "__main__":
         test_losses.append(avg_loss)
         test_accuracies.append(correct / total)
 
-        print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {train_losses[-1]:.4f} | Train Acc: {train_accuracies[-1]:.4f} | Test Loss: {test_losses[-1]:.4f} | Test Acc: {test_accuracies[-1]:.4f}")
-
+        end_time = time.time()
+        epoch_time = end_time - start_time
+        logger.info(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {train_losses[-1]:.4f} | Train Acc: {train_accuracies[-1]:.4f} | Test Loss: {test_losses[-1]:.4f} | Test Acc: {test_accuracies[-1]:.4f} | Time: {epoch_time:.2f} sec")
+    
     # Plot loss curves
     plt.figure()
     plt.plot(range(1, num_epochs+1), train_losses, label="Train Loss", marker='o')
@@ -264,7 +307,7 @@ if __name__ == "__main__":
     plt.title("Loss vs. Epoch")
     plt.legend()
     plt.grid(True)
-    plt.savefig("loss_vs_epoch.png")
+    plt.savefig(f"{plot_path}/loss_vs_epoch.png")
 
     # Plot accuracy curves
     plt.figure()
@@ -275,4 +318,56 @@ if __name__ == "__main__":
     plt.title("Accuracy vs. Epoch")
     plt.legend()
     plt.grid(True)
-    plt.savefig("accuracy_vs_epoch.png")
+    plt.savefig(f"{plot_path}/accuracy_vs_epoch.png")
+
+    # Evaluate on test set and print stats
+    all_preds = []
+    all_labels = []
+    model.eval()
+    with torch.no_grad():
+        for batch in test_loader:
+            csi_seq = batch["csi_seq"]
+            meta_seq = batch["metadata_seq"]
+            labels = batch["label"].squeeze().cpu().numpy()
+            outputs = model(csi_seq, meta_seq)
+            preds = torch.argmax(outputs, dim=1).cpu().numpy()
+            all_preds.extend(preds)
+            all_labels.extend(labels)
+
+    all_preds = np.array(all_preds)
+    all_labels = np.array(all_labels)
+
+    # Accuracy
+    test_accuracy = np.mean(all_preds == all_labels)
+    logger.info(f"Final Test Accuracy: {test_accuracy:.4f}")
+
+    # Confusion Matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    logger.info(f"Confusion Matrix:\n { cm}")
+
+    # Classification Report
+    logger.info(f"Classification Report:\n { classification_report(all_labels, all_preds)}")
+
+    # Macro Precision, Recall, F1-score
+    precision = precision_score(all_labels, all_preds, average='macro')
+    recall = recall_score(all_labels, all_preds, average='macro')
+    f1 = f1_score(all_labels, all_preds, average='macro')
+    logger.info(f"Macro Precision: {precision:.4f}, Macro Recall: {recall:.4f}, Macro F1-score: {f1:.4f}")
+
+    # Per-class Accuracy
+    per_class_acc = cm.diagonal() / cm.sum(axis=1)
+    logger.info(f"Per-class Accuracy:{ per_class_acc}")
+
+    # Plot confusion matrix
+    plt.figure(figsize=(10, 8))
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title("Confusion Matrix")
+    plt.colorbar()
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.savefig(f"{plot_path}/confusion_matrix.png")
+    plt.close()
+
+current_time = now.strftime("%Y%m%d_%H%M%S")
+
+print(f"End : Current Time ={ current_time}")
