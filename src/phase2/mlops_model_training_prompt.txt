@@ -1,0 +1,7 @@
+write a mlops mlflow implemenation that is using 
+1. models from  EfficientNet1D, CSILSTMNet, DenseNet1D, EfficientNet1DLSTM, MobileNetV3 one by one for traiing and eval and find various stats and plots 
+2. saves best model from the exection of train and eval 
+3. does hyperparamter tunning and finds best paramters intra model and interl model
+4. finds best model among all above 4 models (in point 1) 
+5. uses features of mlops to save all the attributes of model training expected to be done in a professional commercail project
+
