@@ -1,170 +1,214 @@
-import os
-import itertools
-import time
+import os, glob, time, itertools, logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader, random_split
+import numpy as np
+import matplotlib.pyplot as plt
 import mlflow
 import mlflow.pytorch
-import numpy as np
-import psutil
-import joblib
+from sklearn.metrics import confusion_matrix, classification_report, precision_score, recall_score, f1_score
 
-# Import all your model class files here
-from DL_EfficientNet1DLSTM import EfficientNet1DLSTM
+# Import your custom classes
+from config_reader import ConfigReader
+from DS_WifiCSIDataset import WifiCSIDataset
 from DL_CSILSTMNet import CSILSTMNet
 from DL_DenseNet1D import DenseNet1D
+from DL_EfficientNet1DLSTM import EfficientNet1DLSTM
 from DL_MobileNetV3 import MobileNetV3_1D_LSTM
+# EfficientNet1D would be imported similarly
 
-# Add EfficientNet1D, if separate, import accordingly
-
-from torch.utils.data import DataLoader
-
-def train_epoch(model, dataloader, criterion, optimizer, device):
-    model.train()
-    total, correct, running_loss = 0, 0, 0.0
-    for batch in dataloader:
-        csi_seq = batch['csi_seq'].to(device)
-        meta_seq = batch['metadata_seq'].to(device)
-        labels = batch['label'].squeeze().to(device)
-        optimizer.zero_grad()
-        outputs = model(csi_seq, meta_seq)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        running_loss += loss.item() * labels.size(0)
-        _, preds = outputs.max(1)
-        total += labels.size(0)
-        correct += preds.eq(labels).sum().item()
-    return running_loss / total, correct / total
-
-def evaluate(model, dataloader, criterion, device):
-    model.eval()
-    total, correct, running_loss = 0, 0, 0.0
-    with torch.no_grad():
-        for batch in dataloader:
-            csi_seq = batch['csi_seq'].to(device)
-            meta_seq = batch['metadata_seq'].to(device)
-            labels = batch['label'].squeeze().to(device)
+def train_and_evaluate(model, train_loader, val_loader, device, params, logger):
+    """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=params["lr"])
+    num_epochs = params["epochs"]
+    best_val_acc, best_epoch = 0, 0
+    best_model_state = None
+    train_losses, val_losses, train_accs, val_accs = [], [], [], []
+    for epoch in range(num_epochs):
+        start_time = time.time()
+        # Training
+        model.train(); running_loss, correct, total = 0.0, 0, 0
+        for batch in train_loader:
+            csi_seq = batch["csi_seq"].to(device)
+            meta_seq = batch["metadata_seq"].to(device)
+            labels = batch["label"].squeeze().to(device)
+            optimizer.zero_grad()
             outputs = model(csi_seq, meta_seq)
             loss = criterion(outputs, labels)
-            running_loss += loss.item() * labels.size(0)
-            _, preds = outputs.max(1)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+            preds = torch.argmax(outputs, dim=1)
+            correct += (preds == labels).sum().item()
             total += labels.size(0)
-            correct += preds.eq(labels).sum().item()
-    return running_loss / total, correct / total
+        avg_loss = running_loss / len(train_loader)
+        train_losses.append(avg_loss)
+        train_acc = correct / total
+        train_accs.append(train_acc)
+        # Validation
+        model.eval(); running_loss, correct, total = 0.0, 0, 0
+        with torch.no_grad():
+            for batch in val_loader:
+                csi_seq = batch["csi_seq"].to(device)
+                meta_seq = batch["metadata_seq"].to(device)
+                labels = batch["label"].squeeze().to(device)
+                outputs = model(csi_seq, meta_seq)
+                loss = criterion(outputs, labels)
+                running_loss += loss.item()
+                preds = torch.argmax(outputs, dim=1)
+                correct += (preds == labels).sum().item()
+                total += labels.size(0)
+        avg_val_loss = running_loss / len(val_loader)
+        val_losses.append(avg_val_loss)
+        val_acc = correct / total
+        val_accs.append(val_acc)
+        end_time = time.time()
+        mlflow.log_metrics({'train_loss': avg_loss, 'train_acc': train_acc,
+                            'val_loss': avg_val_loss, 'val_acc': val_acc}, step=epoch)
+        logger.info(f"Epoch {epoch+1}/{num_epochs} | Train: {train_acc:.4f}, Val: {val_acc:.4f} | Time: {end_time-start_time:.2f}s")
+        # Best model saving
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_epoch = epoch + 1
+            best_model_state = model.state_dict()
+            torch.save(model.state_dict(), f"best_model_{params['model_name']}_epoch{best_epoch}.pt")
+            mlflow.pytorch.log_model(model, f"best_model_{params['model_name']}")
+    return (train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch)
 
-def log_system_metrics():
-    mlflow.log_metric("cpu_usage_percent", psutil.cpu_percent(interval=1))
-    mem = psutil.virtual_memory()
-    mlflow.log_metric("memory_usage_gb", mem.used / (1024**3))
-    disk = psutil.disk_usage('/')
-    mlflow.log_metric("disk_usage_gb", disk.used / (1024**3))
+def plot_stats(history, save_path, logger):
+    epochs = range(1, len(history['accuracy']) + 1)
+    plt.figure(figsize=(12, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, history['accuracy'], label='Train Accuracy')
+    plt.plot(epochs, history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Accuracy over Epochs')
+    plt.legend(); plt.grid(True)
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, history['loss'], label='Train Loss')
+    plt.plot(epochs, history['val_loss'], label='Validation Loss')
+    plt.title('Loss over Epochs')
+    plt.legend(); plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    mlflow.log_artifact(save_path)
+    logger.info(f"Saved stats plot to {save_path}")
+    plt.close()
 
-def grid_search_and_mlflow(
-    model_defs, # dict: name: (class, param_grid_dict)
-    train_loader, val_loader, device, 
-    result_path='./results'
-):
-    os.makedirs(result_path, exist_ok=True)
-    mlflow.set_experiment('CSI_WiFi_Deep_Model_Tuning')
-    best_global = {'val_acc': 0}
-    all_results = []
+def run_mlop_pipeline():
+    # --- Logging setup (use your CSI_ID.py pattern) ---
+    cr = ConfigReader("csi_id_config.properties")
+    now = time.strftime("%Y%m%d_%H%M%S")
+    base_dir = cr.get("local_data_path")
+    gait_filenme = cr.get("file_name_for_gait")
+    filelist = glob.glob(os.path.join(base_dir, '**', gait_filenme), recursive=True)
+    plot_path = f"{cr.get('output_path')}/{now}/plots"; os.makedirs(plot_path, exist_ok=True)
+    print(f"Plot path: {plot_path}")
+    log_path = f"{cr.get('output_path')}/{now}/logs"; os.makedirs(log_path, exist_ok=True)
+    print(f"Log path: {log_path}")
+    checkpoint_dir = f"{cr.get('output_path')}/{now}/checkpoints"; os.makedirs(checkpoint_dir, exist_ok=True)
+    print(f"Checkpoint path: {checkpoint_dir}") 
+    log_filename = f"{log_path}/run_{now}.log"
+    print(f"Log file: {log_filename}")
+    logging.basicConfig(filename=log_filename, filemode='w', format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
+    logger = logging.getLogger()
 
-    for model_name, (model_class, param_grid) in model_defs.items():
-        best_val_acc = 0.0
-        best_model_state = None
-        print(f"\n[INFO] Running Model: {model_name}")
+    # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
+    dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
+    logger.info(f"Dataset loaded with {len(dataset)} samples")
 
-        # Grid search for this model
-        keys, values = zip(*param_grid.items())
-        for run_idx, combo in enumerate(itertools.product(*values)):
-            params = dict(zip(keys, combo))
-            run_name = f"{model_name}_run{run_idx+1}"
-            with mlflow.start_run(run_name=run_name):
-                # ---- Instantiate ----
-                model = model_class(**{k: v for k, v in params.items() if not k.startswith('lr') and not k.startswith('epochs')}).to(device)
-                optimizer = optim.Adam(model.parameters(), lr=params['lr'])
-                criterion = nn.CrossEntropyLoss()
-                train_loss_list, val_loss_list = [], []
-                train_acc_list, val_acc_list = [], []
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+    device = torch.device("mps" if torch.backends.mps.is_available() else
+                         "cuda" if torch.cuda.is_available() else "cpu")
 
-                # ---- Train/Evaluate Loop ----
-                for epoch in range(params['epochs']):
-                    t_loss, t_acc = train_epoch(model, train_loader, criterion, optimizer, device)
-                    v_loss, v_acc = evaluate(model, val_loader, criterion, device)
-                    train_loss_list.append(t_loss)
-                    train_acc_list.append(t_acc)
-                    val_loss_list.append(v_loss)
-                    val_acc_list.append(v_acc)
-                    mlflow.log_metrics({'train_loss': t_loss, 'train_acc': t_acc,
-                                       'val_loss': v_loss, 'val_acc': v_acc}, step=epoch)
-
-                    # Save best within this run
-                    if v_acc > best_val_acc:
-                        best_val_acc = v_acc
-                        best_model_state = model.state_dict()
-                        torch.save(model.state_dict(), os.path.join(result_path, f"{model_name}_best.pth"))
-                        mlflow.pytorch.log_model(model, "best_model")
-
-                # ---- System resource logging, params, plots ----
-                mlflow.log_params(params)
-                log_system_metrics()
-                # Save training curves
-                np.save(os.path.join(result_path, f"{model_name}_loss.npy"), np.array([train_loss_list, val_loss_list]))
-                np.save(os.path.join(result_path, f"{model_name}_acc.npy"), np.array([train_acc_list, val_acc_list]))
-
-                # ---- MLflow Artifacts ----
-                mlflow.log_artifact(os.path.join(result_path, f"{model_name}_loss.npy"))
-                mlflow.log_artifact(os.path.join(result_path, f"{model_name}_acc.npy"))
-
-                all_results.append({'model': model_name, 'params': params, 'val_acc': best_val_acc})
-
-                print(f"    [INFO] Finished Run {run_idx+1} {model_name} | Best val_acc: {best_val_acc:.4f}")
-
-                # Track globally best model
-                if best_val_acc > best_global['val_acc']:
-                    best_global = {'model': model_name, 'params': params, 'val_acc': best_val_acc}
-                    joblib.dump(best_model_state, os.path.join(result_path, f"BEST_MODEL_{model_name}.pth"))
-
-    # Print/Return summary
-    print("\n------------- Best Overall Model ---------------")
-    print(best_global)
-    return all_results, best_global
-
-if __name__ == '__main__':
-    # ---------------------
-    # SETUP DATALOADERS HERE (Use your dataset loader function/classes, e.g., CSI_ID.py)
-    from your_dataset_class import WifiCSIDataset  # CHANGE THIS LINE
-    train_dataset = WifiCSIDataset(...)           # FILL INIT ARGS
-    val_dataset = WifiCSIDataset(...)             # FILL INIT ARGS
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
-    # ---------------------
-
-    # ---- Define Model Search Space ----
+    logger.info(f"Using device: {device}")  
+    # --- Model Definitions & hyperparameter grid ---
     model_defs = {
-        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {
-            'csi_channels': [99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31],
-            'lr': [0.001, 0.0005], 'epochs': [20]
-        }),
-        "CSILSTMNet": (CSILSTMNet, {
-            'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31],
-            'lr':[0.001, 0.0005], 'epochs': [20]
-        }),
-        "DenseNet1D": (DenseNet1D, {
-            'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31],
-            'lr':[0.001, 0.0005], 'epochs': [20]
-        }),
-        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {
-            'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31],
-            'lr':[0.001, 0.0005], 'epochs':[20]
-        }),
-        # If you have EfficientNet1D (non-LSTM), add here
+        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
+        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
+        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
+        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
+        # If EfficientNet1D is available, add here
     }
 
-    all_results, best_global = grid_search_and_mlflow(model_defs, train_loader, val_loader, device, result_path='./mlflow_results')
+    # --- MLflow experiment ---
+    mlflow.set_experiment("CSI_WiFi_MLOps")
+    best_overall = {"val_acc":-1}
+    stats_summary = {}
 
-    print("[INFO] Detailed model search complete. Best overall result:")
-    print(best_global)
+    for model_name, (model_class, param_grid) in model_defs.items():
+        param_keys, param_vals = zip(*param_grid.items())
+        for combo in itertools.product(*param_vals):
+            params = dict(zip(param_keys, combo)); params['model_name'] = model_name
+            with mlflow.start_run(run_name=f"{model_name}_{str(params)}"):
+                batch = next(iter(train_loader))
+                # Model instantiation according to constructor
+                if model_name == "CSILSTMNet":
+                    model = model_class(
+                        csi_input_size=batch["csi_seq"].shape[2],
+                        meta_input_size=batch["metadata_seq"].shape[2],
+                        window_size=batch["metadata_seq"].shape[1],
+                        num_classes=31
+                    ).to(device)
+                elif model_name in ["DenseNet1D", "MobileNetV3_1D_LSTM"]:
+                    model = model_class(
+                        csi_channels=batch["csi_seq"].shape[2],
+                        meta_feature_dim=batch["metadata_seq"].shape[2],
+                        num_classes=31
+                    ).to(device)
+                elif model_name == "EfficientNet1DLSTM":
+                    model = model_class(
+                        csi_input_channels=batch["csi_seq"].shape[2],
+                        meta_input_size=batch["metadata_seq"].shape[-1],
+                        num_classes=31
+                    ).to(device)
+                else:
+                    raise ValueError("Unknown model")
+                mlflow.log_params(params)
+                train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch = train_and_evaluate(
+                    model, train_loader, test_loader, device, params, logger)
+                history = {
+                    'accuracy': train_accs,
+                    'val_accuracy': val_accs,
+                    'loss': train_losses,
+                    'val_loss': val_losses
+                }
+                stats_summary[(model_name, str(params))] = {
+                    "val_acc": best_val_acc,
+                    "epoch": best_epoch,
+                    "history": history
+                }
+                plot_stats(history, save_path=f"{plot_path}/{model_name}_{str(params)}_stats.png", logger=logger)
+                # Save confusion matrix, classification report on test set
+                model.load_state_dict(best_model_state)
+                all_preds, all_labels = [], []
+                model.eval()
+                with torch.no_grad():
+                    for batch in test_loader:
+                        csi_seq = batch["csi_seq"].to(device)
+                        meta_seq = batch["metadata_seq"].to(device)
+                        labels = batch["label"].squeeze().cpu().numpy()
+                        outputs = model(csi_seq, meta_seq)
+                        preds = torch.argmax(outputs, dim=1).cpu().numpy()
+                        all_preds.extend(preds)
+                        all_labels.extend(labels)
+                cm = confusion_matrix(all_labels, all_preds); cr_report = classification_report(all_labels, all_preds)
+                np.save(f"{plot_path}/{model_name}_{str(params)}_cm.npy", cm)
+                mlflow.log_artifact(f"{plot_path}/{model_name}_{str(params)}_cm.npy")
+                logger.info(f"Confusion matrix:\n{cm}")
+                logger.info(f"Classification report:\n{cr_report}")
+                # Save model checkpoint for best overall if needed
+                if best_val_acc > best_overall["val_acc"]:
+                    best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch}
+                    torch.save(best_model_state, os.path.join(checkpoint_dir, f"best_model_{model_name}_epoch{best_epoch}.pt"))
+                mlflow.log_metric("best_val_acc", best_val_acc)
+    print(f"Best model overall: {best_overall}")
+    logger.info(f"Best model overall: {best_overall}")
+
+if __name__ == "__main__":
+    run_mlop_pipeline()

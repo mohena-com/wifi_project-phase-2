@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+#from DL_CSILSTMNet import CSILSTMNet
 
 # Define MobileNetV3 block (simplified version)
 class MobileNetV3Block1D(nn.Module):
@@ -64,14 +65,4 @@ class MobileNetV3_1D_LSTM(nn.Module):
         return self.fc(combined)
 
 
-# In your hyperparameter tuning/grid search code
-
-model_choices = [
-    (CSILSTMNet, {'csi_input_size': 99, 'meta_input_size': 12, 'window_size': 128, 'num_classes': 31}),
-    (EfficientNet1DLSTM, {'csi_channels': 99, 'meta_seq_len': 128, 'meta_feature_dim': 12, 'num_classes': 31}),
-    (DenseNet1D, {'csi_channels': 99, 'meta_feature_dim': 12, 'num_classes': 31}),
-    (MobileNetV3_1D_LSTM, {'csi_channels': 99, 'meta_feature_dim': 12, 'num_classes': 31}),
-]
-
-# Then proceed to select and train models from model_choices for grid search or random search
-
+ 
