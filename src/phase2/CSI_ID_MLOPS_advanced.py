@@ -1,4 +1,8 @@
-import os, glob, time, itertools, logging
+import os
+import glob
+import time
+import logging
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,8 +11,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mlflow
 import mlflow.pytorch
-from sklearn.metrics import confusion_matrix, classification_report, precision_score, recall_score, f1_score
-import logging
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score
+)
+import psutil
+from mlflow.models.signature import infer_signature
+import itertools
+from sklearn.preprocessing import label_binarize
+
 # Import your custom classes
 from config_reader import ConfigReader
 from DS_WifiCSIDataset import WifiCSIDataset
@@ -41,15 +56,15 @@ def setup_logging(log_file_path):
         logging.root.removeHandler(handler)
 
     logging.basicConfig(
-        level=logging.INFO,  # or logging.DEBUG for detailed logs
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
-            logging.StreamHandler(),               # prints to console
-            logging.FileHandler(log_file_path, 'w')  # logs to file, overwrite each run
-        ]
+            logging.StreamHandler(),
+            logging.FileHandler(log_file_path, mode="w"),
+        ],
     )
     logger = logging.getLogger()
-    logger.info("Logger is set up and ready.")
+    logger.info("Logger initialized")
     return logger
 
 def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoint_dir, logger):
@@ -60,10 +75,14 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
     best_val_acc, best_epoch = 0, 0
     best_model_state = None
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
+    total_params = sum(p.numel() for p in model.parameters())
+    mlflow.log_param("parameter_count", total_params)
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
-        model.train(); running_loss, correct, total = 0.0, 0, 0
+        model.train()
+        running_loss, correct, total = 0.0, 0, 0
+        train_true, train_pred = [], []
         for batch in train_loader:
             csi_seq = batch["csi_seq"].to(device)
             meta_seq = batch["metadata_seq"].to(device)
@@ -77,12 +96,28 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
             preds = torch.argmax(outputs, dim=1)
             correct += (preds == labels).sum().item()
             total += labels.size(0)
-        avg_loss = running_loss / len(train_loader)
-        train_losses.append(avg_loss)
+
+            train_true.extend(labels.cpu().numpy())
+            train_pred.extend(preds.cpu().numpy())
+
+        train_loss = running_loss / len(train_loader)
         train_acc = correct / total
-        train_accs.append(train_acc)
-        # Validation
-        model.eval(); running_loss, correct, total = 0.0, 0, 0
+
+        train_precision = precision_score(train_true, train_pred, average="weighted", zero_division=0)
+        train_recall = recall_score(train_true, train_pred, average="weighted", zero_division=0)
+        train_f1 = f1_score(train_true, train_pred, average="weighted", zero_division=0)
+
+        mlflow.log_metric("train_loss", train_loss, step=epoch)
+        mlflow.log_metric("train_acc", train_acc, step=epoch)
+        mlflow.log_metric("train_precision", train_precision, step=epoch)
+        mlflow.log_metric("train_recall", train_recall, step=epoch)
+        mlflow.log_metric("train_f1", train_f1, step=epoch)
+
+        # Validation phase
+        model.eval()
+        running_loss, correct, total = 0.0, 0, 0
+        val_true, val_pred, val_prob = [], [], []
+
         with torch.no_grad():
             for batch in val_loader:
                 csi_seq = batch["csi_seq"].to(device)
@@ -94,28 +129,102 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
                 preds = torch.argmax(outputs, dim=1)
                 correct += (preds == labels).sum().item()
                 total += labels.size(0)
-        avg_val_loss = running_loss / len(val_loader)
-        val_losses.append(avg_val_loss)
+
+                val_true.extend(labels.cpu().numpy())
+                val_pred.extend(preds.cpu().numpy())
+                val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy())
+
+        val_loss = running_loss / len(val_loader)
         val_acc = correct / total
-        val_accs.append(val_acc)
+
+        val_precision = precision_score(val_true, val_pred, average="weighted", zero_division=0)
+        val_recall = recall_score(val_true, val_pred, average="weighted", zero_division=0)
+        val_f1 = f1_score(val_true, val_pred, average="weighted", zero_division=0)
+
+        mlflow.log_metric("val_loss", val_loss, step=epoch)
+        mlflow.log_metric("val_acc", val_acc, step=epoch)
+        mlflow.log_metric("val_precision", val_precision, step=epoch)
+        mlflow.log_metric("val_recall", val_recall, step=epoch)
+        mlflow.log_metric("val_f1", val_f1, step=epoch)
+
+        val_true_np = np.array(val_true)
+        val_prob_np = np.array(val_prob)
+
+        unique_classes = np.unique(val_true_np)
+        num_classes = val_prob_np.shape[1]
+
+        if len(unique_classes) == num_classes:
+        # All classes present, compute directly
+            try:
+                val_auc = roc_auc_score(val_true_np, val_prob_np, multi_class='ovr', average='weighted')
+                mlflow.log_metric('val_auc', val_auc, step=epoch)
+            except Exception as e:
+                logger.warning(f"ROC-AUC computation failed: {e}")
+        else:
+            #    Subset classes and probabilities to avoid mismatch error
+            try:
+                y_true_bin = label_binarize(val_true_np, classes=unique_classes)
+                val_prob_subset = val_prob_np[:, unique_classes]
+                val_auc = roc_auc_score(y_true_bin, val_prob_subset, multi_class='ovr', average='weighted')
+                mlflow.log_metric('val_auc', val_auc, step=epoch)
+            except Exception as e:
+                logger.warning(f"ROC-AUC subset computation failed: {e}")
+
+        for param_group in optimizer.param_groups:
+            mlflow.log_metric("learning_rate", param_group["lr"], step=epoch)
+
         end_time = time.time()
-        mlflow.log_metrics({'train_loss': avg_loss, 'train_acc': train_acc,
-                            'val_loss': avg_val_loss, 'val_acc': val_acc}, step=epoch)
-        logger.info(f"Epoch {epoch+1}/{num_epochs} | Train: {train_acc:.4f}, Val: {val_acc:.4f} | Time: {end_time-start_time:.2f}s")
-        # Best model saving
+        mlflow.log_metric("epoch_time_sec", end_time - start_time, step=epoch)
+
+        mlflow.log_metric("cpu_percent", psutil.cpu_percent())
+        mlflow.log_metric("memory_used_gb", psutil.virtual_memory().used / (1024 ** 3))
+        if torch.cuda.is_available():
+            mlflow.log_metric("gpu_mem_allocated_gb", torch.cuda.memory_allocated() / (1024 ** 3))
+            mlflow.log_metric("gpu_mem_reserved_gb", torch.cuda.memory_reserved() / (1024 ** 3))
+
+        logger.info(
+            f"Epoch {epoch+1}/{num_epochs}, "
+            f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}, "
+            f"Epoch Duration: {end_time-start_time:.2f} sec"
+        )
+
+        # Save best model
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
             mlflow.pytorch.log_model(model, f"best_model_{params['model_name']}")
+			
+       # Log model with signature and input example for MLflow
+    '''    
+    for p in params:
+        print(f"Params : {p} : {params[p]} ")
+    
+    dummy_csi = torch.randn(1, 128, params['csi_input_size']).to(device)
+    dummy_meta = torch.randn(1, params['meta_input_size']).to(device)
+    model.eval()
+    with torch.no_grad():
+        dummy_output = model(dummy_csi, dummy_meta)
+    signature = infer_signature(
+        inputs={"csi_seq": dummy_csi.cpu().numpy(), "meta_seq": dummy_meta.cpu().numpy()},
+        outputs=dummy_output.cpu().numpy()
+    )
+    mlflow.pytorch.log_model(
+        model,
+        artifact_path=f"best_model_{params['model_name']}",
+        input_example={"csi_seq": dummy_csi.cpu().numpy(), "meta_seq": dummy_meta.cpu().numpy()},
+        signature=signature
+    )
+	'''	
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
-        torch.save(model.state_dict(), f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
+        torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
         logger.fatal(f"00. Saved Best Model. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
+        mlflow.log_artifact(f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
 
+    return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch
 
         #logger.info(f"Best Val Acc so far: {best_val_acc:.4f} at epoch {best_epoch} best_model_state : {best_model_state}")
-    return (train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch)
 
 def plot_stats(history, save_path, logger):
     epochs = range(1, len(history['accuracy']) + 1)
@@ -237,10 +346,9 @@ def run_mlop_pipeline():
                 # Save model checkpoint for best overall if needed
                 if best_val_acc > best_overall["val_acc"]:
                     best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch}
- #                   torch.save(best_model_state, os.path.join(checkpoint_dir, f"best_model_{model_name}_epoch{best_epoch}.pt"))
                     torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
                     logger.fatal(f"99. Saved Best Model. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
-
+                    mlflow.log_artifact(f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
 
                 mlflow.log_metric("best_val_acc", best_val_acc)
   #  print(f"Best model overall: {best_overall}")
