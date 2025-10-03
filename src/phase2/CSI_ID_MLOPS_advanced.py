@@ -67,7 +67,7 @@ def setup_logging(log_file_path):
     logger.info("Logger initialized")
     return logger
 
-def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoint_dir, logger):
+def train_and_evaluate(model, model_name, train_loader, val_loader, device, params, checkpoint_dir, logger):
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=params["lr"])
@@ -76,7 +76,9 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
     best_model_state = None
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
     total_params = sum(p.numel() for p in model.parameters())
+
     mlflow.log_param("parameter_count", total_params)
+    
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
@@ -84,8 +86,8 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
         running_loss, correct, total = 0.0, 0, 0
         train_true, train_pred = [], []
         for batch in train_loader:
-            csi_seq = batch["csi_seq"].to(device)
-            meta_seq = batch["metadata_seq"].to(device)
+            csi_seq = batch["csi_seq"].to(device, non_blocking=True)
+            meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
             labels = batch["label"].squeeze().to(device)
             optimizer.zero_grad()
             outputs = model(csi_seq, meta_seq)
@@ -107,11 +109,22 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
         train_recall = recall_score(train_true, train_pred, average="weighted", zero_division=0)
         train_f1 = f1_score(train_true, train_pred, average="weighted", zero_division=0)
 
-        mlflow.log_metric("train_loss", train_loss, step=epoch)
-        mlflow.log_metric("train_acc", train_acc, step=epoch)
-        mlflow.log_metric("train_precision", train_precision, step=epoch)
-        mlflow.log_metric("train_recall", train_recall, step=epoch)
-        mlflow.log_metric("train_f1", train_f1, step=epoch)
+        '''
+        mlflow.log_metric("Training Loss Curve", train_loss, step=epoch)
+        mlflow.log_metric("Training Accuracy Curve", train_acc, step=epoch)
+        mlflow.log_metric("Training Precision Curve", train_precision, step=epoch)
+        mlflow.log_metric("Training Recall Curve", train_recall, step=epoch)
+        mlflow.log_metric("Training F1 Score", train_f1, step=epoch)
+        '''
+
+        tra_metrics_to_log = {
+            "Training Loss Curve": train_loss,
+            "Training Accuracy Curve": train_acc,
+            "Training Precision Curve": train_precision,
+            "Training Recall Curve": train_recall,
+            "Training F1 Score": train_f1
+        }
+        mlflow.log_metrics(tra_metrics_to_log, step=epoch)
 
         # Validation phase
         model.eval()
@@ -120,9 +133,9 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
 
         with torch.no_grad():
             for batch in val_loader:
-                csi_seq = batch["csi_seq"].to(device)
-                meta_seq = batch["metadata_seq"].to(device)
-                labels = batch["label"].squeeze().to(device)
+                csi_seq = batch["csi_seq"].to(device, non_blocking=True)
+                meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
+                labels = batch["label"].squeeze().to(device, non_blocking=True)
                 outputs = model(csi_seq, meta_seq)
                 loss = criterion(outputs, labels)
                 running_loss += loss.item()
@@ -141,11 +154,22 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
         val_recall = recall_score(val_true, val_pred, average="weighted", zero_division=0)
         val_f1 = f1_score(val_true, val_pred, average="weighted", zero_division=0)
 
-        mlflow.log_metric("val_loss", val_loss, step=epoch)
-        mlflow.log_metric("val_acc", val_acc, step=epoch)
-        mlflow.log_metric("val_precision", val_precision, step=epoch)
-        mlflow.log_metric("val_recall", val_recall, step=epoch)
-        mlflow.log_metric("val_f1", val_f1, step=epoch)
+        '''
+        mlflow.log_metric("Validation Loss Curve", val_loss, step=epoch)
+        mlflow.log_metric("Validation Accuracy Curve", val_acc, step=epoch)
+        mlflow.log_metric("Validation Precision Curve", val_precision, step=epoch)
+        mlflow.log_metric("Validation Recall Curve", val_recall, step=epoch)
+        mlflow.log_metric("Validation F1 Score", val_f1, step=epoch)
+        '''
+
+        val_metrics_to_log = {
+            "Validation Loss Curve": val_loss,
+            "Validation Accuracy Curve": val_acc,
+            "Validation Precision Curve": val_precision,
+            "Validation Recall Curve": val_recall,
+            "Validation F1 Score": val_f1
+        }
+        mlflow.log_metrics(val_metrics_to_log, step=epoch)
 
         val_true_np = np.array(val_true)
         val_prob_np = np.array(val_prob)
@@ -157,7 +181,7 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
         # All classes present, compute directly
             try:
                 val_auc = roc_auc_score(val_true_np, val_prob_np, multi_class='ovr', average='weighted')
-                mlflow.log_metric('val_auc', val_auc, step=epoch)
+                mlflow.log_metric('Validation AUC Curve', val_auc, step=epoch)
             except Exception as e:
                 logger.warning(f"ROC-AUC computation failed: {e}")
         else:
@@ -166,24 +190,48 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
                 y_true_bin = label_binarize(val_true_np, classes=unique_classes)
                 val_prob_subset = val_prob_np[:, unique_classes]
                 val_auc = roc_auc_score(y_true_bin, val_prob_subset, multi_class='ovr', average='weighted')
-                mlflow.log_metric('val_auc', val_auc, step=epoch)
+                mlflow.log_metric('Validation AUC Curve', val_auc, step=epoch)
             except Exception as e:
                 logger.warning(f"ROC-AUC subset computation failed: {e}")
 
         for param_group in optimizer.param_groups:
-            mlflow.log_metric("learning_rate", param_group["lr"], step=epoch)
+            mlflow.log_metric("Learning Rate Over Epochs", param_group["lr"], step=epoch)
 
         end_time = time.time()
-        mlflow.log_metric("epoch_time_sec", end_time - start_time, step=epoch)
+        '''
+        mlflow.log_metric("Epoch Duration in Seconds", end_time - start_time, step=epoch)
+        mlflow.log_metric("CPU Utilization (%)", psutil.cpu_percent())
+        mlflow.log_metric("Memory Used (GB)", psutil.virtual_memory().used / (1024 ** 3))
+        mlflow.log_metric("Total Memory (GB)", psutil.virtual_memory().total / (1024 ** 3))
+        '''
 
-        mlflow.log_metric("cpu_percent", psutil.cpu_percent())
-        mlflow.log_metric("memory_used_gb", psutil.virtual_memory().used / (1024 ** 3))
-        if torch.cuda.is_available():
-            mlflow.log_metric("gpu_mem_allocated_gb", torch.cuda.memory_allocated() / (1024 ** 3))
-            mlflow.log_metric("gpu_mem_reserved_gb", torch.cuda.memory_reserved() / (1024 ** 3))
+        hw_one_metrics = {
+            "Epoch Duration in Seconds": end_time - start_time,
+            "CPU Utilization Percent": psutil.cpu_percent(),
+            "Memory Used GB": psutil.virtual_memory().used / (1024 ** 3),
+            "Total Memory GB": psutil.virtual_memory().total / (1024 ** 3)
+        }
+        mlflow.log_metrics(hw_one_metrics, step=epoch)
+
+        disk_info = psutil.disk_usage('/')
+        disk_used = disk_info.used / (1024 ** 3)  # Convert bytes to GB
+        disk_total = disk_info.total / (1024 ** 3)  # Convert bytes to GB
+        logger.debug(f"Disk usage: {disk_used:.2f} GB used out of {disk_total:.2f} GB total")
+
+        '''
+        mlflow.log_metric("Disk Usage (GB)", disk_used)
+        mlflow.log_metric("Total Disk Space (GB)", disk_total)
+        '''
+
+        hw_two_metrics = {
+            "Disk Usage GB": disk_used,
+            "Total Disk Space GB": disk_total
+        }
+        mlflow.log_metrics(hw_two_metrics, step=epoch)
 
         logger.info(
             f"Epoch {epoch+1}/{num_epochs}, "
+            f"Model {model_name}, "
             f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}, "
             f"Epoch Duration: {end_time-start_time:.2f} sec"
         )
@@ -195,27 +243,11 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
             best_model_state = model.state_dict()
             mlflow.pytorch.log_model(model, f"best_model_{params['model_name']}")
 			
-       # Log model with signature and input example for MLflow
-    '''    
-    for p in params:
-        print(f"Params : {p} : {params[p]} ")
-    
-    dummy_csi = torch.randn(1, 128, params['csi_input_size']).to(device)
-    dummy_meta = torch.randn(1, params['meta_input_size']).to(device)
-    model.eval()
-    with torch.no_grad():
-        dummy_output = model(dummy_csi, dummy_meta)
-    signature = infer_signature(
-        inputs={"csi_seq": dummy_csi.cpu().numpy(), "meta_seq": dummy_meta.cpu().numpy()},
-        outputs=dummy_output.cpu().numpy()
-    )
-    mlflow.pytorch.log_model(
-        model,
-        artifact_path=f"best_model_{params['model_name']}",
-        input_example={"csi_seq": dummy_csi.cpu().numpy(), "meta_seq": dummy_meta.cpu().numpy()},
-        signature=signature
-    )
-	'''	
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        train_accs.append(train_acc)
+        val_accs.append(val_acc)
+        
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
         torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
@@ -224,7 +256,6 @@ def train_and_evaluate(model, train_loader, val_loader, device, params, checkpoi
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch
 
-        #logger.info(f"Best Val Acc so far: {best_val_acc:.4f} at epoch {best_epoch} best_model_state : {best_model_state}")
 
 def plot_stats(history, save_path, logger):
     epochs = range(1, len(history['accuracy']) + 1)
@@ -245,8 +276,56 @@ def plot_stats(history, save_path, logger):
     logger.info(f"Saved stats plot to {save_path}")
     plt.close()
 
+import seaborn as sns
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
+    # --- Robust Confusion Matrix Plot ---
+    fig_width = max(12, 0.5 * cm.shape[0])
+    fig_height = max(9, 0.5 * cm.shape[0])
+    plt.figure(figsize=(fig_width, fig_height))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt='d',
+        cmap='Blues',
+        cbar=True,
+        annot_kws={"size": 6 if cm.shape[0] > 20 else 10}
+    )
+    plt.title('Confusion Matrix', fontsize=16)
+    plt.ylabel('True Label', fontsize=14)
+    plt.xlabel('Predicted Label', fontsize=14)
+    tick_font_size = 6 if cm.shape[0] > 20 else 9
+    plt.xticks(np.arange(cm.shape[1]) + 0.5, np.arange(1, cm.shape[1]+1), rotation=90, fontsize=tick_font_size)
+    plt.yticks(np.arange(cm.shape[0]) + 0.5, np.arange(1, cm.shape[0]+1), rotation=0, fontsize=tick_font_size)
+    plt.tight_layout()
+    cm_path = f"{plot_path}/{model_name}_{str(params)}_confusion_matrix.png"
+    plt.savefig(cm_path, bbox_inches='tight', dpi=150)
+    plt.close()
+
+    # --- Robust Classification Report Plot ---
+    # Always treat as a string for wide compatibility, autoscale height for #lines
+    report_str = str(cr_report)
+    n_lines = report_str.count('\n') + 1
+    plt.figure(figsize=(12, min(max(n_lines * 0.4, 6), 48)))
+    plt.text(0, 1, report_str, fontsize=10, family='monospace', verticalalignment='top')
+    plt.axis('off')
+    plt.title('Classification Report')
+    cr_path = f"{plot_path}/{model_name}_{str(params)}_classification_report.png"
+    plt.savefig(cr_path, bbox_inches='tight')
+    plt.close()
+
+    # Log artifacts to MLflow
+    import mlflow
+    mlflow.log_artifact(cm_path)
+    mlflow.log_artifact(cr_path)
 
 def run_mlop_pipeline():
     logger = setup_logging(log_filename)
@@ -258,8 +337,10 @@ def run_mlop_pipeline():
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+
     device = torch.device("mps" if torch.backends.mps.is_available() else
                          "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -291,7 +372,7 @@ def run_mlop_pipeline():
                         meta_input_size=batch["metadata_seq"].shape[2],
                         window_size=batch["metadata_seq"].shape[1],
                         num_classes=31
-                    ).to(device)
+                    ).to(device, non_blocking=True)
                 elif model_name in ["DenseNet1D", "MobileNetV3_1D_LSTM"]:
                     model = model_class(
                         csi_channels=batch["csi_seq"].shape[2],
@@ -308,7 +389,7 @@ def run_mlop_pipeline():
                     raise ValueError("Unknown model")
                 mlflow.log_params(params)
                 train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch = train_and_evaluate(
-                    model, train_loader, test_loader, device, params, checkpoint_dir, logger)
+                    model, model_name, train_loader, test_loader, device, params, checkpoint_dir, logger)
                 #logger.info(f"best model {best_model_state}")
                 history = {
                     'accuracy': train_accs,
@@ -331,16 +412,19 @@ def run_mlop_pipeline():
                 model.eval()
                 with torch.no_grad():
                     for batch in test_loader:
-                        csi_seq = batch["csi_seq"].to(device)
-                        meta_seq = batch["metadata_seq"].to(device)
+                        csi_seq = batch["csi_seq"].to(device, non_blocking=True)
+                        meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
                         labels = batch["label"].squeeze().cpu().numpy()
                         outputs = model(csi_seq, meta_seq)
                         preds = torch.argmax(outputs, dim=1).cpu().numpy()
                         all_preds.extend(preds)
                         all_labels.extend(labels)
-                cm = confusion_matrix(all_labels, all_preds); cr_report = classification_report(all_labels, all_preds)
+                cm = confusion_matrix(all_labels, all_preds) 
+                cr_report = classification_report(all_labels, all_preds)
                 np.save(f"{plot_path}/{model_name}_{str(params)}_cm.npy", cm)
                 mlflow.log_artifact(f"{plot_path}/{model_name}_{str(params)}_cm.npy")
+                plot_cm_cr(cm, cr_report, model_name, params,  plot_path)
+
                 logger.info(f"Confusion matrix:\n{cm}")
                 logger.info(f"Classification report:\n{cr_report}")
                 # Save model checkpoint for best overall if needed
@@ -350,7 +434,7 @@ def run_mlop_pipeline():
                     logger.fatal(f"99. Saved Best Model. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
                     mlflow.log_artifact(f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
 
-                mlflow.log_metric("best_val_acc", best_val_acc)
+                mlflow.log_metric("Top Validation Accuracy", best_val_acc)
   #  print(f"Best model overall: {best_overall}")
     logger.info(f"Best model overall: {best_overall}")
 
