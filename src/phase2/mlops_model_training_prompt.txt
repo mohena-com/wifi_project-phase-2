@@ -4,4 +4,6 @@ write a mlops mlflow implemenation that is using
 3. does hyperparamter tunning and finds best paramters intra model and interl model
 4. finds best model among all above 4 models (in point 1) 
 5. uses features of mlops to save all the attributes of model training expected to be done in a professional commercail project
-
+6. use CS_ID.py (attached)  for referring 
+   a. how to read data from csv files and load in memory using the class in file DS_WifiCSIDataset.py
+   b. how to plot various model quality stats  

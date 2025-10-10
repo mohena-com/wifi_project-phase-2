@@ -45,7 +45,7 @@ log_path = f"{cr.get('output_path')}/{now}/logs"; os.makedirs(log_path, exist_ok
 print(f"Log path: {log_path}")
 checkpoint_dir = f"{cr.get('output_path')}/{now}/checkpoints"; os.makedirs(checkpoint_dir, exist_ok=True)
 print(f"Checkpoint path: {checkpoint_dir}") 
-log_filename = f"{log_path}/run_{now}.log"
+log_filename = f"{log_path}/{cr.get('experiment_name')}_run_{now}.log"
 print(f"Log file: {log_filename}")
 
 
@@ -68,6 +68,7 @@ def setup_logging(log_file_path):
     return logger
 
 def train_and_evaluate(model, model_name, train_loader, val_loader, device, params, checkpoint_dir, logger):
+    logger.info(f"START T-N-E {model_name}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=params["lr"])
@@ -78,7 +79,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     total_params = sum(p.numel() for p in model.parameters())
 
     mlflow.log_param("parameter_count", total_params)
-    
+    logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
@@ -108,14 +109,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
         train_precision = precision_score(train_true, train_pred, average="weighted", zero_division=0)
         train_recall = recall_score(train_true, train_pred, average="weighted", zero_division=0)
         train_f1 = f1_score(train_true, train_pred, average="weighted", zero_division=0)
-
-        '''
-        mlflow.log_metric("Training Loss Curve", train_loss, step=epoch)
-        mlflow.log_metric("Training Accuracy Curve", train_acc, step=epoch)
-        mlflow.log_metric("Training Precision Curve", train_precision, step=epoch)
-        mlflow.log_metric("Training Recall Curve", train_recall, step=epoch)
-        mlflow.log_metric("Training F1 Score", train_f1, step=epoch)
-        '''
+ 
 
         tra_metrics_to_log = {
             "Training Loss Curve": train_loss,
@@ -154,14 +148,6 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
         val_recall = recall_score(val_true, val_pred, average="weighted", zero_division=0)
         val_f1 = f1_score(val_true, val_pred, average="weighted", zero_division=0)
 
-        '''
-        mlflow.log_metric("Validation Loss Curve", val_loss, step=epoch)
-        mlflow.log_metric("Validation Accuracy Curve", val_acc, step=epoch)
-        mlflow.log_metric("Validation Precision Curve", val_precision, step=epoch)
-        mlflow.log_metric("Validation Recall Curve", val_recall, step=epoch)
-        mlflow.log_metric("Validation F1 Score", val_f1, step=epoch)
-        '''
-
         val_metrics_to_log = {
             "Validation Loss Curve": val_loss,
             "Validation Accuracy Curve": val_acc,
@@ -197,13 +183,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
         for param_group in optimizer.param_groups:
             mlflow.log_metric("Learning Rate Over Epochs", param_group["lr"], step=epoch)
 
-        end_time = time.time()
-        '''
-        mlflow.log_metric("Epoch Duration in Seconds", end_time - start_time, step=epoch)
-        mlflow.log_metric("CPU Utilization (%)", psutil.cpu_percent())
-        mlflow.log_metric("Memory Used (GB)", psutil.virtual_memory().used / (1024 ** 3))
-        mlflow.log_metric("Total Memory (GB)", psutil.virtual_memory().total / (1024 ** 3))
-        '''
+        end_time = time.time()    
 
         hw_one_metrics = {
             "Epoch Duration in Seconds": end_time - start_time,
@@ -217,11 +197,6 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
         disk_used = disk_info.used / (1024 ** 3)  # Convert bytes to GB
         disk_total = disk_info.total / (1024 ** 3)  # Convert bytes to GB
         logger.debug(f"Disk usage: {disk_used:.2f} GB used out of {disk_total:.2f} GB total")
-
-        '''
-        mlflow.log_metric("Disk Usage (GB)", disk_used)
-        mlflow.log_metric("Total Disk Space (GB)", disk_total)
-        '''
 
         hw_two_metrics = {
             "Disk Usage GB": disk_used,
@@ -241,20 +216,32 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
-            mlflow.pytorch.log_model(model, f"best_model_{params['model_name']}")
+
+            # --- Log the final model with signature ---
+           # signature = infer_signature()
+            
+            mlflow.pytorch.log_model(
+                pytorch_model=model, 
+                artifact_path=f"best_model_{model_name}.{params['model_name']}",
+             #   signature=signature
+            )
 			
         train_losses.append(train_loss)
         val_losses.append(val_loss)
         train_accs.append(train_acc)
         val_accs.append(val_acc)
-        
+
+    learning_rate =  params['lr']   
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
-        torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
-        logger.fatal(f"00. Saved Best Model. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
-        mlflow.log_artifact(f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
+        best_modle_fname = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
+        torch.save(best_model_state, best_modle_fname)
+        logger.fatal(f"SAVED BEST MODEL {best_modle_fname} USING LEARNING RATE {learning_rate}") 
+        logger.fatal(f"BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}. ")
+       
+        mlflow.log_artifact(best_modle_fname)
 
-    return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch
+    return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
 
 
 def plot_stats(history, save_path, logger):
@@ -353,17 +340,24 @@ def run_mlop_pipeline():
         "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
         # If EfficientNet1D is available, add here
     }
-
+    learning_rate = None
     # --- MLflow experiment ---
     mlflow.set_experiment(cr.get("experiment_name"))
     best_overall = {"val_acc":-1}
     stats_summary = {}
-
+    best_model_path = None
     for model_name, (model_class, param_grid) in model_defs.items():
         param_keys, param_vals = zip(*param_grid.items())
-        for combo in itertools.product(*param_vals):
-            params = dict(zip(param_keys, combo)); params['model_name'] = model_name
-            with mlflow.start_run(run_name=f"{model_name}_{str(params)}"):
+        logger.info(" ")
+        logger.info("N")
+        logger.info("E")
+        logger.info("W")
+        logger.info(f"STARTING TRAINING FLOW : {model_name}:{param_keys}:{param_vals}")
+        with mlflow.start_run(run_name=f"{model_name}_main") as parent_run:
+            for combo in itertools.product(*param_vals):
+                params = dict(zip(param_keys, combo)); params['model_name'] = model_name
+            
+                logger.info(f"START RUN MLFLOW : {model_name}:{str(params)}")
                 batch = next(iter(train_loader))
                 # Model instantiation according to constructor
                 if model_name == "CSILSTMNet":
@@ -378,17 +372,18 @@ def run_mlop_pipeline():
                         csi_channels=batch["csi_seq"].shape[2],
                         meta_feature_dim=batch["metadata_seq"].shape[2],
                         num_classes=31
-                    ).to(device)
+                    ).to(device, non_blocking=True)
                 elif model_name == "EfficientNet1DLSTM":
                     model = model_class(
                         csi_input_channels=batch["csi_seq"].shape[2],
                         meta_input_size=batch["metadata_seq"].shape[-1],
                         num_classes=31
-                    ).to(device)
+                    ).to(device, non_blocking=True)
                 else:
                     raise ValueError("Unknown model")
-                mlflow.log_params(params)
-                train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch = train_and_evaluate(
+                with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
+                #    mlflow.log_params(params)
+                    train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate = train_and_evaluate(
                     model, model_name, train_loader, test_loader, device, params, checkpoint_dir, logger)
                 #logger.info(f"best model {best_model_state}")
                 history = {
@@ -429,15 +424,27 @@ def run_mlop_pipeline():
                 logger.info(f"Classification report:\n{cr_report}")
                 # Save model checkpoint for best overall if needed
                 if best_val_acc > best_overall["val_acc"]:
-                    best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch}
+                    best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch, "lr":learning_rate}
                     torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
-                    logger.fatal(f"99. Saved Best Model. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
-                    mlflow.log_artifact(f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
+                    logger.fatal(f"99. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
+                    best_model_path = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
+                    mlflow.log_artifact(f"{best_model_path}")
+                    
+                    logger.fatal(f"100. LOGGED BEST MODEL IN MLFLOW {best_model_path}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
   #  print(f"Best model overall: {best_overall}")
+    '''
     logger.info(f"Best model overall: {best_overall}")
+    mlflow.log_params( stats_summary)
+    logger.info(f"Logged stats summary to MLflow {stats_summary}")
 
+    mlflow.log_params( best_overall)
+    logger.info(f"Logged best overall to MLflow {best_overall}")
+    '''
+    mlflow.log_artifact(best_model_path)
+    logger.info(f"Logged best model path to MLflow {best_model_path}")
+    logger.fatal(f"best_overall : {best_overall}")
 if __name__ == "__main__":
     run_mlop_pipeline()
 
