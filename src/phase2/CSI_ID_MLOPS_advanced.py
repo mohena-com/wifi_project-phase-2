@@ -286,7 +286,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
     mlflow.pytorch.log_model(
         pytorch_model=model,
         artifact_path=f"best_model_{model_name}.{params['model_name']}",
-        input_example=combined_input,
+     #   input_example=combined_input,
         signature=signature
     )
     logger.info("4. do_signature_logging")
