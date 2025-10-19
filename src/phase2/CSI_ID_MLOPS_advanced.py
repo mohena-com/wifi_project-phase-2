@@ -64,7 +64,7 @@ def setup_logging(log_file_path):
         ],
     )
     logger = logging.getLogger()
-    logger.info("Logger initialized")
+    logger.debug("Logger initialized")
     return logger
 
 
@@ -80,7 +80,10 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
     total_params = sum(p.numel() for p in model.parameters())
 
+    
+    mlflow.log_params(params)    
     mlflow.log_param("parameter_count", total_params)
+    
     logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
     csi_seq = None
     meta_seq = None
@@ -222,18 +225,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
             
-            do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger)    
-            # --- Log the final model with signature ---
-           # signature = infer_signature()
-            
-            #mlflow.pytorch.log_model(
-            #    pytorch_model=model, 
-            #    artifact_path=f"best_model_{model_name}.{params['model_name']}",
-            #    signature=signature
-            #)            
-            
-        
-
+            do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger) 
 			
         train_losses.append(train_loss)
         val_losses.append(val_loss)
@@ -266,7 +258,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
     logger.debug("1. do_signature_logging")
     with torch.no_grad():
         example_output = model(example_csi, example_meta)
-  
+
 
     # Convert tensors to numpy
     csi_np = example_csi.cpu().numpy()
