@@ -257,7 +257,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger):
 
     import numpy as np
-
+    logger.info("1. do_signature_logging")
     # Prepare input example matching your model's expected input
     example_csi = csi_seq 
     example_meta = meta_seq
@@ -273,9 +273,11 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
 
     # Concatenate along the last axis (feature dimension)
     combined_input = np.concatenate([csi_np, meta_np], axis=-1)
+    logger.info("2. do_signature_logging")
 
     # Infer signature and log model
     signature = infer_signature(combined_input, example_output.cpu().numpy())
+    logger.info("3. do_signature_logging")
 
     mlflow.pytorch.log_model(
         pytorch_model=model,
@@ -283,7 +285,9 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
         input_example=combined_input,
         signature=signature
     )
-    logger.info(f"Logged model with signature to MLflow for {model_name} with params {params}")
+    logger.info("4. do_signature_logging")
+
+    logger.info(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
 
 
