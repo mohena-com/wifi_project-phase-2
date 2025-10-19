@@ -218,16 +218,17 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
-
+            
+            do_signature_logging(model, params)    
             # --- Log the final model with signature ---
            # signature = infer_signature()
             
             #mlflow.pytorch.log_model(
             #    pytorch_model=model, 
-                artifact_path=f"best_model_{model_name}.{params['model_name']}",
+            #    artifact_path=f"best_model_{model_name}.{params['model_name']}",
             #    signature=signature
             #)            
-            do_signature_logging(model, params)    
+            
         
 
 			
