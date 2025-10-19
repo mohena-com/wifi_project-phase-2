@@ -458,7 +458,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     model.eval()
     logger.debug("1. do_signature_logging")
     with torch.no_grad():
-        example_output = model(example_csi, example_meta)
+        example_output = model(csi_seq, meta_seq)
 
     # Convert tensors to numpy
     csi_np = csi_seq.cpu().numpy()
