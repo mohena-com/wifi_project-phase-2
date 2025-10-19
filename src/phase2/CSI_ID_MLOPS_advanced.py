@@ -82,6 +82,8 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 
     mlflow.log_param("parameter_count", total_params)
     logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
+    csi_seq = None
+    meta_seq = None
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
@@ -219,7 +221,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
             
-            do_signature_logging(model, params, logger)    
+            do_signature_logging(model, csi_seq, meta_seq, logger)    
             # --- Log the final model with signature ---
            # signature = infer_signature()
             
@@ -249,13 +251,13 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
 
-def do_signature_logging(model, params, logger):
-    logger.info(f"params : {params}")
+def do_signature_logging(model, csi_seq, meta_seq, logger):
+    #logger.info(f"params : {params}")
     from mlflow.models import infer_signature
 
     # Prepare input example matching your model's expected input
-    example_csi = torch.randn(1, params["csi_seq_len"], params["csi_feature_dim"]).to(device)
-    example_meta = torch.randn(1, params["meta_seq_len"], params["meta_feature_dim"]).to(device)
+    example_csi = csi_seq 
+    example_meta = meta_seq
 
     # Run model forward pass
     model.eval()
