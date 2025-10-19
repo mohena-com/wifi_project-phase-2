@@ -84,6 +84,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
     csi_seq = None
     meta_seq = None
+    outputs = None
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
@@ -221,7 +222,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
             
-            do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)    
+            do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger)    
             # --- Log the final model with signature ---
            # signature = infer_signature()
             
@@ -253,18 +254,18 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 
 
 
-def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
+def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger):
 
     import numpy as np
 
     # Prepare input example matching your model's expected input
     example_csi = csi_seq 
     example_meta = meta_seq
-
+    example_output = outputs 
     # Run model forward pass
-    model.eval()
-    with torch.no_grad():
-        example_output = model(example_csi, example_meta)
+    #model.eval()
+    #with torch.no_grad():
+    #    example_output = model(example_csi, example_meta)
 
     # Convert tensors to numpy
     csi_np = example_csi.cpu().numpy()
