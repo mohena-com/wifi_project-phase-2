@@ -36,18 +36,18 @@ class WifiCSIDataset(Dataset):
         i = 0
         for f in file_list:
             X_meta, X_csi, _, _, _ = self.load_csv_as_numpy(f)
-            self.logger.info(f"A_00_{i}. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
+            self.logger.debug(f"A_00_{i}. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             all_meta.append(X_meta)
             all_csi.append(X_csi)
             i = i+1
         
-        self.logger.info(f"A_01. all_meta: {(len(all_meta[0]))} all_csi: {len(all_csi)}")
+        self.logger.debug(f"A_01. all_meta: {(len(all_meta[0]))} all_csi: {len(all_csi)}")
 
         all_meta = np.vstack(all_meta)
         all_csi = np.vstack(all_csi)
         self.scaler_meta.fit(all_meta)
         self.scaler_csi.fit(all_csi)
-        self.logger.info(f"A_02. all_meta: {all_meta.shape} all_csi: {all_csi.shape}")
+        self.logger.debug(f"A_02. all_meta: {all_meta.shape} all_csi: {all_csi.shape}")
 
         # Second pass: windowed sequences
         for f in file_list:
@@ -124,7 +124,7 @@ class WifiCSIDataset(Dataset):
             X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
             self.logger.info(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             
-            self.logger.info(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
+            self.logger.debug(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
             y = {"subject": subj, "activity": act}
             return X_meta, X_csi, y, meta_cols, csi_cols
 

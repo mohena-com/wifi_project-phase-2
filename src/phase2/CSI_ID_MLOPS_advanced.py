@@ -70,7 +70,7 @@ def setup_logging(log_file_path):
 
 
 def train_and_evaluate(model, model_name, train_loader, val_loader, device, params, checkpoint_dir, logger):
-    logger.info(f"START T-N-E {model_name}")
+    logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=params["lr"])
@@ -84,7 +84,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     mlflow.log_params(params)    
     mlflow.log_param("parameter_count", total_params)
     
-    logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
+   # logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
     csi_seq = None
     meta_seq = None
     outputs = None
@@ -245,12 +245,6 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
 
 
-
-
-
-
-
-
 def plot_stats(history, save_path, logger):
     epochs = range(1, len(history['accuracy']) + 1)
     plt.figure(figsize=(12, 5))
@@ -341,10 +335,10 @@ def run_mlop_pipeline():
     logger.info(f"Using device: {device}")  
     # --- Model Definitions & hyperparameter grid ---
     model_defs = {
-        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
-        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
-        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
-        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'epochs':[cr.get_int("epochs")]}),
+        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
+        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
+        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
+        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
         # If EfficientNet1D is available, add here
     }
     learning_rate = None
@@ -362,7 +356,8 @@ def run_mlop_pipeline():
         logger.info(f"STARTING TRAINING FLOW : {model_name}:{param_keys}:{param_vals}")
         with mlflow.start_run(run_name=f"{model_name}_main") as parent_run:
             for combo in itertools.product(*param_vals):
-                params = dict(zip(param_keys, combo)); params['model_name'] = model_name
+                params = dict(zip(param_keys, combo))
+                params['model_name'] = model_name
             
                 logger.info(f"START RUN MLFLOW : {model_name}:{str(params)}")
                 batch = next(iter(train_loader))
@@ -434,7 +429,7 @@ def run_mlop_pipeline():
                 if best_val_acc > best_overall["val_acc"]:
                     best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch, "lr":learning_rate}
                     torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
-                    logger.fatal(f"99. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
+                    logger.fatal(f"9. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
                     best_model_path = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
                     mlflow.log_artifact(f"{best_model_path}")
                     logger.fatal(f"99. LOGGED SIGNATURE OF BEST MODEL {model_name} IN MLFLOW ")
@@ -480,7 +475,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     )
     logger.debug("4. do_signature_logging")
 
-    logger.info(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
+    logger.debug(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
 if __name__ == "__main__":
     run_mlop_pipeline()
