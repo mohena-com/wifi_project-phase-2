@@ -67,6 +67,8 @@ def setup_logging(log_file_path):
     logger.info("Logger initialized")
     return logger
 
+
+
 def train_and_evaluate(model, model_name, train_loader, val_loader, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
@@ -220,11 +222,14 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             # --- Log the final model with signature ---
            # signature = infer_signature()
             
-            mlflow.pytorch.log_model(
-                pytorch_model=model, 
+            #mlflow.pytorch.log_model(
+            #    pytorch_model=model, 
                 artifact_path=f"best_model_{model_name}.{params['model_name']}",
-             #   signature=signature
-            )
+            #    signature=signature
+            #)            
+            do_signature_logging(model, params)    
+        
+
 			
         train_losses.append(train_loss)
         val_losses.append(val_loss)
@@ -242,6 +247,38 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
         mlflow.log_artifact(best_modle_fname)
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
+
+def do_signature_logging(model, params):
+
+    from mlflow.models import infer_signature
+
+    # Prepare input example matching your model's expected input
+    example_csi = torch.randn(1, params["csi_seq_len"], params["csi_feature_dim"]).to(device)
+    example_meta = torch.randn(1, params["meta_seq_len"], params["meta_feature_dim"]).to(device)
+
+    # Run model forward pass
+    model.eval()
+    with torch.no_grad():
+        example_output = model(example_csi, example_meta)
+
+    # Convert to numpy for signature inference
+    input_example = (example_csi.cpu(), example_meta.cpu())
+    signature = infer_signature(
+        inputs=(example_csi.cpu().numpy(), example_meta.cpu().numpy()),
+        outputs=example_output.cpu().numpy()
+    )
+
+    # Log the model with MLflow
+    mlflow.pytorch.log_model(
+        pytorch_model=model,
+        artifact_path=f"best_model_{model_name}.{params['model_name']}",
+        input_example=input_example,
+        signature=signature
+    )
+    logger.info(f"Logged model with signature to MLflow for {model_name} with params {params}")
+
+
+
 
 
 def plot_stats(history, save_path, logger):
