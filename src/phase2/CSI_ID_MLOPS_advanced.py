@@ -265,7 +265,11 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
         example_output = model(example_csi, example_meta)
 
     # Convert to numpy for signature inference
-    input_example = (example_csi.cpu(), example_meta.cpu())
+    input_example = {
+        "csi_seq": example_csi.cpu().numpy(),
+        "meta_seq": example_meta.cpu().numpy()
+    }
+
     
     signature = infer_signature(
         (example_csi.cpu().numpy(), example_meta.cpu().numpy()),
