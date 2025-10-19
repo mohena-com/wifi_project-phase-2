@@ -257,19 +257,16 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger):
 
     import numpy as np
-    logger.info("0. do_signature_logging")
+    logger.debug("0. do_signature_logging")
     # Prepare input example matching your model's expected input
     example_csi = csi_seq 
     example_meta = meta_seq
     example_output = None
     model.eval()
-    logger.info("1. do_signature_logging")
+    logger.debug("1. do_signature_logging")
     with torch.no_grad():
         example_output = model(example_csi, example_meta)
-    # Run model forward pass
-    #model.eval()
-    #with torch.no_grad():
-    #    example_output = model(example_csi, example_meta)
+  
 
     # Convert tensors to numpy
     csi_np = example_csi.cpu().numpy()
@@ -277,11 +274,11 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
 
     # Concatenate along the last axis (feature dimension)
     combined_input = np.concatenate([csi_np, meta_np], axis=-1)
-    logger.info("2. do_signature_logging")
+    logger.debug("2. do_signature_logging")
 
     # Infer signature and log model
     signature = infer_signature(combined_input, example_output.cpu().numpy())
-    logger.info("3. do_signature_logging")
+    logger.debug("3. do_signature_logging")
 
     mlflow.pytorch.log_model(
         pytorch_model=model,
@@ -289,7 +286,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
      #   input_example=combined_input,
         signature=signature
     )
-    logger.info("4. do_signature_logging")
+    logger.debug("4. do_signature_logging")
 
     logger.info(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
