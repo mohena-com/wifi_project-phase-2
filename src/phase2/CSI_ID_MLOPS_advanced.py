@@ -250,7 +250,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
 
 def do_signature_logging(model, params):
-
+    logger.info(f"params : {params}")
     from mlflow.models import infer_signature
 
     # Prepare input example matching your model's expected input
