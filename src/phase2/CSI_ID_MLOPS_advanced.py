@@ -251,39 +251,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate
 
-def do_signature_logging1(model, model_name, csi_seq, meta_seq, params, logger):
-    #logger.info(f"params : {params}")
-    from mlflow.models import infer_signature
 
-    # Prepare input example matching your model's expected input
-    example_csi = csi_seq 
-    example_meta = meta_seq
-
-    # Run model forward pass
-    model.eval()
-    with torch.no_grad():
-        example_output = model(example_csi, example_meta)
-
-    # Convert to numpy for signature inference
-    input_example = {
-        "csi_seq": example_csi.cpu().numpy(),
-        "meta_seq": example_meta.cpu().numpy()
-    }
-
-    
-    signature = infer_signature(
-        (example_csi.cpu().numpy(), example_meta.cpu().numpy()),
-        example_output.cpu().numpy()
-    )
-
-    # Log the model with MLflow
-    mlflow.pytorch.log_model(
-        pytorch_model=model,
-        artifact_path=f"best_model_{model_name}.{params}",
-        input_example=input_example,
-        signature=signature
-    )
-    logger.info(f"Logged model with signature to MLflow for {model_name} with params {params}")
 
 def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
 
@@ -297,7 +265,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     model.eval()
     with torch.no_grad():
         example_output = model(example_csi, example_meta)
-        
+
     # Convert tensors to numpy
     csi_np = example_csi.cpu().numpy()
     meta_np = example_meta.cpu().numpy()
@@ -314,7 +282,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
         input_example=combined_input,
         signature=signature
     )
-
+    logger.info(f"Logged model with signature to MLflow for {model_name} with params {params}")
 
 
 
