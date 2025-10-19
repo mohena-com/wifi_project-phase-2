@@ -225,7 +225,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
             best_epoch = epoch + 1
             best_model_state = model.state_dict()
             
-            do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger) 
+            do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger) 
 			
         train_losses.append(train_loss)
         val_losses.append(val_loss)
@@ -246,41 +246,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, device, para
 
 
 
-def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, logger):
 
-    import numpy as np
-    logger.debug("0. do_signature_logging")
-    # Prepare input example matching your model's expected input
-    example_csi = csi_seq 
-    example_meta = meta_seq
-    example_output = None
-    model.eval()
-    logger.debug("1. do_signature_logging")
-    with torch.no_grad():
-        example_output = model(example_csi, example_meta)
-
-
-    # Convert tensors to numpy
-    csi_np = example_csi.cpu().numpy()
-    meta_np = example_meta.cpu().numpy()
-
-    # Concatenate along the last axis (feature dimension)
-    combined_input = np.concatenate([csi_np, meta_np], axis=-1)
-    logger.debug("2. do_signature_logging")
-
-    # Infer signature and log model
-    signature = infer_signature(combined_input, example_output.cpu().numpy())
-    logger.debug("3. do_signature_logging")
-
-    mlflow.pytorch.log_model(
-        pytorch_model=model,
-        artifact_path=f"best_model_{model_name}.{params['model_name']}",
-     #   input_example=combined_input,
-        signature=signature
-    )
-    logger.debug("4. do_signature_logging")
-
-    logger.info(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
 
 
@@ -423,10 +389,9 @@ def run_mlop_pipeline():
                 else:
                     raise ValueError("Unknown model")
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
-                #    mlflow.log_params(params)
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate = train_and_evaluate(
                     model, model_name, train_loader, test_loader, device, params, checkpoint_dir, logger)
-                #logger.info(f"best model {best_model_state}")
+
                 history = {
                     'accuracy': train_accs,
                     'val_accuracy': val_accs,
@@ -439,10 +404,12 @@ def run_mlop_pipeline():
                     "history": history
                 }
                 plot_stats(history, save_path=f"{plot_path}/{model_name}_{str(params)}_stats.png", logger=logger)
+
                 # Save confusion matrix, classification report on test set
                 if best_model_state is None:
                     logger.warning("No best model state found, skipping test evaluation.")
                     continue
+
                 model.load_state_dict(best_model_state)
                 all_preds, all_labels = [], []
                 model.eval()
@@ -470,22 +437,51 @@ def run_mlop_pipeline():
                     logger.fatal(f"99. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
                     best_model_path = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
                     mlflow.log_artifact(f"{best_model_path}")
+                    logger.fatal(f"99. LOGGED SIGNATURE OF BEST MODEL {model_name} IN MLFLOW ")
+                    do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)
                     
                     logger.fatal(f"100. LOGGED BEST MODEL IN MLFLOW {best_model_path}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
-  #  print(f"Best model overall: {best_overall}")
-    '''
-    logger.info(f"Best model overall: {best_overall}")
-    mlflow.log_params( stats_summary)
-    logger.info(f"Logged stats summary to MLflow {stats_summary}")
 
-    mlflow.log_params( best_overall)
-    logger.info(f"Logged best overall to MLflow {best_overall}")
-    '''
     mlflow.log_artifact(best_model_path)
     logger.info(f"Logged best model path to MLflow {best_model_path}")
     logger.fatal(f"best_overall : {best_overall}")
+
+def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
+
+    import numpy as np
+    logger.debug("0. do_signature_logging")
+    # Prepare input example matching your model's expected input
+
+    example_output = None
+    model.eval()
+    logger.debug("1. do_signature_logging")
+    with torch.no_grad():
+        example_output = model(example_csi, example_meta)
+
+    # Convert tensors to numpy
+    csi_np = csi_seq.cpu().numpy()
+    meta_np = meta_seq.cpu().numpy()
+    op_np = example_output.cpu().numpy()
+
+    # Concatenate along the last axis (feature dimension)
+    combined_input = np.concatenate([csi_np, meta_np], axis=-1)
+    logger.debug("2. do_signature_logging")
+
+    # Infer signature and log model
+    signature = infer_signature(combined_input, op_np)
+    logger.debug("3. do_signature_logging")
+
+    mlflow.pytorch.log_model(
+        pytorch_model=model,
+        artifact_path=f"best_model_{model_name}.{params['model_name']}",   
+        signature=signature
+    )
+    logger.debug("4. do_signature_logging")
+
+    logger.info(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
+
 if __name__ == "__main__":
     run_mlop_pipeline()
 
