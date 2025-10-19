@@ -383,6 +383,7 @@ def run_mlop_pipeline():
                     ).to(device, non_blocking=True)
                 else:
                     raise ValueError("Unknown model")
+                    
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate = train_and_evaluate(
                     model, model_name, train_loader, test_loader, device, params, checkpoint_dir, logger)
