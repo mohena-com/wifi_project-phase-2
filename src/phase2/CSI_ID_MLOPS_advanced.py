@@ -272,7 +272,8 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, outputs, params, 
     meta_np = example_meta.cpu().numpy()
 
     # Concatenate along the last axis (feature dimension)
-    combined_input = np.concatenate([csi_np, meta_np], axis=-1)
+    combined_input = (csi_np, meta_np)
+    #np.concatenate([csi_np, meta_np], axis=-1)
     logger.info("2. do_signature_logging")
 
     # Infer signature and log model
