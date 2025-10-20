@@ -67,33 +67,8 @@ def setup_logging(log_file_path):
     logger.debug("Logger initialized")
     return logger
 
-
-
-def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
-    logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
-    """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
-    criterion = nn.CrossEntropyLoss()
-
-
-    #optimizer = optim.Adam(model.parameters(), lr=params["lr"])
-
-
-
-    num_epochs = params["epochs"]
-    best_val_acc, best_epoch = 0, 0
-    best_model_state = None
-    train_losses, val_losses, train_accs, val_accs = [], [], [], []
-    
-    model = None
-    
-
-    b_size = int(params['batch_size'])
-
-    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False)
-
-    batch = next(iter(train_loader))
-    # Model instantiation according to constructor
+def create_model_instance(model_class, model_name, batch, device):
+        # Model instantiation according to constructor
     if model_name == "CSILSTMNet":
         model = model_class(
             csi_input_size=batch["csi_seq"].shape[2],
@@ -115,6 +90,24 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         ).to(device, non_blocking=True)
     else:
         raise ValueError("Unknown model")
+
+def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
+    logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
+    """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
+    criterion = nn.CrossEntropyLoss()
+
+    num_epochs = params["epochs"]
+    best_val_acc, best_epoch = 0, 0
+    best_model_state = None
+    train_losses, val_losses, train_accs, val_accs = [], [], [], []      
+
+    b_size = int(params['batch_size'])
+
+    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False)
+
+    batch = next(iter(train_loader))
+    model = create_model_instance(model_class, model_name, batch, device)
 
     total_params = sum(p.numel() for p in model.parameters())
 
@@ -336,7 +329,7 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     plt.xticks(np.arange(cm.shape[1]) + 0.5, np.arange(1, cm.shape[1]+1), rotation=90, fontsize=tick_font_size)
     plt.yticks(np.arange(cm.shape[0]) + 0.5, np.arange(1, cm.shape[0]+1), rotation=0, fontsize=tick_font_size)
     plt.tight_layout()
-    cm_path = f"{plot_path}/{model_name}_{make_run_name(params)}_confusion_matrix.png"
+    cm_path = f"{plot_path}/{make_run_name(params)}_confusion_matrix.png"
     plt.savefig(cm_path, bbox_inches='tight', dpi=150)
     plt.close()
 
@@ -348,7 +341,7 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     plt.text(0, 1, report_str, fontsize=10, family='monospace', verticalalignment='top')
     plt.axis('off')
     plt.title('Classification Report')
-    cr_path = f"{plot_path}/{model_name}_{make_run_name(params)}_classification_report.png"
+    cr_path = f"{plot_path}/{make_run_name(params)}_classification_report.png"
     plt.savefig(cr_path, bbox_inches='tight')
     plt.close()
 
@@ -373,7 +366,7 @@ def make_run_name(params):
     lr_str = f"{lr:.0e}" if lr < 1e-2 else f"{lr}".replace('.', 'p')
     wd_str = f"{wd:.0e}" if wd < 1e-2 else f"{wd}".replace('.', 'p')
 
-    run_name = f"lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
+    run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
 def run_mlop_pipeline():
@@ -419,10 +412,9 @@ def run_mlop_pipeline():
                 params = dict(zip(param_keys, combo))
                 params['model_name'] = model_name
             
-                logger.info(f"START RUN MLFLOW : {model_name}:{make_run_name(params)}")
-                
+                logger.info(f"START RUN MLFLOW : {make_run_name(params)}")                
                     
-                with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
+                with mlflow.start_run(run_name=f"{make_run_name(params)}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader = train_and_evaluate(
                         model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
 
@@ -437,7 +429,7 @@ def run_mlop_pipeline():
                     "epoch": best_epoch,
                     "history": history
                 }
-                plot_stats(history, save_path=f"{plot_path}/{model_name}_{make_run_name(params)}_stats.png", logger=logger)
+                plot_stats(history, save_path=f"{plot_path}/{make_run_name(params)}_stats.png", logger=logger)
 
                 # Save confusion matrix, classification report on test set
                 if best_model_state is None:
@@ -458,8 +450,8 @@ def run_mlop_pipeline():
                         all_labels.extend(labels)
                 cm = confusion_matrix(all_labels, all_preds) 
                 cr_report = classification_report(all_labels, all_preds, zero_division=0)
-                np.save(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy", cm)
-                mlflow.log_artifact(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy")
+                np.save(f"{plot_path}/{make_run_name(params)}_cm.npy", cm)
+                mlflow.log_artifact(f"{plot_path}/{make_run_name(params)}_cm.npy")
                 plot_cm_cr(cm, cr_report, model_name, params,  plot_path)
 
                 logger.info(f"Confusion matrix:\n{cm}")
@@ -467,9 +459,9 @@ def run_mlop_pipeline():
                 # Save model checkpoint for best overall if needed
                 if best_val_acc > best_overall["val_acc"]:
                     best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch, "lr":learning_rate}
-                    torch.save(best_model_state, f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt")
+                    torch.save(best_model_state, f"{checkpoint_dir}/best_model_{make_run_name(params)}_epoch{best_epoch}.pt")
                     logger.fatal(f"9. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
-                    best_model_path = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
+                    best_model_path = f"{checkpoint_dir}/best_model_{make_run_name(params)}_epoch{best_epoch}.pt"
                     mlflow.log_artifact(f"{best_model_path}")
                     logger.fatal(f"99. LOGGED SIGNATURE OF BEST MODEL {model_name} IN MLFLOW ")
                     do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)
