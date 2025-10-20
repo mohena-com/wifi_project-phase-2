@@ -284,7 +284,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
        
         mlflow.log_artifact(best_modle_fname)
 
-    return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model
+    return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
 
 
 def plot_stats(history, save_path, logger):
@@ -404,7 +404,7 @@ def run_mlop_pipeline():
                 
                     
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
-                    train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model = train_and_evaluate(
+                    train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader = train_and_evaluate(
                         model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
 
                 history = {
