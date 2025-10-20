@@ -61,7 +61,7 @@ class WifiCSIDataset(Dataset):
                 csi_seq = X_csi[start:start+window_size]  # (W, 99)
                 self.samples.append((m_seq, csi_seq, y))
         
-        self.logger.info(f"dataset initialized with {len(self.samples)} samples.")
+       # self.logger.info(f"dataset initialized with {len(self.samples)} samples.")
 
     def __len__(self):
         return len(self.samples)
