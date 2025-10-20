@@ -83,7 +83,7 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
     best_val_acc, best_epoch = 0, 0
     best_model_state = None
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
-    total_params = sum(p.numel() for p in model.parameters())
+    
     model = None
     
 
@@ -115,6 +115,8 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
         ).to(device, non_blocking=True)
     else:
         raise ValueError("Unknown model")
+
+    total_params = sum(p.numel() for p in model.parameters())
     
     if params["optimizer"] == "adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
