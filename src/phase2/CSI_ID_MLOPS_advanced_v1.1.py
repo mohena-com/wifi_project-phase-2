@@ -77,10 +77,7 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
 
     #optimizer = optim.Adam(model.parameters(), lr=params["lr"])
 
-    if params["optimizer"] == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
-    else:
-        optimizer = torch.optim.SGD(model.parameters(), lr=params["lr"], momentum=0.9, weight_decay=params["weight_decay"])
+
 
     num_epochs = params["epochs"]
     best_val_acc, best_epoch = 0, 0
@@ -89,8 +86,7 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
     total_params = sum(p.numel() for p in model.parameters())
     model = None
     
-    mlflow.log_params(params)    
-    mlflow.log_param("parameter_count", total_params)
+
     b_size = int(params['batch_size'])
 
     train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True)
@@ -120,6 +116,14 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
     else:
         raise ValueError("Unknown model")
     
+    if params["optimizer"] == "adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
+    else:
+        optimizer = torch.optim.SGD(model.parameters(), lr=params["lr"], momentum=0.9, weight_decay=params["weight_decay"])
+    
+    mlflow.log_params(params)    
+    mlflow.log_param("parameter_count", total_params)
+   
    # logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
     csi_seq = None
     meta_seq = None
