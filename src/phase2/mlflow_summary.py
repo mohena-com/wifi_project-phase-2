@@ -5,6 +5,14 @@ client = mlflow.tracking.MlflowClient()
 experiment = client.get_experiment_by_name("10_EPOCHS_TEST_DIFF_BATCH_SIZE")
 runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
 
+print("🔍 Available MLflow columns:\n")
+print(runs.columns.tolist())
+
+print("\n🔍 Sample of run data:\n")
+print(runs.head())
+
+'''
+
 # Select relevant columns
 cols = ["tags.mlflow.runName", "params.model_name", "params.lr", "params.batch_size",
         "params.optimizer", "params.weight_decay", "params.epochs",
@@ -29,3 +37,4 @@ print(summary_df)
 
 # Save as CSV or Excel
 summary_df.to_csv("mlflow_run_summary.csv", index=False)
+'''
