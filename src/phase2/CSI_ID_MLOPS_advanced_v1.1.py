@@ -69,7 +69,7 @@ def setup_logging(log_file_path):
 
 
 
-def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
+def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
     criterion = nn.CrossEntropyLoss()
@@ -117,7 +117,7 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
         raise ValueError("Unknown model")
 
     total_params = sum(p.numel() for p in model.parameters())
-    
+
     if params["optimizer"] == "adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     else:
@@ -405,7 +405,7 @@ def run_mlop_pipeline():
                     
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate = train_and_evaluate(
-                        model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
+                        model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
 
                 history = {
                     'accuracy': train_accs,
