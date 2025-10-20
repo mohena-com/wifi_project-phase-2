@@ -336,7 +336,7 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     plt.xticks(np.arange(cm.shape[1]) + 0.5, np.arange(1, cm.shape[1]+1), rotation=90, fontsize=tick_font_size)
     plt.yticks(np.arange(cm.shape[0]) + 0.5, np.arange(1, cm.shape[0]+1), rotation=0, fontsize=tick_font_size)
     plt.tight_layout()
-    cm_path = f"{plot_path}/{model_name}_{str(params)}_confusion_matrix.png"
+    cm_path = f"{plot_path}/{model_name}_{make_run_name(params)}_confusion_matrix.png"
     plt.savefig(cm_path, bbox_inches='tight', dpi=150)
     plt.close()
 
@@ -348,7 +348,7 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     plt.text(0, 1, report_str, fontsize=10, family='monospace', verticalalignment='top')
     plt.axis('off')
     plt.title('Classification Report')
-    cr_path = f"{plot_path}/{model_name}_{str(params)}_classification_report.png"
+    cr_path = f"{plot_path}/{model_name}_{make_run_name(params)}_classification_report.png"
     plt.savefig(cr_path, bbox_inches='tight')
     plt.close()
 
@@ -356,6 +356,25 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     import mlflow
     mlflow.log_artifact(cm_path)
     mlflow.log_artifact(cr_path)
+
+def make_run_name(params):
+    """
+    Create a short, readable, and unique run/file name based on model and key hyperparameters.
+    Example: 'DenseNet1D_lr1e-3_bs64_adam_wd1e-4_ep20'
+    """
+    lr = params.get("lr", 0)
+    bs = params.get("batch_size", 0)
+    opt = params.get("optimizer", "opt")
+    wd = params.get("weight_decay", 0)
+    epochs = params.get("epochs", 0)
+    model_name = params.get("model_name", 'Invalid Model')
+
+    # Sanitize numbers for filenames (avoid scientific notation & dots)
+    lr_str = f"{lr:.0e}" if lr < 1e-2 else f"{lr}".replace('.', 'p')
+    wd_str = f"{wd:.0e}" if wd < 1e-2 else f"{wd}".replace('.', 'p')
+
+    run_name = f"lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
+    return run_name
 
 def run_mlop_pipeline():
     logger = setup_logging(log_filename)
@@ -400,7 +419,7 @@ def run_mlop_pipeline():
                 params = dict(zip(param_keys, combo))
                 params['model_name'] = model_name
             
-                logger.info(f"START RUN MLFLOW : {model_name}:{str(params)}")
+                logger.info(f"START RUN MLFLOW : {model_name}:{make_run_name(params)}")
                 
                     
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
@@ -418,7 +437,7 @@ def run_mlop_pipeline():
                     "epoch": best_epoch,
                     "history": history
                 }
-                plot_stats(history, save_path=f"{plot_path}/{model_name}_{str(params)}_stats.png", logger=logger)
+                plot_stats(history, save_path=f"{plot_path}/{model_name}_{make_run_name(params)}_stats.png", logger=logger)
 
                 # Save confusion matrix, classification report on test set
                 if best_model_state is None:
@@ -439,8 +458,8 @@ def run_mlop_pipeline():
                         all_labels.extend(labels)
                 cm = confusion_matrix(all_labels, all_preds) 
                 cr_report = classification_report(all_labels, all_preds)
-                np.save(f"{plot_path}/{model_name}_{str(params)}_cm.npy", cm)
-                mlflow.log_artifact(f"{plot_path}/{model_name}_{str(params)}_cm.npy")
+                np.save(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy", cm)
+                mlflow.log_artifact(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy")
                 plot_cm_cr(cm, cr_report, model_name, params,  plot_path)
 
                 logger.info(f"Confusion matrix:\n{cm}")
