@@ -85,8 +85,8 @@ def train_and_evaluate(model, model_name, train_dataset, test_dataset, device, p
     mlflow.log_param("parameter_count", total_params)
     b_size = int(params['batch_size'])
 
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False)
 
     batch = next(iter(train_loader))
     # Model instantiation according to constructor
