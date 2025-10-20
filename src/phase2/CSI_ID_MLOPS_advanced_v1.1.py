@@ -376,10 +376,10 @@ def run_mlop_pipeline():
     logger.info(f"Using device: {device}")  
     # --- Model Definitions & hyperparameter grid ---
     model_defs = {
-        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
-        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
-        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
-        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
+        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3],'epochs':[cr.get_int("epochs")]}),
+        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3], 'epochs':[cr.get_int("epochs")]}),
+        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3] 'epochs':[cr.get_int("epochs")]}),
+        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3], 'epochs':[cr.get_int("epochs")]}),
         # If EfficientNet1D is available, add here
     }
     learning_rate = None
