@@ -176,7 +176,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         val_true, val_pred, val_prob = [], [], []
 
         with torch.no_grad():
-            for batch in val_loader:
+            for batch in test_loader:
                 csi_seq = batch["csi_seq"].to(device, non_blocking=True)
                 meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
                 labels = batch["label"].squeeze().to(device, non_blocking=True)
@@ -191,7 +191,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_pred.extend(preds.cpu().numpy())
                 val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy())
 
-        val_loss = running_loss / len(val_loader)
+        val_loss = running_loss / len(test_loader)
         val_acc = correct / total
 
         val_precision = precision_score(val_true, val_pred, average="weighted", zero_division=0)
