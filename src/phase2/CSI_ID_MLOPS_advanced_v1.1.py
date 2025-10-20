@@ -73,7 +73,15 @@ def train_and_evaluate(model_name, train_dataset, test_dataset, device, params, 
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=params["lr"])
+
+
+    #optimizer = optim.Adam(model.parameters(), lr=params["lr"])
+
+    if params["optimizer"] == "adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
+    else:
+        optimizer = torch.optim.SGD(model.parameters(), lr=params["lr"], momentum=0.9, weight_decay=params["weight_decay"])
+
     num_epochs = params["epochs"]
     best_val_acc, best_epoch = 0, 0
     best_model_state = None
@@ -348,7 +356,7 @@ def run_mlop_pipeline():
     print(f"logger {logger}")
     # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
     dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
-    logger.info(f"Dataset loaded with {len(dataset)} samples")
+    logger.critical(f"Dataset loaded with {len(dataset)} samples")
 
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
@@ -362,10 +370,10 @@ def run_mlop_pipeline():
     logger.info(f"Using device: {device}")  
     # --- Model Definitions & hyperparameter grid ---
     model_defs = {
-        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
-        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
-        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
-        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'epochs':[cr.get_int("epochs")]}),
+        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
+        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
+        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
+        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'epochs':[cr.get_int("epochs")]}),
         # If EfficientNet1D is available, add here
     }
     learning_rate = None
@@ -391,7 +399,7 @@ def run_mlop_pipeline():
                     
                 with mlflow.start_run(run_name=f"{model_name}_lr_{params['lr']}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate = train_and_evaluate(
-                    model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
+                        model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger)
 
                 history = {
                     'accuracy': train_accs,
