@@ -60,6 +60,8 @@ class WifiCSIDataset(Dataset):
                 m_seq = X_meta[start:start+window_size]   # (W, 12)
                 csi_seq = X_csi[start:start+window_size]  # (W, 99)
                 self.samples.append((m_seq, csi_seq, y))
+        
+        self.logger.critical(f"dataset initialized with {len(self.samples)} samples.")
 
     def __len__(self):
         return len(self.samples)
@@ -95,7 +97,7 @@ class WifiCSIDataset(Dataset):
         return None, None
 
     def load_csv_as_numpy(self, filename):
-        self.logger.info(f"B_00. Loading:{ filename}")
+        self.logger.debug(f"B_00. Loading:{ filename}")
         with open(filename, 'r', newline='') as f:
             reader = csv.DictReader(f)
             cols = reader.fieldnames
@@ -122,7 +124,7 @@ class WifiCSIDataset(Dataset):
             
             X_meta = np.array(X_meta, dtype=np.float32)  # (T, 12)
             X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
-            self.logger.info(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
+            self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             
             self.logger.debug(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
             y = {"subject": subj, "activity": act}
