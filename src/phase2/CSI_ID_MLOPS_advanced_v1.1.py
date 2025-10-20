@@ -219,7 +219,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_auc = roc_auc_score(val_true_np, val_prob_np, multi_class='ovr', average='weighted')
                 mlflow.log_metric('Validation AUC Curve', val_auc, step=epoch)
             except Exception as e:
-                logger.warning(f"ROC-AUC computation failed: {e}")
+                logger.debug(f"ROC-AUC computation failed: {e}")
         else:
             #    Subset classes and probabilities to avoid mismatch error
             try:
@@ -228,7 +228,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_auc = roc_auc_score(y_true_bin, val_prob_subset, multi_class='ovr', average='weighted')
                 mlflow.log_metric('Validation AUC Curve', val_auc, step=epoch)
             except Exception as e:
-                logger.warning(f"ROC-AUC subset computation failed: {e}")
+                logger.debug(f"ROC-AUC subset computation failed: {e}")
 
         for param_group in optimizer.param_groups:
             mlflow.log_metric("Learning Rate Over Epochs", param_group["lr"], step=epoch)
