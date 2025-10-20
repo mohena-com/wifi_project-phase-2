@@ -40,7 +40,7 @@ class WifiCSIDataset(Dataset):
             all_meta.append(X_meta)
             all_csi.append(X_csi)
             i = i+1
-        
+        self.logger.critical(f"A_00. Completed first pass for scaling.")   
         self.logger.debug(f"A_01. all_meta: {(len(all_meta[0]))} all_csi: {len(all_csi)}")
 
         all_meta = np.vstack(all_meta)
@@ -60,7 +60,7 @@ class WifiCSIDataset(Dataset):
                 m_seq = X_meta[start:start+window_size]   # (W, 12)
                 csi_seq = X_csi[start:start+window_size]  # (W, 99)
                 self.samples.append((m_seq, csi_seq, y))
-        
+        self.logger.critical(f"A_01. Completed Second pass: windowed sequences.")
        # self.logger.info(f"dataset initialized with {len(self.samples)} samples.")
 
     def __len__(self):
@@ -129,7 +129,7 @@ class WifiCSIDataset(Dataset):
             self.logger.debug(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
             y = {"subject": subj, "activity": act}
 
-            print(f"✅ Loaded:{ filename}", flush=True)
+            
 
             return X_meta, X_csi, y, meta_cols, csi_cols
 

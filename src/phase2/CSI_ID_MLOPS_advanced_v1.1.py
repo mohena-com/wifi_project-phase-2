@@ -457,7 +457,7 @@ def run_mlop_pipeline():
                         all_preds.extend(preds)
                         all_labels.extend(labels)
                 cm = confusion_matrix(all_labels, all_preds) 
-                cr_report = classification_report(all_labels, all_preds)
+                cr_report = classification_report(all_labels, all_preds, zero_division=0)
                 np.save(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy", cm)
                 mlflow.log_artifact(f"{plot_path}/{model_name}_{make_run_name(params)}_cm.npy")
                 plot_cm_cr(cm, cr_report, model_name, params,  plot_path)
