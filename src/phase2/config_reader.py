@@ -78,7 +78,7 @@ class ConfigReader:
         return Path(value) 
 
     # ...existing code...
-    def get_int_list(self, key: str, default: Any = None) -> list:
+    def get_int_list(self, key: str, default  = None) -> list:
         """
         Return the config value for `key` as a list of ints.
         Handles:
@@ -98,7 +98,7 @@ class ConfigReader:
             return [int(p) for p in parts]
         return [int(v)]
 
-    def get_str_list(self, key: str, default: Any = None) -> list:
+    def get_str_list(self, key: str, default = None) -> list:
         """
         Return the config value for `key` as a list of strings.
         Handles:
