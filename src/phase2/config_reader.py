@@ -20,7 +20,7 @@ class ConfigReader:
     def get(self, key, default=None):
         """Get configuration value with optional default."""
         return self.config.get(key, default)
-    def _to_parts(self, v: Any) -> List[str]:
+    def _to_parts(self, v) -> List[str]:
         """Return a list of string parts for comma separated values."""
         if v is None:
             return []
