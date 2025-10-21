@@ -17,11 +17,11 @@ class ConfigReader:
                     key, value = line.split('=', 1)
                     self.config[key.strip()] = value.strip()
 
-        print(f"Loaded config: {self.config}")
-        for key, value in self.config.items():
-            print(f"Config key: '{key}' => value: '{value}'")
+       # print(f"Loaded config: {self.config}")
+      #  for key, value in self.config.items():
+       #     print(f"Config key: '{key}' => value: '{value}'")
 
-        print(f"Loaded config: {self.config}")
+       # print(f"Loaded config: {self.config}")
     
     def get(self, key, default=None):
         """Get configuration value with optional default."""
@@ -82,12 +82,12 @@ class ConfigReader:
 
     def get_int_list(self, key: str, default = None) -> list[int]:
         v = self.get(key, default)
-        print(f"get_int_list for key={key} raw value: {v}")
+      #  print(f"get_int_list for key={key} raw value: {v}")
         parts = self._to_parts(v)
-        print(f"get_int_list for key={key} parts: {parts}")
+     #   print(f"get_int_list for key={key} parts: {parts}")
         result = []
         for p in parts:
-            print(f"Parsing part '{p}' for key '{key}' to int")
+     #       print(f"Parsing part '{p}' for key '{key}' to int")
             # allow floats that represent integers (e.g., "50.0")
             try:
                 if '.' in p:
@@ -114,7 +114,7 @@ class ConfigReader:
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
             l = [str(p) for p in parts]
-            print(f"get_int_list for key={key} returning list: {l}")
+     #       print(f"get_int_list for key={key} returning list: {l}")
             return l
         return [str(v)]
 # ...existing code...
@@ -133,7 +133,7 @@ class ConfigReader:
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
             l = [float(p) for p in parts]
-            print(f"get_int_list for key={key} returning list: {l}")
+     #       print(f"get_int_list for key={key} returning list: {l}")
             return l
             
         # Fallback
