@@ -79,6 +79,7 @@ class ConfigReader:
         parts = self._to_parts(v)
         result = []
         for p in parts:
+            print(f"Parsing part '{p}' for key '{key}' to int")
             # allow floats that represent integers (e.g., "50.0")
             try:
                 if '.' in p:
