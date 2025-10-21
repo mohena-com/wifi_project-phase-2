@@ -70,6 +70,7 @@ def setup_logging(log_file_path):
 def create_model_instance(model_class, model_name, batch, device):
     print(f"Creating model instance for {model_class} / {model_name} ")
         # Model instantiation according to constructor
+    model = None
     if model_name == "CSILSTMNet":
         model = model_class(
             csi_input_size=batch["csi_seq"].shape[2],
@@ -91,6 +92,7 @@ def create_model_instance(model_class, model_name, batch, device):
         ).to(device, non_blocking=True)
     else:
         raise ValueError("Unknown model")
+    return model
 
 def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
