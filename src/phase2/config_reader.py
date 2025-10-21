@@ -16,6 +16,7 @@ class ConfigReader:
                 if line and not line.startswith('#'):
                     key, value = line.split('=', 1)
                     self.config[key.strip()] = value.strip()
+        print(f"Loaded config: {self.config}")
     
     def get(self, key, default=None):
         """Get configuration value with optional default."""
