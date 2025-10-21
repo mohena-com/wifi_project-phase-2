@@ -68,6 +68,7 @@ def setup_logging(log_file_path):
     return logger
 
 def create_model_instance(model_class, model_name, batch, device):
+    logger.info(f"Creating model instance for {model_class} / {model_name} / {batch} / {device}")
         # Model instantiation according to constructor
     if model_name == "CSILSTMNet":
         model = model_class(
