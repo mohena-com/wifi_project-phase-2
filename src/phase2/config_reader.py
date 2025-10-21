@@ -31,22 +31,7 @@ class ConfigReader:
         value = self.get(key, default)
         return float(value) if value is not None else default
     
-    def get_float_list(self, key, default=None):
-        v = self.get(key, default)
-        if v is None:
-            return []
-        # Already a list (numbers or strings)
-        if isinstance(v, list):
-            return [float(x) for x in v]
-        # If a numeric scalar (int/float)
-        if isinstance(v, (int, float)):
-            return [float(v)]
-        # If a string that may be comma-separated
-        if isinstance(v, str):
-            parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            return [float(p) for p in parts]
-        # Fallback
-        return [float(v)]
+
         
 
     def get_bool(self, key, default=None):
@@ -95,7 +80,9 @@ class ConfigReader:
             return [int(v)]
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            return [int(p) for p in parts]
+            l = [int(p) for p in parts]
+            print(f"get_int_list for key={key} returning list: {l}")
+            return 
         return [int(v)]
 
     def get_str_list(self, key: str, default = None) -> list:
@@ -113,6 +100,28 @@ class ConfigReader:
             return [str(x) for x in v]
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            return parts
+            l = [int(p) for p in parts]
+            print(f"get_int_list for key={key} returning list: {l}")
+            return l
         return [str(v)]
 # ...existing code...
+
+    def get_float_list(self, key, default=None):
+        v = self.get(key, default)
+        if v is None:
+            return []
+        # Already a list (numbers or strings)
+        if isinstance(v, list):
+            return [float(x) for x in v]
+        # If a numeric scalar (int/float)
+        if isinstance(v, (int, float)):
+            return [float(v)]
+        # If a string that may be comma-separated
+        if isinstance(v, str):
+            parts = [p.strip() for p in v.split(',') if p.strip() != '']
+            l = [int(p) for p in parts]
+            print(f"get_int_list for key={key} returning list: {l}")
+            return l
+            
+        # Fallback
+        return [float(v)]
