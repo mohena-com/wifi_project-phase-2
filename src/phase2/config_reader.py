@@ -16,7 +16,8 @@ class ConfigReader:
                 if line and not line.startswith('#'):
                     key, value = line.split('=', 1)
                     self.config[key.strip()] = value.strip()
-        
+
+        print(f"Loaded config: {self.config}")
         for key, value in self.config.items():
             print(f"Config key: '{key}' => value: '{value}'")
 
