@@ -408,6 +408,7 @@ def run_mlop_pipeline():
     best_overall = {"val_acc":-1}
     stats_summary = {}
     best_model_path = None
+    print(f"model_defs {model_defs}")
     for model_name, (model_class, param_grid) in model_defs.items():
         param_keys, param_vals = zip(*param_grid.items())
         logger.info(" ")
