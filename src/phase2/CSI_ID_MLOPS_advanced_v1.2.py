@@ -152,7 +152,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         
         train_loss = running_loss / len(train_loader)
         train_acc = correct / total
-        logger.info(f"running loss: {running_loss}, len train_loader: {len(train_loader)}, train_loss: {train_loss}, train_acc: {train_acc}")
+        print(f"running loss: {running_loss}, len train_loader: {len(train_loader)}, train_loss: {train_loss}, train_acc: {train_acc}")
 
         train_precision = precision_score(train_true, train_pred, average="weighted", zero_division=0)
         train_recall = recall_score(train_true, train_pred, average="weighted", zero_division=0)
@@ -395,17 +395,7 @@ def run_mlop_pipeline():
 
     from model_definitions import var_model_definitions
 
-    model_defs = var_model_definitions
-    
-    '''
-    {
-        "CSILSTMNet": (CSILSTMNet, {'csi_input_size':[99], 'meta_input_size':[12], 'window_size':[128], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3],'epochs':[cr.get_int("epochs")]}),
-        "DenseNet1D": (DenseNet1D, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005], 'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3], 'epochs':[cr.get_int("epochs")]}),
-        "EfficientNet1DLSTM": (EfficientNet1DLSTM, {'in_channels':[99], 'meta_seq_len':[128], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3], 'epochs':[cr.get_int("epochs")]}),
-        "MobileNetV3_1D_LSTM": (MobileNetV3_1D_LSTM, {'csi_channels':[99], 'meta_feature_dim':[12], 'num_classes':[31], 'lr':[0.001, 0.0005],'batch_size':[16, 32, 64, 128], 'optimizer':['adam', 'sgd'], 'weight_decay': [0.0, 1e-5, 1e-4, 1e-3], 'epochs':[cr.get_int("epochs")]}),
-        # If EfficientNet1D is available, add here
-    }
-    '''
+    model_defs = var_model_definitions  
 
     learning_rate = None
     # --- MLflow experiment ---
