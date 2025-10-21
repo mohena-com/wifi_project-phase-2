@@ -100,7 +100,7 @@ class ConfigReader:
             return [str(x) for x in v]
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            l = [int(p) for p in parts]
+            l = [str(p) for p in parts]
             print(f"get_int_list for key={key} returning list: {l}")
             return l
         return [str(v)]
@@ -119,7 +119,7 @@ class ConfigReader:
         # If a string that may be comma-separated
         if isinstance(v, str):
             parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            l = [int(p) for p in parts]
+            l = [float(p) for p in parts]
             print(f"get_int_list for key={key} returning list: {l}")
             return l
             
