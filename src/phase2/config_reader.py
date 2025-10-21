@@ -31,6 +31,24 @@ class ConfigReader:
         value = self.get(key, default)
         return float(value) if value is not None else default
     
+    def get_float_list(self, key, default=None):
+        v = self.get(key, default)
+        if v is None:
+            return []
+        # Already a list (numbers or strings)
+        if isinstance(v, list):
+            return [float(x) for x in v]
+        # If a numeric scalar (int/float)
+        if isinstance(v, (int, float)):
+            return [float(v)]
+        # If a string that may be comma-separated
+        if isinstance(v, str):
+            parts = [p.strip() for p in v.split(',') if p.strip() != '']
+            return [float(p) for p in parts]
+        # Fallback
+        return [float(v)]
+        
+
     def get_bool(self, key, default=None):
         """Get boolean configuration value."""
         value = self.get(key, default)
@@ -58,3 +76,43 @@ class ConfigReader:
         if value is None:
             return default
         return Path(value) 
+
+    # ...existing code...
+    def get_int_list(self, key: str, default: Any = None) -> list:
+        """
+        Return the config value for `key` as a list of ints.
+        Handles:
+          - already-parsed lists of numbers/strings
+          - single numeric scalar
+          - comma-separated string like '32, 64'
+        """
+        v = self.get(key, default)
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [int(x) for x in v]
+        if isinstance(v, (int, float)):
+            return [int(v)]
+        if isinstance(v, str):
+            parts = [p.strip() for p in v.split(',') if p.strip() != '']
+            return [int(p) for p in parts]
+        return [int(v)]
+
+    def get_str_list(self, key: str, default: Any = None) -> list:
+        """
+        Return the config value for `key` as a list of strings.
+        Handles:
+          - already-parsed lists
+          - single scalar
+          - comma-separated string like 'adam, sgd'
+        """
+        v = self.get(key, default)
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(x) for x in v]
+        if isinstance(v, str):
+            parts = [p.strip() for p in v.split(',') if p.strip() != '']
+            return parts
+        return [str(v)]
+# ...existing code...
