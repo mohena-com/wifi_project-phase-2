@@ -20,7 +20,19 @@ class ConfigReader:
     def get(self, key, default=None):
         """Get configuration value with optional default."""
         return self.config.get(key, default)
-    
+    def _to_parts(self, v: Any) -> List[str]:
+        """Return a list of string parts for comma separated values."""
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(x) for x in v]
+        s = str(v).strip()
+        # handle empty
+        if s == '':
+            return []
+        parts = [p.strip() for p in s.split(',') if p.strip() != '']
+        return parts
+		
     def get_int(self, key, default=None):
         """Get integer configuration value."""
         value = self.get(key, default)
@@ -62,28 +74,20 @@ class ConfigReader:
             return default
         return Path(value) 
 
-    # ...existing code...
-    def get_int_list(self, key: str, default  = None) -> list:
-        """
-        Return the config value for `key` as a list of ints.
-        Handles:
-          - already-parsed lists of numbers/strings
-          - single numeric scalar
-          - comma-separated string like '32, 64'
-        """
+    def get_int_list(self, key: str, default: Any = None) -> List[int]:
         v = self.get(key, default)
-        if v is None:
-            return []
-        if isinstance(v, list):
-            return [int(x) for x in v]
-        if isinstance(v, (int, float)):
-            return [int(v)]
-        if isinstance(v, str):
-            parts = [p.strip() for p in v.split(',') if p.strip() != '']
-            l = [int(p) for p in parts]
-            print(f"get_int_list for key={key} returning list: {l}")
-            return 
-        return [int(v)]
+        parts = self._to_parts(v)
+        result = []
+        for p in parts:
+            # allow floats that represent integers (e.g., "50.0")
+            try:
+                if '.' in p:
+                    result.append(int(float(p)))
+                else:
+                    result.append(int(p))
+            except ValueError:
+                raise ValueError(f"Cannot convert config value '{p}' for key '{key}' to int")
+        return result
 
     def get_str_list(self, key: str, default = None) -> list:
         """
