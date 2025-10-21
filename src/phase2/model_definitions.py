@@ -16,6 +16,12 @@ list_optimizer = cr.get_list("optimizer", type_func=str)
 list_weight_decay = cr.get_float_list("weight_decay")   
 list_epochs = cr.get_int_list("epochs")
 
+print(f"list_batch_size: {list_batch_size}")
+print(f"list_learning_rate: {list_learning_rate}")  
+print(f"list_optimizer: {list_optimizer}")
+print(f"list_weight_decay: {list_weight_decay}")
+print(f"list_epochs: {list_epochs}")
+
 
 var_model_definitions = {
     "CSILSTMNet": (
