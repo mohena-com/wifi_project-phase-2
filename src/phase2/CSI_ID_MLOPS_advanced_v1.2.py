@@ -149,8 +149,10 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             train_true.extend(labels.cpu().numpy())
             train_pred.extend(preds.cpu().numpy())
 
+        
         train_loss = running_loss / len(train_loader)
         train_acc = correct / total
+        logger.info(f"running loss: {running_loss}, len train_loader: {len(train_loader)}, train_loss: {train_loss}, train_acc: {train_acc}")
 
         train_precision = precision_score(train_true, train_pred, average="weighted", zero_division=0)
         train_recall = recall_score(train_true, train_pred, average="weighted", zero_division=0)
