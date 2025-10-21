@@ -9,11 +9,16 @@ import pandas as pd
 from pathlib import Path
 import argparse
 
-def prune_bad_combinations(df, val_quantile=0.2, overfit_thresh=0.05, std_thresh=0.05):
+def prune_bad_combinations(csv_path, output_path="promising_combos.csv",
+                           val_quantile=0.2, overfit_thresh=0.05, std_thresh=0.05):
+    """Filter out unstable or low-performing hyperparameter combinations."""
+
+    df = pd.read_csv(csv_path)
     df = df.dropna(subset=["Val F1", "Train F1", "Model",
                            "Learning Rate", "Batch Size",
                            "Optimizer", "Weight Decay"])
 
+    # Group by unique hyperparameter settings
     group_cols = ["Model", "Learning Rate", "Batch Size", "Optimizer", "Weight Decay"]
     agg = df.groupby(group_cols).agg({
         "Val F1": ["mean", "std", "max"],
@@ -23,14 +28,19 @@ def prune_bad_combinations(df, val_quantile=0.2, overfit_thresh=0.05, std_thresh
     agg.columns = ["Model", "Learning Rate", "Batch Size", "Optimizer", "Weight Decay",
                    "Val_F1_mean", "Val_F1_std", "Val_F1_max", "Train_F1_mean"]
 
+    # Thresholds
     val_threshold = agg["Val_F1_mean"].quantile(val_quantile)
 
+    # Mask: mark as bad
     bad_mask = (
         (agg["Val_F1_mean"] < val_threshold) |
         ((agg["Train_F1_mean"] - agg["Val_F1_mean"]) > overfit_thresh) |
         (agg["Val_F1_std"] > std_thresh)
     )
+    good_df = agg[~bad_mask].copy()
+    bad_df = agg[bad_mask].copy()
 
+    # ✅ sort good and bad separately
     good_df = agg[~bad_mask].copy().sort_values(by="Val_F1_mean", ascending=False)
 
     # ✅ remove combos with zero / meaningless metrics
@@ -41,8 +51,11 @@ def prune_bad_combinations(df, val_quantile=0.2, overfit_thresh=0.05, std_thresh
     ]
 
     bad_df = agg[bad_mask].copy().sort_values(by="Val_F1_mean", ascending=True)
+    print(f"✅ Saved {len(good_df)} promising combos to {output_path}")
+    print(f"🚫 Saved {len(bad_df)} discarded combos to discarded_combos.csv")
+    print(f"Val F1 quantile threshold used: {val_threshold:.4f}")
+    
     return good_df, bad_df
-
 
 
 if __name__ == "__main__":
