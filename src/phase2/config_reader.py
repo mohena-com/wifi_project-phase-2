@@ -76,7 +76,9 @@ class ConfigReader:
 
     def get_int_list(self, key: str, default = None) -> list[int]:
         v = self.get(key, default)
+        print(f"get_int_list for key={key} raw value: {v}")
         parts = self._to_parts(v)
+        print(f"get_int_list for key={key} parts: {parts}")
         result = []
         for p in parts:
             print(f"Parsing part '{p}' for key '{key}' to int")
