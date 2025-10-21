@@ -1,4 +1,12 @@
 from config_reader import ConfigReader
+
+from MobileNetV3_1D_LSTM import MobileNetV3_1D_LSTM
+from CSILSTMNet import CSILSTMNet
+from DenseNet1D import DenseNet1D
+from EfficientNet1DLSTM import EfficientNet1DLSTM
+
+
+
 cr = ConfigReader("csi_id_config.properties")
 
 list_batch_size = cr.get_int_list("batch_size")
