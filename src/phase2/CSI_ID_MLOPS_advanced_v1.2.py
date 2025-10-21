@@ -111,7 +111,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
     batch = next(iter(train_loader))
     model = create_model_instance(model_class, model_name, batch, device)
-
+ 
     total_params = sum(p.numel() for p in model.parameters())
 
     if params["optimizer"] == "adam":
