@@ -74,7 +74,7 @@ class ConfigReader:
             return default
         return Path(value) 
 
-    def get_int_list(self, key: str, default: Any = None) -> List[int]:
+    def get_int_list(self, key: str, default = None) -> list[int]:
         v = self.get(key, default)
         parts = self._to_parts(v)
         result = []
