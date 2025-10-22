@@ -3,7 +3,8 @@ import pandas as pd
 
 # Connect to MLflow and fetch runs
 client = mlflow.tracking.MlflowClient()
-experiment = client.get_experiment_by_name("100_50_EPOCHS_CONFIGURABLE_HYPERPARAMS_5")
+exp_name = "100_50_EPOCHS_CONFIGURABLE_HYPERPARAMS_5"
+experiment = client.get_experiment_by_name(exp_name)
 runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
 
 print("🔍 Available MLflow columns:\n")
@@ -51,5 +52,5 @@ print("\n📊 Experiment Summary Table:\n")
 print(summary_df)
 
 # ✅ Save as CSV
-summary_df.to_csv("mlflow_run_summary.csv", index=False)
-print("\n✅ Saved summary table to mlflow_run_summary.csv")
+summary_df.to_csv(f"{exp_name}_mlflow_run_summary.csv", index=False)
+print(f"\n✅ Saved summary table to {exp_name}_mlflow_run_summary.csv")
