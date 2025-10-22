@@ -3,7 +3,7 @@ import pandas as pd
 
 # Connect to MLflow and fetch runs
 client = mlflow.tracking.MlflowClient()
-exp_name = "100_50_EPOCHS_CONFIGURABLE_HYPERPARAMS_5"
+exp_name = "10_EPOCHS_TEST_DIFF_BATCH_SIZE"
 experiment = client.get_experiment_by_name(exp_name)
 runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
 
