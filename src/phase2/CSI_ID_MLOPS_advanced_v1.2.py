@@ -39,12 +39,22 @@ now = time.strftime("%Y%m%d_%H%M%S")
 base_dir = cr.get("local_data_path")
 gait_filenme = cr.get("file_name_for_gait")
 filelist = glob.glob(os.path.join(base_dir, '**', gait_filenme), recursive=True)
-plot_path = f"{cr.get('output_path')}/{now}/plots"; os.makedirs(plot_path, exist_ok=True)
+
+exp_path = f"{cr.get('output_path')}/{cr.get('experiment_name')}_{now}"
+os.makedirs(exp_path, exist_ok=True)
+
+plot_path = f"{exp_path}/plots"
+os.makedirs(plot_path, exist_ok=True)
 print(f"Plot path: {plot_path}")
-log_path = f"{cr.get('output_path')}/{now}/logs"; os.makedirs(log_path, exist_ok=True)
+
+log_path = f"{exp_path}/logs"
+os.makedirs(log_path, exist_ok=True)
 print(f"Log path: {log_path}")
-checkpoint_dir = f"{cr.get('output_path')}/{now}/checkpoints"; os.makedirs(checkpoint_dir, exist_ok=True)
+
+checkpoint_dir = f"{exp_path}/checkpoints"
+os.makedirs(checkpoint_dir, exist_ok=True)
 print(f"Checkpoint path: {checkpoint_dir}") 
+
 log_filename = f"{log_path}/{cr.get('experiment_name')}_run_{now}.log"
 print(f"Log file: {log_filename}")
 
