@@ -52,5 +52,5 @@ print("\n📊 Experiment Summary Table:\n")
 print(summary_df)
 
 # ✅ Save as CSV
-summary_df.to_csv(f"../../doc/{exp_name}_mlflow_run_summary.csv", index=False)
-print(f"\n✅ Saved summary table to ../../doc/{exp_name}_mlflow_run_summary.csv")
+summary_df.to_csv(f"../../docs/{exp_name}_mlflow_run_summary.csv", index=False)
+print(f"\n✅ Saved summary table to ../../docs/{exp_name}_mlflow_run_summary.csv")
