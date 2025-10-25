@@ -547,7 +547,9 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     logger.debug(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
 if __name__ == "__main__":
+    print("Starting MLOps pipeline...")
     run_mlop_pipeline()
+    print("MLOps pipeline completed.")
 
 
 # for additional metrices - 
