@@ -285,12 +285,12 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     learning_rate =  params['lr']   
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
-        best_modle_fname = f"{checkpoint_dir}/best_model_{params['model_name']}_epoch{best_epoch}.pt"
-        torch.save(best_model_state, best_modle_fname)
-        logger.fatal(f"SAVED BEST MODEL {best_modle_fname} USING LEARNING RATE {learning_rate}") 
+        best_model_fname = f"{checkpoint_dir}/inner_best_model_{params['model_name']}_epoch{best_epoch}.pt"
+        torch.save(best_model_state, best_model_fname)
+        logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}") 
         logger.fatal(f"BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}. ")
-       
-        mlflow.log_artifact(best_modle_fname)
+
+        mlflow.log_artifact(best_model_fname)
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
 
@@ -406,11 +406,11 @@ def run_mlop_pipeline():
     from model_definitions import var_model_definitions
 
     model_defs = var_model_definitions  
-
+    best_model_no = 0
     learning_rate = None
     # --- MLflow experiment ---
     mlflow.set_experiment(cr.get("experiment_name"))
-    best_overall = {"val_acc":-1}
+    best_overall = {"val_acc": -1}
     stats_summary = {}
     best_model_path = None
     print(f"model_defs {model_defs}")
@@ -472,10 +472,11 @@ def run_mlop_pipeline():
                 logger.info(f"Classification report:\n{cr_report}")
                 # Save model checkpoint for best overall if needed
                 if best_val_acc > best_overall["val_acc"]:
+                    best_model_no += 1  
                     best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch, "lr":learning_rate}
-                    torch.save(best_model_state, f"{checkpoint_dir}/best_model_{make_run_name(params)}_epoch{best_epoch}.pt")
-                    logger.fatal(f"9. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
-                    best_model_path = f"{checkpoint_dir}/best_model_{make_run_name(params)}_epoch{best_epoch}.pt"
+                    best_model_path = f"{checkpoint_dir}/best_overall_model_{best_model_no}_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
+                    torch.save(best_model_state, f"{best_model_path}")
+                    logger.fatal(f"9. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")                    
                     mlflow.log_artifact(f"{best_model_path}")
                     logger.fatal(f"99. LOGGED SIGNATURE OF BEST MODEL {model_name} IN MLFLOW ")
                     do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)
@@ -485,7 +486,7 @@ def run_mlop_pipeline():
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
 
     mlflow.log_artifact(best_model_path)
-    logger.info(f"Logged best model path to MLflow {best_model_path}")
+    logger.info(f"Logged overall best model path to MLflow {best_model_path}")
     logger.fatal(f"best_overall : {best_overall}")
 
 def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
