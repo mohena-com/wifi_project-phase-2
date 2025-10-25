@@ -35,28 +35,7 @@ from DL_MobileNetV3 import MobileNetV3_1D_LSTM
 
 # --- Logging setup (use your CSI_ID.py pattern) ---
 cr = ConfigReader("csi_id_config.properties")
-now = time.strftime("%Y%m%d_%H%M%S")
-base_dir = cr.get("local_data_path")
-gait_filenme = cr.get("file_name_for_gait")
-filelist = glob.glob(os.path.join(base_dir, '**', gait_filenme), recursive=True)
 
-exp_path = f"{cr.get('output_path')}/{cr.get('experiment_name')}_{now}"
-os.makedirs(exp_path, exist_ok=True)
-
-plot_path = f"{exp_path}/plots"
-os.makedirs(plot_path, exist_ok=True)
-print(f"Plot path: {plot_path}")
-
-log_path = f"{exp_path}/logs"
-os.makedirs(log_path, exist_ok=True)
-print(f"Log path: {log_path}")
-
-checkpoint_dir = f"{exp_path}/checkpoints"
-os.makedirs(checkpoint_dir, exist_ok=True)
-print(f"Checkpoint path: {checkpoint_dir}") 
-
-log_filename = f"{log_path}/{cr.get('experiment_name')}_run_{now}.log"
-print(f"Log file: {log_filename}")
 
 
 
@@ -407,7 +386,7 @@ def make_run_name(params):
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
-def run_mlop_pipeline():
+def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename):
     logger = setup_logging(log_filename)
     print(f"logger {logger}")
     # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
@@ -547,8 +526,31 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     logger.debug(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 
 if __name__ == "__main__":
+    now = time.strftime("%Y%m%d_%H%M%S")
+    base_dir = cr.get("local_data_path")
+    gait_filenme = cr.get("file_name_for_gait")
+    filelist = glob.glob(os.path.join(base_dir, '**', gait_filenme), recursive=True)
+
+    exp_path = f"{cr.get('output_path')}/{cr.get('experiment_name')}_{now}"
+    os.makedirs(exp_path, exist_ok=True)
+
+    plot_path = f"{exp_path}/plots"
+    os.makedirs(plot_path, exist_ok=True)
+    print(f"Plot path: {plot_path}")
+
+    log_path = f"{exp_path}/logs"
+    os.makedirs(log_path, exist_ok=True)
+    print(f"Log path: {log_path}")
+
+    checkpoint_dir = f"{exp_path}/checkpoints"
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    print(f"Checkpoint path: {checkpoint_dir}") 
+
+    log_filename = f"{log_path}/{cr.get('experiment_name')}_run_{now}.log"
+    print(f"Log file: {log_filename}")
+
     print("Starting MLOps pipeline...")
-    run_mlop_pipeline()
+    run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename)
     print("MLOps pipeline completed.")
 
 
