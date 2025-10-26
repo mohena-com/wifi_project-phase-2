@@ -66,22 +66,22 @@ def create_model_instance(model_class, model_name, batch, device):
             meta_input_size=batch["metadata_seq"].shape[2],
             window_size=batch["metadata_seq"].shape[1],
             num_classes=31
-        ).to(device, non_blocking=True)
+        ) 
     elif model_name in ["DenseNet1D", "MobileNetV3_1D_LSTM"]:
         model = model_class(
             csi_channels=batch["csi_seq"].shape[2],
             meta_feature_dim=batch["metadata_seq"].shape[2],
             num_classes=31
-        ).to(device, non_blocking=True)
+        ) 
     elif model_name == "EfficientNet1DLSTM":
         model = model_class(
             csi_input_channels=batch["csi_seq"].shape[2],
             meta_input_size=batch["metadata_seq"].shape[-1],
             num_classes=31
-        ).to(device, non_blocking=True)
+        ) 
     else:
         raise ValueError("Unknown model")
-    return model
+    return model.to(device)
 
 def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
@@ -96,9 +96,16 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     b_size = int(params['batch_size'])
 
     # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
+    # device-specific flags
+    non_blocking_flag = True if device.type == "cuda" else False
     pin_mem = True if device.type != "cpu" else False
-    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True, num_workers=4, pin_memory=pin_mem)
-    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False, num_workers=4, pin_memory=pin_mem)
+
+    # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
+    num_workers = 4
+    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True,
+                              num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
+    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False,
+                             num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
 
     batch = next(iter(train_loader))
     model = create_model_instance(model_class, model_name, batch, device)
@@ -124,9 +131,9 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         running_loss, correct, total = 0.0, 0, 0
         train_true, train_pred = [], []
         for batch in train_loader:
-            csi_seq = batch["csi_seq"].to(device, non_blocking=True)
-            meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
-            labels = batch["label"].squeeze().to(device, non_blocking=True).long()
+            csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
+            meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
+            labels = batch["label"].squeeze().to(device, non_blocking=non_blocking_flag).long()
 
             # guard against NaN/Inf values in inputs/labels
             if torch.isnan(csi_seq).any() or torch.isinf(csi_seq).any():
@@ -199,10 +206,10 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
         with torch.no_grad():
             for batch in test_loader:
-                csi_seq = batch["csi_seq"].to(device, non_blocking=True)
-                meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
-                labels = batch["label"].squeeze().to(device, non_blocking=True)
-                
+                csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
+                meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
+                labels = batch["label"].squeeze().to(device, non_blocking=non_blocking_flag)
+
                 if torch.isnan(csi_seq).any() or torch.isinf(csi_seq).any():
                     csi_seq = torch.nan_to_num(csi_seq, nan=0.0, posinf=1e6, neginf=-1e6)
                 if torch.isnan(meta_seq).any() or torch.isinf(meta_seq).any():
@@ -284,7 +291,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = {k: v.cpu() for k, v in model.state_dict().items()}
-            do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)
+            do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
 
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
@@ -386,7 +393,7 @@ def make_run_name(params):
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
-def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename):
+def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename, device):
     logger = setup_logging(log_filename)
     print(f"logger {logger}")
     # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
@@ -398,9 +405,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
 
-
-    device = torch.device("mps" if torch.backends.mps.is_available() else
-                         "cuda" if torch.cuda.is_available() else "cpu")
+    best_overall_model = (None, None)
+   # device = torch.device("mps" if torch.backends.mps.is_available() else
+    #                     "cuda" if torch.cuda.is_available() else "cpu")
 
     logger.info(f"Using device: {device}")  
     # --- Model Definitions & hyperparameter grid ---
@@ -414,7 +421,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     mlflow.set_experiment(cr.get("experiment_name"))
     best_overall = {"val_acc": -1}
     stats_summary = {}
-    best_model_path = None
+    
     print(f"model_defs {model_defs}")
     for model_name, (model_class, param_grid) in model_defs.items():
         param_keys, param_vals = zip(*param_grid.items())
@@ -474,24 +481,60 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 logger.info(f"Classification report:\n{cr_report}")
                 # Save model checkpoint for best overall if needed
                 if best_val_acc > best_overall["val_acc"]:
-                    best_model_no += 1  
-                    best_overall = {"model": model_name, "params": params, "val_acc": best_val_acc, "epoch": best_epoch, "lr":learning_rate}
-                    best_model_path = f"{checkpoint_dir}/best_overall_model_{best_model_no}_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
-                    torch.save(best_model_state, f"{best_model_path}")
-                    logger.fatal(f"9. SAVED BEST MODEL IN {model_name}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")                    
-                    mlflow.log_artifact(f"{best_model_path}")
-                    logger.fatal(f"99. LOGGED SIGNATURE OF BEST MODEL {model_name} IN MLFLOW ")
-                    do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger)
-                    
-                    logger.fatal(f"100. LOGGED BEST MODEL IN MLFLOW {best_model_path}. BEST VALIDATION ACCURACY: {best_val_acc:.4f} at epoch {best_epoch}.")
+                    best_model_no += 1
+                    best_overall = {
+                        "model": model_name,
+                        "params": params,
+                        "val_acc": best_val_acc,
+                        "epoch": best_epoch,
+                        "lr": learning_rate
+                    }
+                    # store state and metadata to save once later
+                    best_overall_model_state = best_model_state
+                    best_overall_model_meta = {
+                        "model_name": model_name,
+                        "params": params,
+                        "model_class": model_class
+                    }
+                    logger.info(f"New best overall model (deferred save): {model_name} val_acc={best_val_acc:.4f} epoch={best_epoch}")
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
 
-    mlflow.log_artifact(best_model_path)
-    logger.info(f"Logged overall best model path to MLflow {best_model_path}")
-    logger.fatal(f"best_overall : {best_overall}")
+    # single final save/log of best overall model (if any)
+    if best_overall.get("val_acc", -1) >= 0 and best_overall_model_state is not None:
+        final_name = make_run_name(best_overall["params"])
+        final_path = f"{checkpoint_dir}/best_overall_model_final_{final_name}_valacc{best_overall['val_acc']:.4f}.pt"
+        # save state + metadata so you can reconstruct model later
+        payload = {
+            "state_dict": best_overall_model_state,
+            "model_name": best_overall_model_meta["model_name"],
+            "params": best_overall_model_meta["params"]
+        }
+        torch.save(payload, final_path)
+        mlflow.log_artifact(final_path)
+        logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
 
-def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
+        # attempt to log a pytorch model with signature for real-world inference
+        try:
+            # create a small sample batch from training split to build input signature
+            sample_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0)
+            sample_batch = next(iter(sample_loader))
+            # instantiate model and load state
+            bc = best_overall_model_meta["model_class"]
+            sample_model = create_model_instance(bc, best_overall_model_meta["model_name"], sample_batch, device)
+            sample_model.load_state_dict(payload["state_dict"])
+            # log model (this saves the model artifact for inference)
+            mlflow.pytorch.log_model(pytorch_model=sample_model, artifact_path=f"best_model_{best_overall_model_meta['model_name']}")
+            # log signature using one sample
+            do_signature_logging(sample_model, best_overall_model_meta["model_name"],
+                                 sample_batch["csi_seq"], sample_batch["metadata_seq"], payload["params"], logger, device)
+            logger.info("Logged PyTorch model + signature to MLflow for production use.")
+        except Exception as e:
+            logger.exception(f"Failed to log PyTorch model with signature: {e}")
+
+    logger.info(f"best_overall : {best_overall}")
+
+def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device):
 
     import numpy as np
     logger.debug("0. do_signature_logging")
@@ -501,7 +544,10 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     model.eval()
     logger.debug("1. do_signature_logging")
     with torch.no_grad():
-        example_output = model(csi_seq, meta_seq)
+        # ensure inputs are on device before forward
+        inp_csi = csi_seq.to(next(model.parameters()).device) if not csi_seq.device == next(model.parameters()).device else csi_seq
+        inp_meta = meta_seq.to(next(model.parameters()).device) if not meta_seq.device == next(model.parameters()).device else meta_seq
+        example_output = model(inp_csi, inp_meta)
 
     # Convert tensors to numpy
     csi_np = csi_seq.cpu().numpy()
@@ -524,6 +570,29 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger):
     logger.debug("4. do_signature_logging")
 
     logger.debug(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
+def get_device():
+    """
+    Return a torch.device choosing MPS (Apple), then CUDA, then CPU.
+    Also set a few backend flags appropriate for the chosen device.
+    """
+    # prefer MPS on Apple silicon
+    try:
+        if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+            device = torch.device("mps")
+            # improve matmul precision on MPS (PyTorch 1.12+)
+            try:
+                torch.set_float32_matmul_precision("high")
+            except Exception:
+                pass
+            return device
+    except Exception:
+        pass
+
+    if torch.cuda.is_available():
+        # CUDA path
+        torch.backends.cudnn.benchmark = True
+        return torch.device("cuda")
+    return torch.device("cpu")
 
 if __name__ == "__main__":
     now = time.strftime("%Y%m%d_%H%M%S")
@@ -549,8 +618,12 @@ if __name__ == "__main__":
     log_filename = f"{log_path}/{cr.get('experiment_name')}_run_{now}.log"
     print(f"Log file: {log_filename}")
 
+    # select device using helper
+    device = get_device()
+    print(f"Using device: {device}")
+
     print("Starting MLOps pipeline...")
-    run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename)
+    run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename, device)
     print("MLOps pipeline completed.")
 
 
