@@ -519,19 +519,44 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
             # create a small sample batch from training split to build input signature
             sample_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0)
             sample_batch = next(iter(sample_loader))
+
             # instantiate model and load state
             bc = best_overall_model_meta["model_class"]
             sample_model = create_model_instance(bc, best_overall_model_meta["model_name"], sample_batch, device)
             sample_model.load_state_dict(payload["state_dict"])
-            # log model (this saves the model artifact for inference)
-            mlflow.pytorch.log_model(pytorch_model=sample_model, artifact_path=f"best_model_{best_overall_model_meta['model_name']}")
-            # log signature using one sample
-            do_signature_logging(sample_model, best_overall_model_meta["model_name"],
-                                 sample_batch["csi_seq"], sample_batch["metadata_seq"], payload["params"], logger, device)
+            sample_model.eval()
+
+
+            # prepare one-sample numpy input example (concatenate csi + meta as used for signature)
+            csi_np = sample_batch["csi_seq"].cpu().numpy()
+            meta_np = sample_batch["metadata_seq"].cpu().numpy()
+            # align shapes: pick first sample (batch dim=1)
+            csi_ex = csi_np[:1]
+            meta_ex = meta_np[:1]
+            try:
+                input_example = np.concatenate([csi_ex, meta_ex], axis=-1)
+            except Exception:
+                # fallback: use dict of arrays if shapes cannot be concatenated
+                input_example = {"csi_seq": csi_ex, "metadata_seq": meta_ex}
+
+            # get prediction example via model (move tensors to device for forward)
+            with torch.no_grad():
+                inp_csi = torch.from_numpy(csi_ex).to(device)
+                inp_meta = torch.from_numpy(meta_ex).to(device)
+                pred = sample_model(inp_csi, inp_meta).cpu().numpy()
+
+            signature = infer_signature(input_example, pred)
+
+            # log the model with input_example and signature to avoid the warning
+            mlflow.pytorch.log_model(
+                pytorch_model=sample_model,
+                artifact_path=f"best_model_{best_overall_model_meta['model_name']}",
+                signature=signature,
+                input_example=input_example
+            )
             logger.info("Logged PyTorch model + signature to MLflow for production use.")
         except Exception as e:
             logger.exception(f"Failed to log PyTorch model with signature: {e}")
-
     logger.info(f"best_overall : {best_overall}")
 
 def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device):
