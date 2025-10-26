@@ -177,7 +177,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         train_losses.append(train_loss)
         train_accs.append(train_acc)
 
-        print(f"running loss: {running_loss}, len train_loader: {len(train_loader)}, train_loss: {train_loss}, train_acc: {train_acc}")
+        logger.debug(f"running loss: {running_loss}, len train_loader: {len(train_loader)}, train_loss: {train_loss}, train_acc: {train_acc}")
 
         # log training metrics
         train_precision = precision_score(train_true, train_pred, average="weighted", zero_division=0) if train_true else 0.0
