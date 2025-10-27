@@ -577,8 +577,58 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     logger.info(f"best_overall : {best_overall}")
 
 def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device):
+    """Log model signature to MLflow with proper resource cleanup."""
+    import tempfile
+    import shutil
+    import os
+
+    logger.debug("0. Starting signature logging")
+    model.eval()
+
+    try:
+        with torch.no_grad():
+            # ensure inputs are on device
+            inp_csi = csi_seq.to(device, non_blocking=True)
+            inp_meta = meta_seq.to(device, non_blocking=True)
+            example_output = model(inp_csi, inp_meta)
+
+        # Convert tensors to numpy on CPU
+        csi_np = inp_csi.cpu().numpy()
+        meta_np = inp_meta.cpu().numpy()
+        op_np = example_output.cpu().numpy()
+
+        # Concatenate features
+        combined_input = np.concatenate([csi_np, meta_np], axis=-1)
+        signature = infer_signature(combined_input, op_np)
+
+        # Create temp dir for MLflow artifacts
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            artifact_path = f"best_model_{model_name}.{params['model_name']}"
+            mlflow.pytorch.log_model(
+                pytorch_model=model,
+                artifact_path=artifact_path,
+                signature=signature
+            )
+            logger.debug(f"3. Model logged to MLflow: {artifact_path}")
+
+    except Exception as e:
+        logger.exception(f"Failed to log model signature: {e}")
+        raise
+    finally:
+        # Force cleanup
+        torch.cuda.empty_cache()
+        import gc
+        gc.collect()
+
+    logger.debug("4. Signature logging completed")
+    
+def do_signature_logging1(model, model_name, csi_seq, meta_seq, params, logger, device):
 
     import numpy as np
+    import tempfile
+    import shutil
+    import os
+    
     logger.debug("0. do_signature_logging")
     # Prepare input example matching your model's expected input
 
