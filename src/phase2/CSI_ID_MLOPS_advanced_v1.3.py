@@ -101,7 +101,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     pin_mem = True if device.type != "cpu" else False
 
     # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
-    num_workers = 4
+    num_workers = 0 if device.type == "mps" or device.type == "cpu" else min(4, max(1, (os.cpu_count() or 4)//2))
+
     train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True,
                               num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
     test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False,
@@ -719,7 +720,34 @@ def get_device():
         return torch.device("cuda")
     return torch.device("cpu")
 
+def set_system_resources():
+    import os
+    # limit OpenMP/BLAS threads to avoid many shared-memory fds
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    os.environ.setdefault("MKL_NUM_THREADS", "1")
+    os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+    os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
+    import torch
+    # limit torch intra/inter op threads
+    try:
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+    except Exception:
+        pass
+
+    # try to raise soft fd limit (Unix/macOS)
+    try:
+        import resource
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        target = max(4096, soft)
+        resource.setrlimit(resource.RLIMIT_NOFILE, (target, hard))
+    except Exception:
+        # ignore if not permitted
+        pass
+
 if __name__ == "__main__":
+    set_system_resources()
     now = time.strftime("%Y%m%d_%H%M%S")
     base_dir = cr.get("local_data_path")
     gait_filenme = cr.get("file_name_for_gait")
