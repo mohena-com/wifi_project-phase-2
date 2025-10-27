@@ -374,6 +374,45 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     mlflow.log_artifact(cm_path)
     mlflow.log_artifact(cr_path)
 
+def format_weight_decay_for_name(wd) -> str:
+    """
+    Return a compact string for wd suitable for filenames.
+    Examples:
+      0       -> "0"
+      1e-05   -> "1e-05"
+      0.001   -> "1e-03"
+      0.01    -> "0p01"
+      0.1     -> "0p1"
+    """
+    wd = float(wd)
+    if wd == 0.0:
+        return "0"
+    if wd < 1e-2:
+        # scientific format for very small values (remove '+' in exponent)
+        s = f"{wd:.0e}"
+        return s.replace("+", "")
+    # readable decimal with '.' -> 'p' for filenames
+    return str(wd).replace(".", "p")
+
+def format_lr_for_name(lr) -> str:
+    """
+    Format learning rate for filenames:
+      0       -> "0"
+      0.0001  -> "1e-04"
+      5e-05   -> "5e-05"
+      0.01    -> "0p01"
+      0.1     -> "0p1"
+    """
+    lr = float(lr)
+    if lr == 0.0:
+        return "0"
+    if lr < 1e-2:
+        s = f"{lr:.0e}"
+        return s.replace("+", "")
+    return str(lr).replace(".", "p")
+
+
+
 def make_run_name(params):
     """
     Create a short, readable, and unique run/file name based on model and key hyperparameters.
@@ -387,8 +426,8 @@ def make_run_name(params):
     model_name = params.get("model_name", 'Invalid Model')
 
     # Sanitize numbers for filenames (avoid scientific notation & dots)
-    lr_str = f"{lr:.0e}" if lr < 1e-2 else f"{lr}".replace('.', 'p')
-    wd_str = f"{wd:.0e}" if wd < 1e-2 else f"{wd}".replace('.', 'p')
+    lr_str = format_lr_for_name(lr)
+    wd_str = format_weight_decay_for_name(wd)
 
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
