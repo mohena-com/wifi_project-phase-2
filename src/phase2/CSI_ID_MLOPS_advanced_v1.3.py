@@ -203,7 +203,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         model.eval()
         running_loss, correct, total = 0.0, 0, 0
         val_true, val_pred, val_prob = [], [], []
-
+        non_blocking_flag = True if device.type == "cuda" else False
         with torch.no_grad():
             for batch in test_loader:
                 csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
@@ -460,7 +460,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     mlflow.set_experiment(cr.get("experiment_name"))
     best_overall = {"val_acc": -1}
     stats_summary = {}
-    
+    non_blocking_flag = True if device.type == "cuda" else False
     print(f"model_defs {model_defs}")
     for model_name, (model_class, param_grid) in model_defs.items():
         param_keys, param_vals = zip(*param_grid.items())
@@ -503,9 +503,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 model.eval()
                 with torch.no_grad():
                     for batch in test_loader:
-                        csi_seq = batch["csi_seq"].to(device, non_blocking=True)
-                        meta_seq = batch["metadata_seq"].to(device, non_blocking=True)
-                        labels = batch["label"].squeeze().cpu().numpy()
+                        csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
+                        meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
+                        labels = batch["label"].squeeze().to(device, non_blocking=True)
                         outputs = model(csi_seq, meta_seq)
                         preds = torch.argmax(outputs, dim=1).cpu().numpy()
                         all_preds.extend(preds)
@@ -584,12 +584,12 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
 
     logger.debug("0. Starting signature logging")
     model.eval()
-
+    non_blocking = True if device.type == "cuda" else False
     try:
         with torch.no_grad():
             # ensure inputs are on device
-            inp_csi = csi_seq.to(device, non_blocking=True)
-            inp_meta = meta_seq.to(device, non_blocking=True)
+            inp_csi = csi_seq.to(device, non_blocking=non_blocking)
+            inp_meta = meta_seq.to(device, non_blocking=non_blocking)
             example_output = model(inp_csi, inp_meta)
 
         # Convert tensors to numpy on CPU
@@ -597,31 +597,62 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         meta_np = inp_meta.cpu().numpy()
         op_np = example_output.cpu().numpy()
 
-        # Concatenate features
-        combined_input = np.concatenate([csi_np, meta_np], axis=-1)
-        signature = infer_signature(combined_input, op_np)
+        # Build an input example for signature inference (try concat, fallback to dict)
+        try:
+            input_example = np.concatenate([csi_np, meta_np], axis=-1)
+            input_is_array = True
+        except Exception:
+            input_example = {"csi_seq": csi_np, "metadata_seq": meta_np}
+            input_is_array = False
 
-        # Create temp dir for MLflow artifacts
+        # Try to infer signature but tolerate failures
+        signature = None
+        try:
+            signature = infer_signature(input_example, out_np)
+        except Exception as e:
+            logger.debug(f"Signature inference failed: {e}")
+            signature = None
+
+        # Save minimal artifacts in a temp dir and upload via mlflow.log_artifacts
         with tempfile.TemporaryDirectory() as tmp_dir:
-            artifact_path = f"best_model_{model_name}.{params['model_name']}"
-            mlflow.pytorch.log_model(
-                pytorch_model=model,
-                artifact_path=artifact_path,
-                signature=signature
-            )
-            logger.debug(f"3. Model logged to MLflow: {artifact_path}")
+            # save model state dict (smaller than logging full model environment)
+            state_path = os.path.join(tmp_dir, "state_dict.pth")
+            torch.save(model.state_dict(), state_path)
+
+            # save examples
+            if input_is_array:
+                np.save(os.path.join(tmp_dir, "input_example.npy"), input_example)
+            else:
+                np.save(os.path.join(tmp_dir, "csi_example.npy"), input_example["csi_seq"])
+                np.save(os.path.join(tmp_dir, "meta_example.npy"), input_example["metadata_seq"])
+            np.save(os.path.join(tmp_dir, "output_example.npy"), out_np)
+
+            # save metadata + signature (if available)
+            meta = {
+                "model_name": model_name,
+                "params": params,
+                "signature": signature.to_dict() if signature is not None else None
+            }
+            with open(os.path.join(tmp_dir, "meta.json"), "w", encoding="utf-8") as fh:
+                json.dump(meta, fh, indent=2)
+
+            # Upload the directory as a single artifact tree (less fd churn than log_model)
+            mlflow.log_artifacts(tmp_dir, artifact_path=f"best_model_{model_name}")
+            logger.debug(f"Logged artifacts for model {model_name} to MLflow (artifact_path=best_model_{model_name})")
 
     except Exception as e:
-        logger.exception(f"Failed to log model signature: {e}")
-        raise
+        logger.exception(f"Failed to log model signature/artifacts: {e}")
     finally:
-        # Force cleanup
-        torch.cuda.empty_cache()
-        import gc
+        # device-aware cleanup
+        try:
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+        except Exception:
+            pass
         gc.collect()
 
     logger.debug("4. Signature logging completed")
-    
+
 def do_signature_logging1(model, model_name, csi_seq, meta_seq, params, logger, device):
 
     import numpy as np
