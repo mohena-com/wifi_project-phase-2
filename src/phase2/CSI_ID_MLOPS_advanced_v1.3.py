@@ -112,7 +112,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
  
     total_params = sum(p.numel() for p in model.parameters())
 
-    if params["optimizer"] == "adam":
+    if params["optimizer"] == "adam" or params["optimizer"] == "adamw":
         optimizer = torch.optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     else:
         optimizer = torch.optim.SGD(model.parameters(), lr=params["lr"], momentum=0.9, weight_decay=params["weight_decay"])
