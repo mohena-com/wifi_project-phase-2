@@ -579,8 +579,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
 def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device):
     """Log model signature to MLflow with proper resource cleanup."""
     import tempfile
-    import shutil
     import os
+    import json
+    import gc
 
     logger.debug("0. Starting signature logging")
     model.eval()
@@ -625,7 +626,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
             else:
                 np.save(os.path.join(tmp_dir, "csi_example.npy"), input_example["csi_seq"])
                 np.save(os.path.join(tmp_dir, "meta_example.npy"), input_example["metadata_seq"])
-            np.save(os.path.join(tmp_dir, "output_example.npy"), out_np)
+            np.save(os.path.join(tmp_dir, "output_example.npy"), op_np)
 
             # save metadata + signature (if available)
             meta = {
