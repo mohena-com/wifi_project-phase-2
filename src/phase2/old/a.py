@@ -1,7 +1,7 @@
 vals = {
-    "learning_rate": "1, 2, 4",
-    "batch_size": "256, 512, 1024",
-    "optimizer": "adam, adamw, sgd",
+    "learning_rate": "1, 2",
+    "batch_size": "256, 512",
+    "optimizer": "adam, adamw",
     "weight_decay": "0, 1e-5, 1e-3",
     "epochs": "1"
 }
