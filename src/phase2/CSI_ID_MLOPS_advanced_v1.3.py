@@ -297,7 +297,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
-        best_model_fname = f"{checkpoint_dir}/inner_best_model_{params['model_name']}_epoch{best_epoch}.pt"
+        best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
         torch.save(best_model_state, best_model_fname)
         logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
@@ -444,6 +444,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
+    del dataset  # free memory
 
     best_overall_model = (None, None)
    # device = torch.device("mps" if torch.backends.mps.is_available() else
@@ -584,7 +585,10 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     import os
     import json
     import gc
-
+    csi_np = None
+    meta_np = None
+    out_np = None
+    example_output = None
     logger.debug("0. Starting signature logging")
     model.eval()
     non_blocking = True if device.type == "cuda" else False
@@ -641,11 +645,22 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
 
             # Upload the directory as a single artifact tree (less fd churn than log_model)
             mlflow.log_artifacts(tmp_dir, artifact_path=f"best_model_{model_name}")
+            mlflow.pytorch.log_model(
+                pytorch_model=model,
+                artifact_path="model", # This is the folder name inside the MLflow run
+                # Use infer_signature for robust logging of inputs/outputs
+                signature=signature,
+                registered_model_name=model_name # Use this to create a Model Registry entry
+            )
             logger.debug(f"Logged artifacts for model {model_name} to MLflow (artifact_path=best_model_{model_name})")
 
     except Exception as e:
         logger.exception(f"Failed to log model signature/artifacts: {e}")
     finally:
+        del csi_np
+        del meta_np
+        del out_np
+        del example_output
         # device-aware cleanup
         try:
             if device.type == "cuda":
@@ -656,46 +671,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
 
     logger.debug("4. Signature logging completed")
 
-def do_signature_logging1(model, model_name, csi_seq, meta_seq, params, logger, device):
 
-    import numpy as np
-    import tempfile
-    import shutil
-    import os
-    
-    logger.debug("0. do_signature_logging")
-    # Prepare input example matching your model's expected input
-
-    example_output = None
-    model.eval()
-    logger.debug("1. do_signature_logging")
-    with torch.no_grad():
-        # ensure inputs are on device before forward
-        inp_csi = csi_seq.to(next(model.parameters()).device) if not csi_seq.device == next(model.parameters()).device else csi_seq
-        inp_meta = meta_seq.to(next(model.parameters()).device) if not meta_seq.device == next(model.parameters()).device else meta_seq
-        example_output = model(inp_csi, inp_meta)
-
-    # Convert tensors to numpy
-    csi_np = csi_seq.cpu().numpy()
-    meta_np = meta_seq.cpu().numpy()
-    op_np = example_output.cpu().numpy()
-
-    # Concatenate along the last axis (feature dimension)
-    combined_input = np.concatenate([csi_np, meta_np], axis=-1)
-    logger.debug("2. do_signature_logging")
-
-    # Infer signature and log model
-    signature = infer_signature(combined_input, op_np)
-    logger.debug("3. do_signature_logging")
-
-    mlflow.pytorch.log_model(
-        pytorch_model=model,
-        artifact_path=f"best_model_{model_name}.{params['model_name']}",   
-        signature=signature
-    )
-    logger.debug("4. do_signature_logging")
-
-    logger.debug(f"5. do_signature_logging Logged model with signature to MLflow for {model_name} with params {params}")
 def get_device():
     """
     Return a torch.device choosing MPS (Apple), then CUDA, then CPU.
