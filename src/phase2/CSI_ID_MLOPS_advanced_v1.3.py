@@ -292,7 +292,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = {k: v.cpu() for k, v in model.state_dict().items()}
-            do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
+            
 
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
@@ -301,6 +301,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         torch.save(best_model_state, best_model_fname)
         logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
+        do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
 #
