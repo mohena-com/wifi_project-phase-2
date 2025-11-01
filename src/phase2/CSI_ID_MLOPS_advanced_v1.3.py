@@ -474,7 +474,8 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     learning_rate = None
     # --- MLflow experiment ---
     now = time.strftime("%Y%m%d_%H%M%S")
-    mlflow.set_experiment(f"{cr.get("experiment_name")}_{now}")
+    exp_name =  cr.get('experiment_name') 
+    mlflow.set_experiment(f"{exp_name}_{now}")
     best_overall = {"val_acc": -1}
     stats_summary = {}
     non_blocking_flag = True if device.type == "cuda" else False
