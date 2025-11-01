@@ -381,7 +381,7 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     mlflow.log_artifact(cm_path)
     mlflow.log_artifact(cr_path)
     # Delete large objects to free memory
-    del cm, report_str, cm_path, cr_path
+    cm, report_str, cm_path, cr_path = None, None, None, None
   #  import gc
  #   gc.collect()
 
@@ -460,7 +460,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-    del dataset  # free memory
+    dataset = None  # free memory
 
     best_overall_model = (None, None) 
 
@@ -556,11 +556,12 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                     }
                     logger.info(f"New best overall model (deferred save): {model_name} val_acc={best_val_acc:.4f} epoch={best_epoch}")
                 
-                del train_losses, val_losses, train_accs, val_accs
-                del model  # release model references when done
-                del test_loader
-                del all_preds, all_labels, cm, cr_report
-             #   gc.collect()
+                #free memory
+                train_losses, val_losses, train_accs, val_accs = None, None, None, None
+                model = None  # release model references when done
+                test_loader = None
+                all_preds, all_labels, cm, cr_report = None, None, None, None
+               # gc.collect()
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
 
@@ -627,7 +628,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         meta_np = inp_meta.cpu().numpy()
         op_np = example_output.cpu().numpy()
 
-        del inp_csi, inp_meta, example_output
+        inp_csi, inp_meta, example_output = None, None, None
        # gc.collect()
         
         # Build an input example for signature inference (try concat, fallback to dict)
@@ -683,10 +684,10 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     except Exception as e:
         logger.exception(f"Failed to log model signature/artifacts: {e}")
     finally:
-        del csi_np
-        del meta_np
-        del out_np         
-        del input_example
+        csi_np = None
+        meta_np = None
+        out_np = None
+        input_example = None
         # device-aware cleanup
         try:
             if device.type == "cuda":
