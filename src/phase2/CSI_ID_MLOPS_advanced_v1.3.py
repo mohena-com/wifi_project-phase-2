@@ -590,6 +590,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     meta_np = None
     out_np = None
     example_output = None
+    input_example = None
     logger.debug("0. Starting signature logging")
     model.eval()
     non_blocking = True if device.type == "cuda" else False
@@ -605,6 +606,9 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         meta_np = inp_meta.cpu().numpy()
         op_np = example_output.cpu().numpy()
 
+        del inp_csi, inp_meta, example_output
+        gc.collect()
+        
         # Build an input example for signature inference (try concat, fallback to dict)
         try:
             input_example = np.concatenate([csi_np, meta_np], axis=-1)
@@ -662,6 +666,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         del meta_np
         del out_np
         del example_output
+        del input_example
         # device-aware cleanup
         try:
             if device.type == "cuda":
@@ -687,6 +692,7 @@ def get_device():
                 torch.set_float32_matmul_precision("high")
             except Exception:
                 pass
+            print("Using MPS backend")
             return device
     except Exception:
         pass
