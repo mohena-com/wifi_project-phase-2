@@ -110,7 +110,7 @@ def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
     _loader_cache[batch_size] = (train_loader, test_loader)
 
     return train_loader, test_loader
-}
+
 
 
 def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
