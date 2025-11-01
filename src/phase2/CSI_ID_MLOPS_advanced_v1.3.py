@@ -33,10 +33,6 @@ from DL_EfficientNet1DLSTM import EfficientNet1DLSTM
 from DL_MobileNetV3 import MobileNetV3_1D_LSTM
 # EfficientNet1D would be imported similarly
 
-# --- Logging setup (use your CSI_ID.py pattern) ---
-cr = ConfigReader("csi_id_config.properties")
-
-
 
 
 def setup_logging(log_file_path):
@@ -178,6 +174,9 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             train_true.extend(labels.cpu().numpy().tolist())
             train_pred.extend(preds.cpu().numpy().tolist())
 
+            # Explicitly cleanup batch variables to free memory
+            del csi_seq, meta_seq, labels, outputs, loss, preds
+            gc.collect()
         
         # compute epoch train metrics
         train_loss = running_loss / max(1, len(train_loader))
@@ -204,6 +203,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         model.eval()
         running_loss, correct, total = 0.0, 0, 0
         val_true, val_pred, val_prob = [], [], []
+
         non_blocking_flag = True if device.type == "cuda" else False
         with torch.no_grad():
             for batch in test_loader:
@@ -234,6 +234,10 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_true.extend(labels.cpu().numpy().tolist())
                 val_pred.extend(preds.cpu().numpy().tolist())
                 val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy().tolist())
+
+                # Cleanup
+                del csi_seq, meta_seq, labels, outputs, loss, preds
+                gc.collect()
 
         val_loss = running_loss / max(1, len(test_loader))
         val_acc = correct / max(1, total)
@@ -302,7 +306,11 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
-
+    
+    # Final cleanup before return to caller
+    del optimizer, test_loader, best_model_fname
+    gc.collect()
+    
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
 #
 
@@ -755,6 +763,9 @@ def set_system_resources():
         pass
 
 if __name__ == "__main__":
+    # --- Logging setup (use your CSI_ID.py pattern) ---
+    cr = ConfigReader("csi_id_config.properties")
+    
     set_system_resources()
     now = time.strftime("%Y%m%d_%H%M%S")
     base_dir = cr.get("local_data_path")
