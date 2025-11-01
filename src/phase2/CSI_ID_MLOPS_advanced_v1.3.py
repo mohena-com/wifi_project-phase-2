@@ -105,11 +105,11 @@ def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
         test_dataset, batch_size=batch_size, shuffle=False,
         num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
     )
-
+    batch = next(iter(train_loader))
     # Cache loaders by batch_size
-    _loader_cache[batch_size] = (train_loader, test_loader)
+    _loader_cache[batch_size] = (train_loader, test_loader, batch)
 
-    return train_loader, test_loader
+    return train_loader, test_loader, batch
 
 
 
@@ -139,8 +139,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False,
                              num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
     '''
-    train_loader, test_loader = get_test_train_loaders(train_dataset, test_dataset, b_size, device)
-    batch = next(iter(train_loader))
+    train_loader, test_loader, batch = get_test_train_loaders(train_dataset, test_dataset, b_size, device)
+   # batch = next(iter(train_loader))
     model = create_model_instance(model_class, model_name, batch, device)
  
     total_params = sum(p.numel() for p in model.parameters())
