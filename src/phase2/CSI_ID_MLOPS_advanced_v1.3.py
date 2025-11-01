@@ -1,5 +1,4 @@
 import os
-
 import glob
 import time
 import logging
@@ -33,6 +32,10 @@ from DL_DenseNet1D import DenseNet1D
 from DL_EfficientNet1DLSTM import EfficientNet1DLSTM
 from DL_MobileNetV3 import MobileNetV3_1D_LSTM
 # EfficientNet1D would be imported similarly
+
+# --- Logging setup (use your CSI_ID.py pattern) ---
+cr = ConfigReader("csi_id_config.properties")
+
 
 
 
@@ -175,10 +178,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             train_true.extend(labels.cpu().numpy().tolist())
             train_pred.extend(preds.cpu().numpy().tolist())
 
-            # Explicitly cleanup batch variables to free memory
-            del csi_seq, meta_seq, labels, outputs, loss, preds
-            import gc
-            gc.collect()
         
         # compute epoch train metrics
         train_loss = running_loss / max(1, len(train_loader))
@@ -205,7 +204,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         model.eval()
         running_loss, correct, total = 0.0, 0, 0
         val_true, val_pred, val_prob = [], [], []
-
         non_blocking_flag = True if device.type == "cuda" else False
         with torch.no_grad():
             for batch in test_loader:
@@ -236,10 +234,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_true.extend(labels.cpu().numpy().tolist())
                 val_pred.extend(preds.cpu().numpy().tolist())
                 val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy().tolist())
-
-                # Cleanup
-                del labels, outputs, loss, preds
-                gc.collect()
 
         val_loss = running_loss / max(1, len(test_loader))
         val_acc = correct / max(1, total)
@@ -302,18 +296,13 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
-    best_model_fname = None
     if best_model_state is not None:
         best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
         torch.save(best_model_state, best_model_fname)
         logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
-    
-    # Final cleanup before return to caller
-    del optimizer, best_model_fname
-    gc.collect()
-    
+
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
 #
 
@@ -335,18 +324,11 @@ def plot_stats(history, save_path, logger):
     plt.plot(epochs, history['val_loss'], label='Validation Loss')
     plt.title('Loss over Epochs')
     plt.legend(); plt.grid(True)
-
-
     plt.tight_layout()
     plt.savefig(save_path)
-    plt.close()
     mlflow.log_artifact(save_path)
     logger.info(f"Saved stats plot to {save_path}")
-
-    # Explicit deletes and garbage collection to free memory early
-    del history, epochs, save_path
-    import gc
-    gc.collect()    
+    plt.close()
 
 import seaborn as sns
 
@@ -491,7 +473,8 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     best_model_no = 0
     learning_rate = None
     # --- MLflow experiment ---
-    mlflow.set_experiment(cr.get("experiment_name"))
+    now = time.strftime("%Y%m%d_%H%M%S")
+    mlflow.set_experiment(f"{cr.get("experiment_name")}_{now}")
     best_overall = {"val_acc": -1}
     stats_summary = {}
     non_blocking_flag = True if device.type == "cuda" else False
@@ -576,7 +559,6 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 del model  # release model references when done
                 del test_loader
                 del all_preds, all_labels, cm, cr_report
-                import gc
                 gc.collect()
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
@@ -767,9 +749,6 @@ def set_system_resources():
         pass
 
 if __name__ == "__main__":
-    # --- Logging setup (use your CSI_ID.py pattern) ---
-    cr = ConfigReader("csi_id_config.properties")
-
     set_system_resources()
     now = time.strftime("%Y%m%d_%H%M%S")
     base_dir = cr.get("local_data_path")
