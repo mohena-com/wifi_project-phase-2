@@ -1,4 +1,5 @@
 import os
+
 import glob
 import time
 import logging
@@ -176,6 +177,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
             # Explicitly cleanup batch variables to free memory
             del csi_seq, meta_seq, labels, outputs, loss, preds
+            import gc
             gc.collect()
         
         # compute epoch train metrics
@@ -765,7 +767,7 @@ def set_system_resources():
 if __name__ == "__main__":
     # --- Logging setup (use your CSI_ID.py pattern) ---
     cr = ConfigReader("csi_id_config.properties")
-    
+
     set_system_resources()
     now = time.strftime("%Y%m%d_%H%M%S")
     base_dir = cr.get("local_data_path")
