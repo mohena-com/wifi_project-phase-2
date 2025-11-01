@@ -331,9 +331,10 @@ def plot_stats(history, save_path, logger):
     plt.close()
     mlflow.log_artifact(save_path)
     logger.info(f"Saved stats plot to {save_path}")
-    
+
     # Explicit deletes and garbage collection to free memory early
     del history, epochs, save_path
+    import gc
     gc.collect()    
 
 import seaborn as sns
