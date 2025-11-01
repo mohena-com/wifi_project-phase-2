@@ -375,6 +375,10 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     import mlflow
     mlflow.log_artifact(cm_path)
     mlflow.log_artifact(cr_path)
+    # Delete large objects to free memory
+    del cm, report_str, cm_path, cr_path
+    import gc
+    gc.collect()
 
 def format_weight_decay_for_name(wd) -> str:
     """
