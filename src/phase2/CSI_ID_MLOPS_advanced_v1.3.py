@@ -128,19 +128,9 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
     # device-specific flags
     non_blocking_flag = True if device.type == "cuda" else False
-    pin_mem = True if device.type != "cpu" else False
-
-    # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
-    '''
-    num_workers = 0 if device.type == "mps" or device.type == "cpu" else min(4, max(1, (os.cpu_count() or 4)//2))
-
-    train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
-    test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False,
-                             num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
-    '''
+  
     train_loader, test_loader, batch = get_test_train_loaders(train_dataset, test_dataset, b_size, device)
-   # batch = next(iter(train_loader))
+ 
     model = create_model_instance(model_class, model_name, batch, device)
  
     total_params = sum(p.numel() for p in model.parameters())
@@ -185,7 +175,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 # fallback: skip normalization if shape unexpected
                 pass
 
-
             optimizer.zero_grad()
             try:
                 outputs = model(csi_seq, meta_seq)
@@ -209,7 +198,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
             train_true.extend(labels.cpu().numpy().tolist())
             train_pred.extend(preds.cpu().numpy().tolist())
-
         
         # compute epoch train metrics
         train_loss = running_loss / max(1, len(train_loader))
