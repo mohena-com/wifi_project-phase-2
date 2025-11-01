@@ -437,6 +437,12 @@ def make_run_name(params):
 def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename, device):
     logger = setup_logging(log_filename)
     print(f"logger {logger}")
+
+    train_losses, val_losses, train_accs, val_accs = None, None, None, None
+    model = None  # release model references when done
+    test_loader = None
+    all_preds, all_labels, cm, cr_report = None, None, None, None
+
     # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
     dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
     logger.critical(f"Dataset loaded with {len(dataset)} samples")
@@ -447,9 +453,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
 
     del dataset  # free memory
 
-    best_overall_model = (None, None)
-   # device = torch.device("mps" if torch.backends.mps.is_available() else
-    #                     "cuda" if torch.cuda.is_available() else "cpu")
+    best_overall_model = (None, None) 
 
     logger.info(f"Using device: {device}")  
     # --- Model Definitions & hyperparameter grid ---
@@ -540,6 +544,12 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                         "model_class": model_class
                     }
                     logger.info(f"New best overall model (deferred save): {model_name} val_acc={best_val_acc:.4f} epoch={best_epoch}")
+                
+                del train_losses, val_losses, train_accs, val_accs
+                del model  # release model references when done
+                del test_loader
+                del all_preds, all_labels, cm, cr_report
+                gc.collect()
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
 
