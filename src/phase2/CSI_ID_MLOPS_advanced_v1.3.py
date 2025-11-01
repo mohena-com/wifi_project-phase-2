@@ -576,6 +576,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 del model  # release model references when done
                 del test_loader
                 del all_preds, all_labels, cm, cr_report
+                import gc
                 gc.collect()
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
