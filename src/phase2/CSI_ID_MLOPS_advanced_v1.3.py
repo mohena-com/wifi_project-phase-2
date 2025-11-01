@@ -238,7 +238,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy().tolist())
 
                 # Cleanup
-                del csi_seq, meta_seq, labels, outputs, loss, preds
+                del meta_seq, labels, outputs, loss, preds
                 gc.collect()
 
         val_loss = running_loss / max(1, len(test_loader))
