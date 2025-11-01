@@ -83,6 +83,36 @@ def create_model_instance(model_class, model_name, batch, device):
         raise ValueError("Unknown model")
     return model.to(device)
 
+_loader_cache = {}
+
+def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
+    global _loader_cache
+
+    if batch_size in _loader_cache:
+        return _loader_cache[batch_size]
+
+    import os
+    from torch.utils.data import DataLoader
+
+    num_workers = 0 if device.type in ["mps", "cpu"] else min(4, max(1, (os.cpu_count() or 4) // 2))
+    pin_mem = True if device.type != "cpu" else False
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
+    )
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
+    )
+
+    # Cache loaders by batch_size
+    _loader_cache[batch_size] = (train_loader, test_loader)
+
+    return train_loader, test_loader
+}
+
+
 def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
@@ -101,13 +131,15 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     pin_mem = True if device.type != "cpu" else False
 
     # DataLoader options tuned for typical desktop/laptop (adjust num_workers)
+    '''
     num_workers = 0 if device.type == "mps" or device.type == "cpu" else min(4, max(1, (os.cpu_count() or 4)//2))
 
     train_loader = DataLoader(train_dataset, batch_size=b_size, shuffle=True,
                               num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
     test_loader = DataLoader(test_dataset, batch_size=b_size, shuffle=False,
                              num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers>0))
-
+    '''
+    train_loader, test_loader = get_test_train_loaders(train_dataset, test_dataset, b_size, device)
     batch = next(iter(train_loader))
     model = create_model_instance(model_class, model_name, batch, device)
  
