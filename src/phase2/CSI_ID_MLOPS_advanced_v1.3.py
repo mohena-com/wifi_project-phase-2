@@ -382,8 +382,8 @@ def plot_cm_cr(cm, cr_report, model_name, params, plot_path):
     mlflow.log_artifact(cr_path)
     # Delete large objects to free memory
     del cm, report_str, cm_path, cr_path
-    import gc
-    gc.collect()
+  #  import gc
+ #   gc.collect()
 
 def format_weight_decay_for_name(wd) -> str:
     """
@@ -560,7 +560,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 del model  # release model references when done
                 del test_loader
                 del all_preds, all_labels, cm, cr_report
-                gc.collect()
+             #   gc.collect()
 
                 mlflow.log_metric("Top Validation Accuracy", best_val_acc)
 
@@ -628,7 +628,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         op_np = example_output.cpu().numpy()
 
         del inp_csi, inp_meta, example_output
-        gc.collect()
+       # gc.collect()
         
         # Build an input example for signature inference (try concat, fallback to dict)
         try:
@@ -693,7 +693,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
                 torch.cuda.empty_cache()
         except Exception:
             pass
-        gc.collect()
+      #  gc.collect()
 
     logger.debug("4. Signature logging completed")
 
