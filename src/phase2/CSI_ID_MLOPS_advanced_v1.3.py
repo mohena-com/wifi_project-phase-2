@@ -311,7 +311,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
     
     # Final cleanup before return to caller
-    del optimizer, test_loader, best_model_fname
+    del optimizer, best_model_fname
     gc.collect()
     
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
