@@ -308,22 +308,33 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
 def plot_stats(history, save_path, logger):
     epochs = range(1, len(history['accuracy']) + 1)
+    
     plt.figure(figsize=(12, 5))
+
+    # Accuracy subplot
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history['accuracy'], label='Train Accuracy')
     plt.plot(epochs, history['val_accuracy'], label='Validation Accuracy')
     plt.title('Accuracy over Epochs')
     plt.legend(); plt.grid(True)
+
+    # Loss subplot
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history['loss'], label='Train Loss')
     plt.plot(epochs, history['val_loss'], label='Validation Loss')
     plt.title('Loss over Epochs')
     plt.legend(); plt.grid(True)
+
+
     plt.tight_layout()
     plt.savefig(save_path)
+    plt.close()
     mlflow.log_artifact(save_path)
     logger.info(f"Saved stats plot to {save_path}")
-    plt.close()
+    
+    # Explicit deletes and garbage collection to free memory early
+    del history, epochs, save_path
+    gc.collect()    
 
 import seaborn as sns
 
