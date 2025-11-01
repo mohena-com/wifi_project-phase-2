@@ -302,6 +302,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
 
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
+    best_model_fname = None
     if best_model_state is not None:
         best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
         torch.save(best_model_state, best_model_fname)
