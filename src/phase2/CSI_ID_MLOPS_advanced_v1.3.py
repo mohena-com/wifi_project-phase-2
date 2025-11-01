@@ -664,8 +664,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     finally:
         del csi_np
         del meta_np
-        del out_np
-        del example_output
+        del out_np         
         del input_example
         # device-aware cleanup
         try:
