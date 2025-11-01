@@ -143,10 +143,11 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     mlflow.log_params(params)    
     mlflow.log_param("parameter_count", total_params)
    
-   # logger.info(f"{model_name} USING LEARNING RATE {params['lr']}")
+   # 
     csi_seq = None
     meta_seq = None
     outputs = None
+    logger.info(f"{model_name} STARTING EPOCHS TRAINING FOR {num_epochs} EPOCHS USING LEARNING RATE {params['lr']} ")
     for epoch in range(num_epochs):
         start_time = time.time()
         # Training
@@ -312,8 +313,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = {k: v.cpu() for k, v in model.state_dict().items()}
-            
-
+    logger.info(f"{model_name} COMPLETED EPOCHS TRAINING FOR {num_epochs} EPOCHS USING LEARNING RATE {params['lr']} ")
+ 
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
