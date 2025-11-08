@@ -86,12 +86,12 @@ class WifiCSIDataset(Dataset):
             # If still not parsable, default to 0
             return 0.0 + 0.0j
 
-    def extract_S_A_numbers(self, filename):
+    def extract_S_C_numbers(self, filename):
         """
-        Extract subject (Sxx) and activity (Axx) numbers from filename.
+        Extract subject (Sxx) and class (C03) numbers from filename.
         Example: 'E1_S01_C03_A03_T01.csv' -> (1, 3)
         """
-        match = re.search(r'S(\d+).*A(\d+)', filename)
+        match = re.search(r'S(\d+).*C(\d+)', filename)
         if match:
             return int(match.group(1)), int(match.group(2))
         return None, None
@@ -110,8 +110,8 @@ class WifiCSIDataset(Dataset):
             ]
             
             X_meta, X_csi = [], []
-            subj, act = [], []
-            s, a = self.extract_S_A_numbers(os.path.basename(filename))
+            subj, class_labels = [], []
+            s, c = self.extract_S_C_numbers(os.path.basename(filename))
             for row in reader:
                 # metadata
                 meta_row = [float(row[c]) for c in meta_cols]
@@ -120,16 +120,16 @@ class WifiCSIDataset(Dataset):
                 X_meta.append(meta_row)
                 X_csi.append(csi_row)
                 subj.append(s)
-                act.append(a)
+                class_labels.append(c)
             
             X_meta = np.array(X_meta, dtype=np.float32)  # (T, 12)
             X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
             self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
-            
-            self.logger.debug(f"B_02. Subject: {len(subj)}, Activity: {len(act)}")
-            y = {"subject": subj, "activity": act}
+
+            self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
+            y = {"subject": subj, "class": class_labels}
 
             
 
-            return X_meta, X_csi, y, meta_cols, csi_cols
+        return X_meta, X_csi, y, meta_cols, csi_cols
 
