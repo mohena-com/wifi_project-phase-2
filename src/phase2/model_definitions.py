@@ -79,3 +79,11 @@ var_model_definitions = {
         },
     ),
 }
+
+model_defs = var_model_definitions  
+model_list = cr.get("training_model_list")
+for model_name, (model_class, param_grid) in model_defs.items():
+    if model_name in model_list:
+        print(f"Model: {model_name}")
+        print(f"Class: {model_class}")
+        print(f"Param Grid: {param_grid}")
