@@ -84,9 +84,9 @@ model_defs = var_model_definitions
 model_list = cr.get("training_model_list")
 print( f"model_list from config: {model_list}")
 for model_name, (model_class, param_grid) in model_defs.items():     
-    if model_name not in model_list:  
-        continue
-        print(f"=== Not Matched Model: {model_name} ====")  
+    if model_name not in model_list: 
+        print(f"=== Not Matched Model: {model_name} ====")   
+        continue        
     else:
         print(f"=== Matched Model: {model_name} ====")      
         print(f"Class: {model_class}")
