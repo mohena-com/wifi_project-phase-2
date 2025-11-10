@@ -501,7 +501,12 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     stats_summary = {}
     non_blocking_flag = True if device.type == "cuda" else False
     print(f"model_defs {model_defs}")
+    model_list = cr.get("training_model_list")
+    print( f"model_list from config: {model_list}")
     for model_name, (model_class, param_grid) in model_defs.items():
+        if model_name not in model_list:
+            logger.info(f"Skipping model {model_name} as it's not in the training_model_list")
+            continue
         param_keys, param_vals = zip(*param_grid.items())
         logger.info(" ")
         logger.info("N")
