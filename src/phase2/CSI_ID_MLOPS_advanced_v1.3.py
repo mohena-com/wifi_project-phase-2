@@ -251,13 +251,14 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 preds = torch.argmax(outputs, dim=1)
                 correct += (preds == labels).sum().item()
                 total += labels.size(0)
-
+                logger.info(f"\n🧩val_true extended: {labels.cpu().numpy().tolist()}")
+                logger.info(f"🧩val_pred extended: {preds.cpu().numpy().tolist()}")
+                logger.info(f"🧩val_prob extended: {torch.softmax(outputs, dim=1).cpu().numpy().tolist()}")
+                
                 val_true.extend(labels.cpu().numpy().tolist())
-                print(f"\n🧩val_true extended: {val_true}")
                 val_pred.extend(preds.cpu().numpy().tolist())
-                print(f"🧩val_pred extended: {val_pred}")
                 val_prob.extend(torch.softmax(outputs, dim=1).cpu().numpy().tolist())
-                print(f"🧩val_prob extended: {val_prob}")
+                
 
         val_loss = running_loss / max(1, len(test_loader))
         val_acc = correct / max(1, total)
