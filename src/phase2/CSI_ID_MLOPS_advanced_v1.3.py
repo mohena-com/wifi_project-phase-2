@@ -251,7 +251,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                 preds = torch.argmax(outputs, dim=1)
                 correct += (preds == labels).sum().item()
                 total += labels.size(0)
-                logger.info(f"\n🧩val_true extended: {labels.cpu().numpy().tolist()}")
+                logger.info(f"🧩")
+                logger.info(f"🧩val_true extended: {labels.cpu().numpy().tolist()}")
                 logger.info(f"🧩val_pred extended: {preds.cpu().numpy().tolist()}")
               #  logger.info(f"🧩val_prob extended: {torch.softmax(outputs, dim=1).cpu().numpy().tolist()}")
 
@@ -307,7 +308,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         mlflow.log_metrics(hw_metrics, step=epoch)
 
         logger.info(
-            f"Epoch {epoch+1}/{num_epochs}, Model {model_name}, "
+            f"✅ Epoch {epoch+1}/{num_epochs}, Model {model_name}, "
             f"Train Loss: {train_loss:.6f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.6f}, Val Acc: {val_acc:.4f}, "
             f"Epoch Duration: {end_time-start_time:.2f} sec"
         )
@@ -317,14 +318,14 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             best_val_acc = val_acc
             best_epoch = epoch + 1
             best_model_state = {k: v.cpu() for k, v in model.state_dict().items()}
-    logger.info(f"{model_name} COMPLETED EPOCHS TRAINING FOR {num_epochs} EPOCHS USING LEARNING RATE {params['lr']} ")
+    logger.info(f"✅{model_name} COMPLETED EPOCHS TRAINING FOR {num_epochs} EPOCHS USING LEARNING RATE {params['lr']} ")
  
     learning_rate = float(params.get('lr', 0.0))
-    logger.fatal(f"Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
+    logger.fatal(f"✅Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
         best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
         torch.save(best_model_state, best_model_fname)
-        logger.fatal(f"SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
+        logger.fatal(f"✅ SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
 
