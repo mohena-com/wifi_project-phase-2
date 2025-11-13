@@ -43,7 +43,7 @@ class MobileNetV3Block1D(nn.Module):
 
 
 class MobileNetV3_1D_LSTM(nn.Module):
-    def __init__(self, csi_channels, meta_feature_dim, num_classes):
+    def __init__(self, csi_channels, meta_feature_dim, num_classes, dropout_p=0.3):
         super().__init__()
         self.block1 = MobileNetV3Block1D(csi_channels, 32, stride=1)
         self.block2 = MobileNetV3Block1D(32, 64, stride=2)
