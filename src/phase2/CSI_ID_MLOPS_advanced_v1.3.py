@@ -116,7 +116,7 @@ def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
 def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, device, params, checkpoint_dir, logger):
     logger.info(f"START T-N-E {model_name} USING LEARNING RATE {params['lr']}")
     """Train and evaluate for one set of params, return metrics, best ckpt, and full history."""
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
 
     num_epochs = params["epochs"]
     best_val_acc, best_epoch = 0, 0
