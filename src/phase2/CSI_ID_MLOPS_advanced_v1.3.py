@@ -157,7 +157,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         for batch in train_loader:
             csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
             meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
-            labels = batch["label"].squeeze().to(device, non_blocking=non_blocking_flag).long()
+            #labels = batch["label"].squeeze().to(device, non_blocking=non_blocking_flag).long()
+            labels = batch["label"].reshape(-1).to(device, non_blocking=non_blocking_flag).long()
 
             # guard against NaN/Inf values in inputs/labels
             if torch.isnan(csi_seq).any() or torch.isinf(csi_seq).any():
@@ -230,7 +231,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             for batch in test_loader:
                 csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
                 meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
-                labels = batch["label"].squeeze().to(device, non_blocking=non_blocking_flag)
+                labels = batch["label"].reshape(-1).to(device, non_blocking=non_blocking_flag).long()
 
                 if torch.isnan(csi_seq).any() or torch.isinf(csi_seq).any():
                     csi_seq = torch.nan_to_num(csi_seq, nan=0.0, posinf=1e6, neginf=-1e6)
@@ -554,7 +555,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                     for batch in test_loader:
                         csi_seq = batch["csi_seq"].to(device, non_blocking=non_blocking_flag)
                         meta_seq = batch["metadata_seq"].to(device, non_blocking=non_blocking_flag)
-                        labels = batch["label"].squeeze().to(device, non_blocking=True)
+                        labels = batch["label"].reshape(-1).to(device, non_blocking=non_blocking_flag).long()
                         outputs = model(csi_seq, meta_seq)
                         preds = torch.argmax(outputs, dim=1).cpu().numpy()
                         labels_np = labels.cpu().numpy()
@@ -641,7 +642,8 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     import gc
     csi_np = None
     meta_np = None
-    out_np = None
+    #out_np = None
+    op_np = None
     example_output = None
     input_example = None
     logger.debug("0. Starting signature logging")
@@ -673,7 +675,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
         # Try to infer signature but tolerate failures
         signature = None
         try:
-            signature = infer_signature(input_example, out_np)
+            signature = infer_signature(input_example, op_np)
         except Exception as e:
             logger.debug(f"Signature inference failed: {e}")
             signature = None
@@ -717,7 +719,7 @@ def do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, d
     finally:
         csi_np = None
         meta_np = None
-        out_np = None
+        op_np = None
         input_example = None
         # device-aware cleanup
         try:

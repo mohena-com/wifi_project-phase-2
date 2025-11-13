@@ -34,7 +34,18 @@ class DenseNet1D(nn.Module):
         )
         self.global_pool = nn.AdaptiveAvgPool1d(1)
 
-        self.lstm = nn.LSTM(meta_feature_dim, 64, 2, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(
+            meta_feature_dim,
+            64,
+            num_layers=2,
+            batch_first=True,
+            bidirectional=True,
+            dropout=dropout_p
+        )
+
+        # Dropout before final classifier
+        self.dropout = nn.Dropout(p=dropout_p)
+
         self.fc = nn.Linear(128 + 64*2, num_classes)
 
     def forward(self, csi_seq, meta_seq):
@@ -48,6 +59,7 @@ class DenseNet1D(nn.Module):
         h_n = torch.cat([h_n[-2], h_n[-1]], dim=1)
 
         combined = torch.cat([x, h_n], dim=1)
+        combined = self.dropout(combined)  # dropout active in train mode
         return self.fc(combined)
 
 

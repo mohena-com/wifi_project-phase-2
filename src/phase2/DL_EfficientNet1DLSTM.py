@@ -53,11 +53,21 @@ class EfficientNet1DLSTM(nn.Module):
         self.mbconv3 = MBConv1D(40, 80, stride=2)
         self.pool = nn.AdaptiveAvgPool1d(1)
 
-        self.lstm = nn.LSTM(meta_input_size, hidden_size=64, num_layers=2, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(
+            meta_input_size,
+            64,
+            num_layers=2,
+            batch_first=True,
+            bidirectional=True,
+            dropout=dropout_p if 2 > 1 else 0.0
+        )
+
+        # dropout before classifier
+        self.dropout = nn.Dropout(p=dropout_p)
+
         self.fc = nn.Linear(80 + 64*2, num_classes)
 
     def forward(self, csi_seq, meta_seq):
-        # csi_seq shape: (B, W, C), transpose for Conv1d: (B, C, W)
         x = csi_seq.permute(0, 2, 1)
         x = self.stem(x)
         x = self.mbconv1(x)
@@ -69,5 +79,6 @@ class EfficientNet1DLSTM(nn.Module):
         h_n = torch.cat((h_n[-2], h_n[-1]), dim=1)
 
         out = torch.cat([x, h_n], dim=1)
+        out = self.dropout(out)          # active only in train()
         out = self.fc(out)
         return out
