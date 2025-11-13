@@ -41,7 +41,8 @@ class MBConv1D(nn.Module):
         return out
 
 class EfficientNet1DLSTM(nn.Module):
-    def __init__(self, csi_input_channels, meta_input_size, num_classes):
+    def __init__(self, csi_input_channels, meta_input_size, num_classes, dropout_p=0.3):
+
         super().__init__()
         self.stem = nn.Sequential(
             nn.Conv1d(csi_input_channels, 32, kernel_size=3, stride=1, padding=1),
