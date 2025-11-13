@@ -22,7 +22,7 @@ class DenseBlock1D(nn.Module):
         return torch.cat(features, dim=1)
 
 class DenseNet1D(nn.Module):
-    def __init__(self, csi_channels, meta_feature_dim, num_classes):
+    def __init__(self, csi_channels, meta_feature_dim, num_classes, dropout_p=0.3):
         super().__init__()
         self.initial_conv = nn.Conv1d(csi_channels, 64, 7, stride=2, padding=3)
         self.dense_block = DenseBlock1D(64, growth_rate=32, n_layers=4)
