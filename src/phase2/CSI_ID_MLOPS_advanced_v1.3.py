@@ -96,13 +96,14 @@ def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
 
     num_workers = 0 if device.type in ["mps", "cpu"] else min(4, max(1, (os.cpu_count() or 4) // 2))
     pin_mem = True if device.type != "cpu" else False
-
+    t_shuffle = cr.getboolean("t_shuffle", False)
+    v_shuffle = cr.getboolean("v_shuffle", False)
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True,
+        train_dataset, batch_size=batch_size, shuffle=t_shuffle,
         num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
     )
     test_loader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False,
+        test_dataset, batch_size=batch_size, shuffle=v_shuffle,
         num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
     )
     batch = next(iter(train_loader))
@@ -613,8 +614,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
 
         # attempt to log a pytorch model with signature for real-world inference
         try:
+            v_shuffle = cr.getboolean("v_shuffle", False)
             # create a small sample batch and instantiate model, then delegate signature logging
-            sample_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0)
+            sample_loader = DataLoader(train_dataset, batch_size=1, shuffle=v_shuffle, num_workers=0)
             sample_batch = next(iter(sample_loader))
             bc = best_overall_model_meta["model_class"]
             sample_model = create_model_instance(bc, best_overall_model_meta["model_name"], sample_batch, device)
