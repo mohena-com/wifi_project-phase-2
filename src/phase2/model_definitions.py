@@ -23,7 +23,7 @@ print(f"list_weight_decay: {list_weight_decay}")
 print(f"list_epochs: {list_epochs}")
 
 #csi_size = 99
-csi_size = 180
+csi_size = 182  # Updated to 182 to include class and action labels as features
 
 var_model_definitions = {
     "CSILSTMNet": (

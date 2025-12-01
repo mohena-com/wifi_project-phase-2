@@ -86,15 +86,15 @@ class WifiCSIDataset(Dataset):
             # If still not parsable, default to 0
             return 0.0 + 0.0j
 
-    def extract_S_C_numbers(self, filename):
+    def extract_S_C_A_numbers(self, filename):
         """
         Extract subject (Sxx) and class (C03) numbers from filename.
         Example: 'E1_S01_C03_A03_T01.csv' -> (1, 3)
         """
-        match = re.search(r'S(\d+).*C(\d+)', filename)
+        match = re.search(r'S(\d+).*C(\d+).*A(\d+)', filename)
         if match:
-            return int(match.group(1)), int(match.group(2))
-        return None, None
+            return int(match.group(1)), int(match.group(2)), int(match.group(3))
+        return None, None, None
 
 
     # Place this helper method within the same class (self)
@@ -159,9 +159,9 @@ class WifiCSIDataset(Dataset):
             
             # --- MODIFIED: Separate lists for Magnitude and Raw Phase ---
             X_meta, X_mag, X_raw_phase = [], [], []
-            subj, class_labels = [], []
+            subj, class_labels, action_labels = [], [], []
             
-            subject, class_label = self.extract_S_C_numbers(os.path.basename(filename))
+            subject, class_label, action_label = self.extract_S_C_A_numbers(os.path.basename(filename))
             
             for row in reader:
                 # metadata
@@ -177,15 +177,18 @@ class WifiCSIDataset(Dataset):
                 # Append the row data
                 X_meta.append(meta_row)
                 X_mag.append(mag_row)
-                X_raw_phase.append(phase_row)
-                
+                X_raw_phase.append(phase_row)                                
+                class_labels.append(class_label)                
+                action_labels.append(action_label)
+
                 subj.append(subject)
-                class_labels.append(class_label)
             
             # Convert lists to numpy arrays
             X_meta = np.array(X_meta, dtype=np.float32) 
             X_mag = np.array(X_mag, dtype=np.float32) 
             X_raw_phase = np.array(X_raw_phase, dtype=np.float32) # (T, 99)
+            X_class_labels = np.array(class_labels, dtype=np.int32)
+            X_action_labels = np.array(action_labels, dtype=np.int32)
             
             # --- CRITICAL STEP: Phase Sanitization (Unwrap and Trend Removal) ---
             # The phase data must be processed column-wise (per subcarrier)
@@ -194,13 +197,13 @@ class WifiCSIDataset(Dataset):
             # 4. Combine Magnitude and Sanitized Phase into the final CSI feature matrix
             # The final matrix X_csi will be (T, 198) 
             # where T is the number of time steps (rows) and 198 = 99*2
-            X_csi = np.concatenate((X_mag, X_sanitized_phase), axis=1, dtype=np.float32)
+            X_csi = np.concatenate((X_mag, X_sanitized_phase, X_class_labels[:, None], X_action_labels[:, None]), axis=1, dtype=np.float32)
 
             self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             # X_csi.shape will now be (T, 198) if the number of subcarriers is 99
             
             self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
-            y = {"subject": subj, "class": class_labels}
+            y = {"subject": subj}
 
         return X_meta, X_csi, y, meta_cols, csi_cols
 
