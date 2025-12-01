@@ -96,46 +96,53 @@ class WifiCSIDataset(Dataset):
             return int(match.group(1)), int(match.group(2))
         return None, None
 
+    import numpy as np
+# Assuming self.parse_complex exists and returns a complex number z = a + bj
 
-    # Place this helper method within the same class (self)
-    from scipy import unwrap # Use 'from numpy import unwrap' if available in your numpy version
-
-    def sanitize_phase(self, raw_phase_matrix):
+    def process_csi_row(self, row, csi_cols):
         """
-        Applies phase unwrapping and linear trend removal to the raw phase matrix.
-
+        Converts a row of complex CSI data into two real-valued features: 
+        Magnitude (r) and Raw Phase (theta), and flattens them into a single list.
+        
         Args:
-            raw_phase_matrix (np.ndarray): Array of shape (Time_Steps, Subcarriers).
+            row (list): The row of raw data containing complex number strings.
+            csi_cols (list): Indices of columns containing the complex data.
 
         Returns:
-            np.ndarray: Sanitized phase data.
+            list: A flattened list of [r1, θ1, r2, θ2, ...].
         """
-        T, N = raw_phase_matrix.shape
-        sanitized_phase = np.zeros_like(raw_phase_matrix)
-        time_index = np.arange(T)
-
-        # Process each subcarrier column-wise
-        for subcarrier_index in range(N):
-            raw_phase = raw_phase_matrix[:, subcarrier_index]
-            
-            # 1. Phase Unwrapping
-            # Transforms phase from (-pi, pi] to a continuous signal
-            unwrapped_phase = unwrap(raw_phase)
-            
-            # 2. Linear Trend Removal (Sanitization)
-            # Removes the large, static hardware phase offset (CFO/SFO)
-            # Fit a 1st-degree polynomial (linear fit: y = mx + c)
-            p = np.polyfit(time_index, unwrapped_phase, 1)
-            
-            # Calculate the linear trend
-            linear_trend = np.polyval(p, time_index)
-            
-            # Subtract the trend to isolate motion-induced phase
-            sanitized_phase[:, subcarrier_index] = unwrapped_phase - linear_trend
-
-        return sanitized_phase
         
-    def load_csv_as_numpy_old(self, filename):
+        # 1. Extract complex numbers and calculate features
+        feature_pairs = []
+        
+        for c in csi_cols:
+            # Get the complex number (z = a + bj)
+            z = self.parse_complex(row[c])
+            
+            # Calculate Magnitude (r)
+            # abs(z) is equivalent to np.abs(z) or cmath.polar(z)[0]
+            magnitude = abs(z)
+            
+            # Calculate Phase (theta) using the ambiguity-free function
+            # np.angle(z) is equivalent to cmath.phase(z) or atan2(b, a)
+            # Using numpy here for consistency with typical ML pipelines.
+            phase = np.angle(z)
+            
+            # Store the (r, theta) pair for the current subcarrier
+            feature_pairs.append((magnitude, phase))
+
+        # 2. Flatten the list of pairs (r1, θ1), (r2, θ2), ... 
+        # This creates the final feature vector: [r1, θ1, r2, θ2, ...]
+        csi_row_features = [feature for pair in feature_pairs for feature in pair]
+        
+        return csi_row_features
+
+    # NOTE: The resulting phase (theta) will be the raw, wrapped phase ((-pi, pi]).
+    # If you are processing a time series of these rows, you must apply the 
+    # **Phase Unwrapping and Sanitization** steps *after* you collect all rows
+    # of phase data over time.
+
+    def load_csv_as_numpy(self, filename):
         self.logger.debug(f"B_00. Loading:{ filename}")
         with open(filename, 'r', newline='') as f:
             reader = csv.DictReader(f)
@@ -155,7 +162,9 @@ class WifiCSIDataset(Dataset):
                 # metadata
                 meta_row = [float(row[c]) for c in meta_cols]
                 # CSI as magnitudes
+                
                 csi_row = [abs(self.parse_complex(row[c])) for c in csi_cols]
+               
                 X_meta.append(meta_row)
                 X_csi.append(csi_row)
                 subj.append(s)
@@ -166,74 +175,9 @@ class WifiCSIDataset(Dataset):
             self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
 
             self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
-            y = {"subject": subj, "class": class_labels}       
-
-        return X_meta, X_csi, y, meta_cols, csi_cols
-
-    import numpy as np
-    import csv
-    import os
-    # Assuming self.sanitize_phase is defined elsewhere (see helper function below)
-    # Note: Ensure you import 'unwrap' directly from 'scipy' or 'numpy' 
-    # if you implement the helper function.
-
-    def load_csv_as_numpy(self, filename):
-        self.logger.debug(f"B_00. Loading:{ filename}")
-        
-        with open(filename, 'r', newline='') as f:
-            reader = csv.DictReader(f)
-            cols = reader.fieldnames
-
-            csi_cols = [c for c in cols if c.startswith('csi_')]
-            meta_cols = [
-                'timestamp_low','bfee_count','Nrx','Ntx',
-                'rssi_a','rssi_b','rssi_c','agc',
-                'perm_1','perm_2','perm_3'
-            ]
-            
-            # --- MODIFIED: Separate lists for Magnitude and Raw Phase ---
-            X_meta, X_mag, X_raw_phase = [], [], []
-            subj, class_labels = [], []
-            
-            s, c = self.extract_S_C_numbers(os.path.basename(filename))
-            
-            for row in reader:
-                # metadata
-                meta_row = [float(row[c]) for c in meta_cols]
-                
-                # --- MODIFIED: Extract MAGNITUDE and RAW PHASE ---
-                mag_row, phase_row = [], []
-                for c in csi_cols:
-                    z = self.parse_complex(row[c])
-                    mag_row.append(np.abs(z))   # Magnitude (r)
-                    phase_row.append(np.angle(z)) # Raw Phase (theta)
-
-                # Append the row data
-                X_meta.append(meta_row)
-                X_mag.append(mag_row)
-                X_raw_phase.append(phase_row)
-                
-                subj.append(s)
-                class_labels.append(c)
-            
-            # Convert lists to numpy arrays
-            X_meta = np.array(X_meta, dtype=np.float32) 
-            X_mag = np.array(X_mag, dtype=np.float32) 
-            X_raw_phase = np.array(X_raw_phase, dtype=np.float32) # (T, 99)
-            
-            # --- CRITICAL STEP: Phase Sanitization (Unwrap and Trend Removal) ---
-            # The phase data must be processed column-wise (per subcarrier)
-            X_sanitized_phase = self.sanitize_phase(X_raw_phase) # (T, 99)
-            
-            # 4. Combine Magnitude and Sanitized Phase into the final CSI feature matrix
-            # The final matrix X_csi will be (T, 198) 
-            # where T is the number of time steps (rows) and 198 = 99*2
-            X_csi = np.concatenate((X_mag, X_sanitized_phase), axis=1, dtype=np.float32)
-
-            self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
-            # X_csi.shape will now be (T, 198) if the number of subcarriers is 99
-            
-            self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
             y = {"subject": subj, "class": class_labels}
 
+            
+
         return X_meta, X_csi, y, meta_cols, csi_cols
+

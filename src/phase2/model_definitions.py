@@ -22,12 +22,14 @@ print(f"list_optimizer: {list_optimizer}")
 print(f"list_weight_decay: {list_weight_decay}")
 print(f"list_epochs: {list_epochs}")
 
+#csi_size = 99
+csi_size = 180
 
 var_model_definitions = {
     "CSILSTMNet": (
         CSILSTMNet,
         {
-            'csi_input_size': [99],
+            'csi_input_size': [csi_size],
             'meta_input_size': [12],
             'window_size': [128],
             'num_classes': [31],
@@ -41,7 +43,7 @@ var_model_definitions = {
     "DenseNet1D": (
         DenseNet1D,
         {
-            'csi_channels': [99],
+            'csi_channels': [csi_size],
             'meta_feature_dim': [12],
             'num_classes': [31],
             'lr': list_learning_rate,
@@ -54,7 +56,7 @@ var_model_definitions = {
     "EfficientNet1DLSTM": (
         EfficientNet1DLSTM,
         {
-            'in_channels': [99],
+            'in_channels': [csi_size],
             'meta_seq_len': [128],
             'meta_feature_dim': [12],
             'num_classes': [31],
@@ -68,7 +70,7 @@ var_model_definitions = {
     "MobileNetV3_1D_LSTM": (
         MobileNetV3_1D_LSTM,
         {
-            'csi_channels': [99],
+            'csi_channels': [csi_size],
             'meta_feature_dim': [12],
             'num_classes': [31],
             'lr': list_learning_rate,
