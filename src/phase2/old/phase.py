@@ -54,9 +54,12 @@ def extract_S_C_numbers( filename="E1_S01_C03_A03_T01.csv"):
     Extract subject (Sxx) and class (C03) numbers from filename.
     Example: 'E1_S01_C03_A03_T01.csv' -> (1, 3)
     """
-    match = re.search(r'S(\d+).*C(\d+)', filename)
+     
+    match = re.search(r'S(\d+).*C(\d+).*A(\d+)', filename)
     if match:
-        return int(match.group(1)), int(match.group(2))
+        return int(match.group(1)), int(match.group(2)), int(match.group(3))
     return None, None
-a, b =extract_S_C_numbers()
-print(a,b)
+a, b, c =extract_S_C_numbers()
+print(a,b, c)
+
+   
