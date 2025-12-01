@@ -20,6 +20,8 @@ def process_complex_csi(complex_csi_data):
     # The magnitude preserves signal strength information.
     # np.abs() calculates |z| = sqrt(a^2 + b^2)
     magnitude = np.abs(complex_csi_data)
+    for m, c in zip(magnitude, complex_csi_data):
+        print(f"complex_csi_data: {c}, magnitude: {m}, abs_check: {np.sqrt(c.real**2 + c.imag**2)}  ")
     
     # The raw phase captures the angle theta using atan2.
     # np.angle() uses atan2(imag(z), real(z)), resolving quadrant ambiguity.
