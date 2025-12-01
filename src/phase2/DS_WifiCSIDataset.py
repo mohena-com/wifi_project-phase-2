@@ -98,7 +98,8 @@ class WifiCSIDataset(Dataset):
 
 
     # Place this helper method within the same class (self)
-    from scipy import unwrap # Use 'from numpy import unwrap' if available in your numpy version
+   # from scipy import unwrap # Use 'from numpy import unwrap' if available in your numpy version
+    from numpy import unwrap
 
     def sanitize_phase(self, raw_phase_matrix):
         """
@@ -134,7 +135,7 @@ class WifiCSIDataset(Dataset):
             sanitized_phase[:, subcarrier_index] = unwrapped_phase - linear_trend
 
         return sanitized_phase
-        
+
     def load_csv_as_numpy_old(self, filename):
         self.logger.debug(f"B_00. Loading:{ filename}")
         with open(filename, 'r', newline='') as f:
