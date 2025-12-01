@@ -161,7 +161,7 @@ class WifiCSIDataset(Dataset):
             X_meta, X_mag, X_raw_phase = [], [], []
             subj, class_labels = [], []
             
-            s, c = self.extract_S_C_numbers(os.path.basename(filename))
+            subject, class_label = self.extract_S_C_numbers(os.path.basename(filename))
             
             for row in reader:
                 # metadata
@@ -179,8 +179,8 @@ class WifiCSIDataset(Dataset):
                 X_mag.append(mag_row)
                 X_raw_phase.append(phase_row)
                 
-                subj.append(s)
-                class_labels.append(c)
+                subj.append(subject)
+                class_labels.append(class_label)
             
             # Convert lists to numpy arrays
             X_meta = np.array(X_meta, dtype=np.float32) 
