@@ -34,13 +34,16 @@ def get_polar_coordinates(z):
 z1 = 3 + 4j
 r1, theta1 = get_polar_coordinates(z1)
 print(f"z1 = {z1}: Magnitude (r) = {r1:.2f}, Phase (theta) = {theta1:.2f} radians")
+print(f"{r1 * theta1}")
 
 # Example 2: z2 = -3 - 4j (Quadrant III) - Same magnitude, different phase
 z2 = -3 - 4j
 r2, theta2 = get_polar_coordinates(z2)
 print(f"z2 = {z2}: Magnitude (r) = {r2:.2f}, Phase (theta) = {theta2:.2f} radians")
+print(f"{r2 * theta2}")
 
 # Example 3: z3 = 0 - 5j (Negative Imaginary Axis)
 z3 = 0 - 5j
 r3, theta3 = get_polar_coordinates(z3)
 print(f"z3 = {z3}: Magnitude (r) = {r3:.2f}, Phase (theta) = {theta3:.2f} radians")
+print(f"{r3 * theta3}")
