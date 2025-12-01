@@ -1,95 +1,46 @@
-import numpy as np
-#from scipy import unwrap # <-- This is correct
-from numpy import unwrap
-def process_complex_csi(complex_csi_data):
+import cmath # Standard library for complex math operations
+import math  # Standard library for basic math (not strictly needed here, but good practice)
+
+def get_polar_coordinates(z):
     """
-    Converts a time-series of complex CSI data into two real-valued arrays: 
-    Magnitude and Sanitzed Phase.
+    Calculates the magnitude (r) and phase (theta) of a single complex number.
 
     Args:
-        complex_csi_data (np.ndarray): A 1D or 2D NumPy array where the 
-                                       elements are complex numbers (a + bj). 
-                                       (e.g., one subcarrier's data over time).
+        z (complex): The complex number in the form a + bj.
 
     Returns:
-        tuple: A tuple containing (magnitude_data, sanitized_phase_data).
+        tuple: A tuple containing (magnitude, phase_in_radians).
     """
+    # 1. Calculate Magnitude (r)
+    # cmath.polar(z) returns (r, theta). The r value is the magnitude.
+    # Alternatively, you could use abs(z)
+    magnitude = abs(z)
     
-    # 1. Calculate Magnitude (r) and Raw Phase (theta)
+    # 2. Calculate Phase (theta)
+    # cmath.phase(z) is equivalent to math.atan2(imag(z), real(z)).
+    # It correctly returns the angle in the range (-pi, pi], resolving quadrant ambiguity.
+    phase_in_radians = cmath.phase(z)
     
-    # The magnitude preserves signal strength information.
-    # np.abs() calculates |z| = sqrt(a^2 + b^2)
-    magnitude = np.abs(complex_csi_data)
-    for m, c in zip(magnitude, complex_csi_data):
-        print(f"complex_csi_data: {c}, magnitude: {m}, abs_check: {np.sqrt(c.real**2 + c.imag**2)}  ")
-    
-    # The raw phase captures the angle theta using atan2.
-    # np.angle() uses atan2(imag(z), real(z)), resolving quadrant ambiguity.
-    raw_phase = np.angle(complex_csi_data)
-    
-    # 2. Phase Unwrapping
-    
-    # This step removes the 2*pi discontinuities inherent in the atan2 function 
-    # (jumps from pi to -pi or vice-versa), ensuring a continuous phase signal.
-    unwrapped_phase = unwrap(raw_phase)
-    
-    # 3. Phase Sanitization (Remove Linear Offset)
-    
-    # Wi-Fi hardware offsets (CFO, SFO) introduce a large, typically linear, 
-    # phase component that masks the small motion-induced phase changes. 
-    # We remove this linear component using a simple Least Squares fit.
-    
-    # Create the x-axis for the linear fit (time steps or subcarrier index)
-    N = unwrapped_phase.shape[0]
-    time_index = np.arange(N)
-    
-    # Fit a 1st-degree polynomial (linear fit: y = mx + c)
-    # The polynomial is unwrapped_phase ~ p[0]*time_index + p[1]
-    p = np.polyfit(time_index, unwrapped_phase, 1)
-    
-    # Calculate the linear component (the fitted line)
-    linear_trend = np.polyval(p, time_index)
-    
-    # Subtract the linear trend to isolate the motion-induced phase
-    sanitized_phase = unwrapped_phase - linear_trend
-    
-    return magnitude, sanitized_phase
+    # Alternatively, you can decompose the complex number and use math.atan2
+    # real_part = z.real
+    # imag_part = z.imag
+    # phase_in_radians = math.atan2(imag_part, real_part)
+
+    return magnitude, phase_in_radians
 
 # --- Example Usage ---
-# 1. Create a dummy complex CSI signal (e.g., 100 time steps)
-time_steps = 100
-# Simulate a signal where the phase slowly increases (movement) 
-# and then gets wrapped near pi (3.14)
-simulated_phase = np.linspace(1, 5, time_steps) + np.sin(np.linspace(0, 10, time_steps))
-simulated_magnitude = np.ones(time_steps) * 10 
 
-# Convert magnitude and simulated continuous phase back to a complex number 
-# to mimic raw CSI data. This will include the wrapping.
-raw_complex_data = simulated_magnitude * np.exp(1j * simulated_phase)
-print(f"raw_complex_data: {raw_complex_data}")
-# 2. Run the preprocessing method
-magnitude_out, phase_out = process_complex_csi(raw_complex_data)
+# Example 1: z1 = 3 + 4j (Quadrant I)
+z1 = 3 + 4j
+r1, theta1 = get_polar_coordinates(z1)
+print(f"z1 = {z1}: Magnitude (r) = {r1:.2f}, Phase (theta) = {theta1:.2f} radians")
 
-# 3. Print the results (first 5 samples)
-print("--- Complex CSI Preprocessing Results ---")
-print(f"Input Complex Data (first 5): {raw_complex_data[:10]}")
-print("---")
-print(f"Output Magnitude (first 5): {magnitude_out[:10]}")
-print(f"Output Sanitized Phase (first 5): {phase_out[:10]}")
+# Example 2: z2 = -3 - 4j (Quadrant III) - Same magnitude, different phase
+z2 = -3 - 4j
+r2, theta2 = get_polar_coordinates(z2)
+print(f"z2 = {z2}: Magnitude (r) = {r2:.2f}, Phase (theta) = {theta2:.2f} radians")
 
-
-
-# 1. Create a dummy complex CSI signal (e.g., 100 time steps)
-time_steps = 100
-simulated_phase = np.linspace(1, 5, time_steps) + np.sin(np.linspace(0, 10, time_steps))
-
-# --- MODIFIED: Introduce magnitude variation ---
-# Create a base magnitude of 10, plus some small random fluctuation (e.g., 5%)
-base_magnitude = 10
-random_variation = (np.random.rand(time_steps) - 0.5) * 0.1 * base_magnitude
-simulated_magnitude = base_magnitude + random_variation 
-
-# The rest of the code remains the same
-raw_complex_data = simulated_magnitude * np.exp(1j * simulated_phase)
-
-# ... (Run the processing function) ...
+# Example 3: z3 = 0 - 5j (Negative Imaginary Axis)
+z3 = 0 - 5j
+r3, theta3 = get_polar_coordinates(z3)
+print(f"z3 = {z3}: Magnitude (r) = {r3:.2f}, Phase (theta) = {theta3:.2f} radians")
