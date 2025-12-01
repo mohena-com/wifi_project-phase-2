@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ab70966e-1d57-48fc-8d43-4ed7ea64ee0d" name="Changes" comment="phase2-init" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;urssanj00&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/mohena-com/wifi_project-phase-2.git&quot;,
+    &quot;accountId&quot;: &quot;41f973ee-6aa3-49b2-bac6-34cc0c1fabca&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="308dADn5XCZMOeZPxu9UGlmSUoL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "dev__1.0",
+    "last_opened_file_path": "C:/Sanjeev/VNIT_CLASSES/VNIT-AAI-SEM4/wifi_project-phase-2/src/phase2",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Sanjeev\VNIT_CLASSES\VNIT-AAI-SEM4\wifi_project-phase-2\src\phase2" />
+      <recent name="C:\Sanjeev\VNIT_CLASSES\VNIT-AAI-SEM4\wifi_project-phase-2\research_papers" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ab70966e-1d57-48fc-8d43-4ed7ea64ee0d" name="Changes" comment="" />
+      <created>1753012987426</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753012987426</updated>
+      <workItem from="1753012989296" duration="2894000" />
+      <workItem from="1757787635401" duration="10812000" />
+    </task>
+    <task id="LOCAL-00001" summary="phase2-init">
+      <option name="closed" value="true" />
+      <created>1757860799912</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1757860799912</updated>
+    </task>
+    <task id="LOCAL-00002" summary="phase2-init">
+      <option name="closed" value="true" />
+      <created>1757863199144</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1757863199144</updated>
+    </task>
+    <task id="LOCAL-00003" summary="phase2-init">
+      <option name="closed" value="true" />
+      <created>1757864714158</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1757864714158</updated>
+    </task>
+    <task id="LOCAL-00004" summary="phase2-init">
+      <option name="closed" value="true" />
+      <created>1757867593528</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1757867593528</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="phase2-init" />
+    <option name="LAST_COMMIT_MESSAGE" value="phase2-init" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" log-message="true" suspend="NONE" type="python-line">
+          <url>file://$PROJECT_DIR$/src/phase2/01.load_dataset.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
