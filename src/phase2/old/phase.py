@@ -73,3 +73,20 @@ print(f"Input Complex Data (first 5): {raw_complex_data[:10]}")
 print("---")
 print(f"Output Magnitude (first 5): {magnitude_out[:10]}")
 print(f"Output Sanitized Phase (first 5): {phase_out[:10]}")
+
+
+
+# 1. Create a dummy complex CSI signal (e.g., 100 time steps)
+time_steps = 100
+simulated_phase = np.linspace(1, 5, time_steps) + np.sin(np.linspace(0, 10, time_steps))
+
+# --- MODIFIED: Introduce magnitude variation ---
+# Create a base magnitude of 10, plus some small random fluctuation (e.g., 5%)
+base_magnitude = 10
+random_variation = (np.random.rand(time_steps) - 0.5) * 0.1 * base_magnitude
+simulated_magnitude = base_magnitude + random_variation 
+
+# The rest of the code remains the same
+raw_complex_data = simulated_magnitude * np.exp(1j * simulated_phase)
+
+# ... (Run the processing function) ...
