@@ -58,4 +58,5 @@ def extract_S_C_numbers( filename="E1_S01_C03_A03_T01.csv"):
     if match:
         return int(match.group(1)), int(match.group(2))
     return None, None
-extract_S_C_numbers()
+a, b =extract_S_C_numbers()
+print(a,b)
