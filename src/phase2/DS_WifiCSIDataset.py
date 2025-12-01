@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report, precision_score, recall_score, f1_score
 from torch.utils.data import random_split
 from config_reader import ConfigReader 
-
+from numpy import unwrap
 ###########################################
 # Step 2: Dataset with sliding windows
 ###########################################
@@ -99,7 +99,7 @@ class WifiCSIDataset(Dataset):
 
     # Place this helper method within the same class (self)
    # from scipy import unwrap # Use 'from numpy import unwrap' if available in your numpy version
-    from numpy import unwrap
+    
 
     def sanitize_phase(self, raw_phase_matrix):
         """
@@ -121,7 +121,7 @@ class WifiCSIDataset(Dataset):
             
             # 1. Phase Unwrapping
             # Transforms phase from (-pi, pi] to a continuous signal
-            unwrapped_phase = unwrap(raw_phase)
+            unwrapped_phase = unwrap(raw_phase) 
             
             # 2. Linear Trend Removal (Sanitization)
             # Removes the large, static hardware phase offset (CFO/SFO)
