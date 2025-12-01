@@ -136,41 +136,6 @@ class WifiCSIDataset(Dataset):
 
         return sanitized_phase
 
-    def load_csv_as_numpy_old(self, filename):
-        self.logger.debug(f"B_00. Loading:{ filename}")
-        with open(filename, 'r', newline='') as f:
-            reader = csv.DictReader(f)
-            cols = reader.fieldnames
-
-            csi_cols = [c for c in cols if c.startswith('csi_')]
-            meta_cols = [
-                'timestamp_low','bfee_count','Nrx','Ntx',
-                'rssi_a','rssi_b','rssi_c','agc',
-                'perm_1','perm_2','perm_3'
-            ]
-            
-            X_meta, X_csi = [], []
-            subj, class_labels = [], []
-            s, c = self.extract_S_C_numbers(os.path.basename(filename))
-            for row in reader:
-                # metadata
-                meta_row = [float(row[c]) for c in meta_cols]
-                # CSI as magnitudes
-                csi_row = [abs(self.parse_complex(row[c])) for c in csi_cols]
-                X_meta.append(meta_row)
-                X_csi.append(csi_row)
-                subj.append(s)
-                class_labels.append(c)
-            
-            X_meta = np.array(X_meta, dtype=np.float32)  # (T, 12)
-            X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
-            self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
-
-            self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
-            y = {"subject": subj, "class": class_labels}       
-
-        return X_meta, X_csi, y, meta_cols, csi_cols
-
     import numpy as np
     import csv
     import os
@@ -236,5 +201,49 @@ class WifiCSIDataset(Dataset):
             
             self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
             y = {"subject": subj, "class": class_labels}
+
+        return X_meta, X_csi, y, meta_cols, csi_cols
+
+
+
+
+
+
+
+
+
+#################
+    def load_csv_as_numpy_old(self, filename):
+        self.logger.debug(f"B_00. Loading:{ filename}")
+        with open(filename, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            cols = reader.fieldnames
+
+            csi_cols = [c for c in cols if c.startswith('csi_')]
+            meta_cols = [
+                'timestamp_low','bfee_count','Nrx','Ntx',
+                'rssi_a','rssi_b','rssi_c','agc',
+                'perm_1','perm_2','perm_3'
+            ]
+            
+            X_meta, X_csi = [], []
+            subj, class_labels = [], []
+            s, c = self.extract_S_C_numbers(os.path.basename(filename))
+            for row in reader:
+                # metadata
+                meta_row = [float(row[c]) for c in meta_cols]
+                # CSI as magnitudes
+                csi_row = [abs(self.parse_complex(row[c])) for c in csi_cols]
+                X_meta.append(meta_row)
+                X_csi.append(csi_row)
+                subj.append(s)
+                class_labels.append(c)
+            
+            X_meta = np.array(X_meta, dtype=np.float32)  # (T, 12)
+            X_csi = np.array(X_csi, dtype=np.float32)    # (T, 99)
+            self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
+
+            self.logger.debug(f"B_02. Subject: {len(subj)}, Class: {len(class_labels)}")
+            y = {"subject": subj, "class": class_labels}       
 
         return X_meta, X_csi, y, meta_cols, csi_cols
