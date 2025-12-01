@@ -47,3 +47,15 @@ z3 = 0 - 5j
 r3, theta3 = get_polar_coordinates(z3)
 print(f"z3 = {z3}: Magnitude (r) = {r3:.2f}, Phase (theta) = {theta3:.2f} radians")
 print(f"{r3 * theta3}")
+
+
+def extract_S_C_numbers( filename="E1_S01_C03_A03_T01.csv"):
+    """
+    Extract subject (Sxx) and class (C03) numbers from filename.
+    Example: 'E1_S01_C03_A03_T01.csv' -> (1, 3)
+    """
+    match = re.search(r'S(\d+).*C(\d+)', filename)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return None, None
+extract_S_C_numbers()
