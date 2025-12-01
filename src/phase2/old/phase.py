@@ -64,7 +64,7 @@ simulated_magnitude = np.ones(time_steps) * 10
 # Convert magnitude and simulated continuous phase back to a complex number 
 # to mimic raw CSI data. This will include the wrapping.
 raw_complex_data = simulated_magnitude * np.exp(1j * simulated_phase)
-print(f"raw_complex_data: raw_complex_data")
+print(f"raw_complex_data: {raw_complex_data}")
 # 2. Run the preprocessing method
 magnitude_out, phase_out = process_complex_csi(raw_complex_data)
 
