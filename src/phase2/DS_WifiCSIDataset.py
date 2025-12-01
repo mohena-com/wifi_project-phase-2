@@ -144,7 +144,7 @@ class WifiCSIDataset(Dataset):
     # if you implement the helper function.
 
     def load_csv_as_numpy(self, filename):
-        self.logger.debug(f"B_00. Loading:{ filename}")
+        self.logger.debug(f"📂 Loading:{ filename}")
         
         with open(filename, 'r', newline='') as f:
             reader = csv.DictReader(f)
@@ -203,13 +203,6 @@ class WifiCSIDataset(Dataset):
             y = {"subject": subj, "class": class_labels}
 
         return X_meta, X_csi, y, meta_cols, csi_cols
-
-
-
-
-
-
-
 
 
 #################
