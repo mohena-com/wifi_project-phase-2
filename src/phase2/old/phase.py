@@ -49,7 +49,7 @@ print(f"z3 = {z3}: Magnitude (r) = {r3:.2f}, Phase (theta) = {theta3:.2f} radian
 print(f"{r3 * theta3}")
 
 import re
-def extract_S_C_numbers( filename="E1_S01_C03_A03_T01.csv"):
+def extract_S_C_numbers( filename="E1_S01_C03_A05_T01.csv"):
     """
     Extract subject (Sxx) and class (C03) numbers from filename.
     Example: 'E1_S01_C03_A03_T01.csv' -> (1, 3)
