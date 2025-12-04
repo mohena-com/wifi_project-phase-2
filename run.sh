@@ -1,3 +1,4 @@
+git pull
 conda activate har-env
 
 cr src
