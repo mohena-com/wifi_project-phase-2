@@ -1,4 +1,5 @@
 git pull
+conda init
 conda activate har-env
 
 cd src
