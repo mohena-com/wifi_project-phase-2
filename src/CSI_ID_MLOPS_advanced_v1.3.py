@@ -38,6 +38,7 @@ cr = ConfigReader("csi_id_config.properties")
 
 
 
+n_classes = cr.get_int("num_classes")
 
 def setup_logging(log_file_path):
 
@@ -65,19 +66,19 @@ def create_model_instance(model_class, model_name, batch, device):
             csi_input_size=batch["csi_seq"].shape[2],
             meta_input_size=batch["metadata_seq"].shape[2],
             window_size=batch["metadata_seq"].shape[1],
-            num_classes=31
+            num_classes=n_classes
         ) 
     elif model_name in ["DenseNet1D", "MobileNetV3_1D_LSTM"]:
         model = model_class(
             csi_channels=batch["csi_seq"].shape[2],
             meta_feature_dim=batch["metadata_seq"].shape[2],
-            num_classes=31
+            num_classes=n_classes
         ) 
     elif model_name == "EfficientNet1DLSTM":
         model = model_class(
             csi_input_channels=batch["csi_seq"].shape[2],
             meta_input_size=batch["metadata_seq"].shape[-1],
-            num_classes=31
+            num_classes=n_classes
         ) 
     else:
         raise ValueError("Unknown model")

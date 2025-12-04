@@ -24,6 +24,7 @@ print(f"list_epochs: {list_epochs}")
 
 #csi_size = 99
 csi_size = 182  # Updated to 182 to include class and action labels as features
+n_classes = cr.get_int("num_classes")
 
 var_model_definitions = {
     "CSILSTMNet": (
@@ -32,7 +33,7 @@ var_model_definitions = {
             'csi_input_size': [csi_size],
             'meta_input_size': [12],
             'window_size': [128],
-            'num_classes': [31],
+            'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
             'optimizer': list_optimizer,
@@ -45,7 +46,7 @@ var_model_definitions = {
         {
             'csi_channels': [csi_size],
             'meta_feature_dim': [12],
-            'num_classes': [31],
+            'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
             'optimizer': list_optimizer,
@@ -59,7 +60,7 @@ var_model_definitions = {
             'in_channels': [csi_size],
             'meta_seq_len': [128],
             'meta_feature_dim': [12],
-            'num_classes': [31],
+            'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
             'optimizer': list_optimizer,
@@ -72,7 +73,7 @@ var_model_definitions = {
         {
             'csi_channels': [csi_size],
             'meta_feature_dim': [12],
-            'num_classes': [31],
+            'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
             'optimizer': list_optimizer,
