@@ -123,8 +123,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     num_epochs = params["epochs"]
     best_val_acc, best_epoch = 0, 0
     best_model_state = None
-    train_losses, val_losses, train_accs, val_accs = [], [], [], []      
-
+    train_losses, val_losses, train_accs, val_accs = [], [], [], []
+    
     b_size = int(params['batch_size'])
 
     # DataLoader options tuned for typical desktop/laptop (adjust num_workers)

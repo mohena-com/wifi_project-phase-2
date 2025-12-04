@@ -177,8 +177,8 @@ class WifiCSIDataset(Dataset):
                 # Append the row data
                 X_meta.append(meta_row)
                 X_mag.append(mag_row)
-                X_raw_phase.append(phase_row)                                
-				subj.append(subject)
+                X_raw_phase.append(phase_row)
+                subj.append(subject)
                 class_labels.append(class_label)                
                 action_labels.append(action_label)
 
