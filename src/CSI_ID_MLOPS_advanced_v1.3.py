@@ -654,7 +654,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
         save_bundle = {
             "state_dict": best_overall_model_state,
             "model_name": best_overall_model_meta["model_name"],
-            "params": best_overall_model_meta["params"]
+            "params": best_overall_model_meta["params"],
             "model_state": best_overall_model_state,        # weights
             "model_fname": final_name,  # filepath 
             "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
