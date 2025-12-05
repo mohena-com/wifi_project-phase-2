@@ -42,7 +42,7 @@ scaler_bundle = {
     "scaler_phase": None,
     "meta_feature_dim": None,
     "csi_channels": None,
-    "num_classes": n_clcr.get_int("num_classes")
+    "num_classes": cr.get_int("num_classes")
 }
 
 def setup_logging(log_file_path):
