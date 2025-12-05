@@ -464,6 +464,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     test_loader = None
     all_preds, all_labels, cm, cr_report = None, None, None, None
 
+    import random
     # ---- Shuffle + 80/20 split at file level ----
     random.shuffle(filelist)              # or use train_test_split below
     split_idx = int(0.8 * len(filelist))
