@@ -26,7 +26,7 @@ from sklearn.preprocessing import label_binarize
 
 # Import your custom classes
 from config_reader import ConfigReader
-from DS_WifiCSIDataset import WifiCSIDataset
+from DS_WifiCSIDataset import WifiCSIDataset, build_scaler_meta, build_scalers_csi_mag_phase
 from DL_CSILSTMNet import CSILSTMNet
 from DL_DenseNet1D import DenseNet1D
 from DL_EfficientNet1DLSTM import EfficientNet1DLSTM
@@ -456,6 +456,8 @@ def make_run_name(params):
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
+
+
 def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename, device):
     logger = setup_logging(log_filename)
     print(f"logger {logger}")
@@ -472,8 +474,17 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     train_files = filelist[:split_idx]
     test_files  = filelist[split_idx:]
     logger.debug(f"📡Total files: {len(filelist)} | Train: {len(train_files)} | Test: {len(test_files)}")
+
     train_dataset = WifiCSIDataset(logger, train_files, window_size=128, stride=64)
     test_dataset  = WifiCSIDataset(logger, test_files,  window_size=128, stride=64)
+
+    # 3) Build scalers from TRAIN dataset only
+    scaler_meta = build_scaler_meta(train_dataset)
+    scaler_mag, scaler_phase = build_scalers_csi_mag_phase(train_dataset)
+
+    # 4) Attach scalers to both train & test
+    train_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
+    test_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
 
     logger.debug(f"📡Train dataset loaded: {len(train_dataset)}")
     logger.debug(f"📡Test dataset loaded : {len(test_dataset)}")
