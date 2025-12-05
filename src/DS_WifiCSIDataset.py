@@ -56,7 +56,7 @@ class WifiCSIDataset(Dataset):
         Normalization is applied here if scalers are set.
         """
         m_seq, csi_seq, y = self.samples[idx]  # numpy arrays
-
+        
         # 1) META normalization (if scaler_meta is set)
         if self.scaler_meta is not None:
             # m_seq: (W, n_meta)
@@ -79,7 +79,7 @@ class WifiCSIDataset(Dataset):
 
         # Subject label: 1..30 -> 0..29
         subject_label = int(y["subject"][0]) - 1
-
+        print("IDX:", idx, "SUB:", subject_label)
         return {
             "metadata_seq": torch.tensor(m_seq, dtype=torch.float32),
             "csi_seq":      torch.tensor(csi_seq, dtype=torch.float32),
@@ -124,7 +124,9 @@ class WifiCSIDataset(Dataset):
         """
         match = re.search(r'S(\d+).*C(\d+).*A(\d+)', filename)
         if match:
-            return int(match.group(1)), int(match.group(2)), int(match.group(3))
+            a, b, c =  int(match.group(1)), int(match.group(2)), int(match.group(3))
+            print(f"✅ {filename} Extracted: S={a}, C={b}, A={c}")
+            return a, b, c
         return None, None, None
 
     def sanitize_phase(self, raw_phase_matrix):
