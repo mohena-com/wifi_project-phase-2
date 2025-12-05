@@ -170,18 +170,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             if torch.isnan(labels).any() or torch.isinf(labels).any():
                 labels = torch.nan_to_num(labels, nan=0).long()
 
-            '''
-            WifiCSIDataset.py -achevied in this dataset loading
-            # simple per-batch normalization for csi_seq (avoid division by zero)
-            try:
-                mean = csi_seq.mean(dim=(0, 1), keepdim=True)
-                std = csi_seq.std(dim=(0, 1), keepdim=True) + 1e-8
-                csi_seq = (csi_seq - mean) / std
-            except Exception:
-                # fallback: skip normalization if shape unexpected
-                pass
-            '''
-
             optimizer.zero_grad()
             try:
                 outputs = model(csi_seq, meta_seq)
@@ -242,14 +230,6 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
                     csi_seq = torch.nan_to_num(csi_seq, nan=0.0, posinf=1e6, neginf=-1e6)
                 if torch.isnan(meta_seq).any() or torch.isinf(meta_seq).any():
                     meta_seq = torch.nan_to_num(meta_seq, nan=0.0, posinf=1e6, neginf=-1e6)
-
-                # same per-batch normalization used in training
-                try:
-                    mean = csi_seq.mean(dim=(0, 1), keepdim=True)
-                    std = csi_seq.std(dim=(0, 1), keepdim=True) + 1e-8
-                    csi_seq = (csi_seq - mean) / std
-                except Exception:
-                    pass
 
                 outputs = model(csi_seq, meta_seq)
                 loss = criterion(outputs, labels)
@@ -484,13 +464,25 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     test_loader = None
     all_preds, all_labels, cm, cr_report = None, None, None, None
 
-    # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
-    dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
-    logger.critical(f"Dataset loaded with {len(dataset)} samples")
+    # ---- Shuffle + 80/20 split at file level ----
+    random.shuffle(filelist)              # or use train_test_split below
+    split_idx = int(0.8 * len(filelist))
+    train_files = filelist[:split_idx]
+    test_files  = filelist[split_idx:]
+    logger.debug(f"📡Total files: {len(filelist)} | Train: {len(train_files)} | Test: {len(test_files)}")
+    train_dataset = WifiCSIDataset(logger, train_files, window_size=128, stride=64)
+    test_dataset  = WifiCSIDataset(logger, test_files,  window_size=128, stride=64)
 
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    logger.debug(f"📡Train dataset loaded: {len(train_dataset)}")
+    logger.debug(f"📡Test dataset loaded : {len(test_dataset)}")
+
+    # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
+    #dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
+    #logger.critical(f"Dataset loaded with {len(dataset)} samples")
+
+    #train_size = int(0.8 * len(dataset))
+    #test_size = len(dataset) - train_size
+    #train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     dataset = None  # free memory
 
@@ -511,9 +503,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     best_overall = {"val_acc": -1}
     stats_summary = {}
     non_blocking_flag = True if device.type == "cuda" else False
-    print(f"model_defs {model_defs}")
+    print(f"📡model_defs {model_defs}")
     model_list = cr.get("training_model_list")
-    print( f"model_list from config: {model_list}")
+    print( f"📡model_list from config: {model_list}")
     for model_name, (model_class, param_grid) in model_defs.items():
         if model_name not in model_list:
             logger.info(f"Skipping model {model_name} as it's not in the training_model_list")
