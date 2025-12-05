@@ -67,7 +67,7 @@ class DenseNet1D(nn.Module):
         combined = torch.cat([x, h_n], dim=1)
         combined = self.dropout(combined)  # dropout active in train mode
         output = self.fc(combined)
-		print(f"📡 [output] returning : {output}")
+        print(f"📡 [output] returning : {output}")
         return output
 
 
