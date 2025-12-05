@@ -36,19 +36,13 @@ from DL_MobileNetV3 import MobileNetV3_1D_LSTM
 # --- Logging setup (use your CSI_ID.py pattern) ---
 cr = ConfigReader("csi_id_config.properties")
 
-
-
-
-
-n_classes = cr.get_int("num_classes")
-
 scaler_bundle = {
-    "scaler_meta": None
+    "scaler_meta": None,
     "scaler_mag": None,
     "scaler_phase": None,
     "meta_feature_dim": None,
     "csi_channels": None,
-    "num_classes": n_classes
+    "num_classes": n_clcr.get_int("num_classes")asses
 }
 
 def setup_logging(log_file_path):
