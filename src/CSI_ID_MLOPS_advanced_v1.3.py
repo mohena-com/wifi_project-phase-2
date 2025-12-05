@@ -108,7 +108,7 @@ def get_test_train_loaders(train_dataset, test_dataset, batch_size, device):
         num_workers=num_workers, pin_memory=pin_mem, persistent_workers=(num_workers > 0)
     )
     batch = next(iter(train_loader))
-    print(f"csi_seq: {batch['csi_seq'].shape}, metadata_seq:{batch['metadata_seq'].shape}, label: {batch['label'][:10]}")
+    print(f" ✔ csi_seq: {batch['csi_seq'].shape}, \n ✔ metadata_seq:{batch['metadata_seq'].shape}, \n ✔ label: {batch['label'][:12]}")
     # Cache loaders by batch_size
     _loader_cache[batch_size] = (train_loader, test_loader, batch)
 
