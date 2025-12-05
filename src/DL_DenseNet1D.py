@@ -49,17 +49,17 @@ class DenseNet1D(nn.Module):
         self.fc = nn.Linear(128 + 64*2, num_classes)
 
     def forward(self, csi_seq, meta_seq):
-        print(f"🔍 [Input] CSI seq shape (csi_seq): {csi_seq}")
+        #print(f"🔍 [Input] CSI seq shape (csi_seq): {csi_seq}")
         x = csi_seq.permute(0, 2, 1)
-        print(f"🔍 [CSI] After permute x : {x}")
+        #print(f"🔍 [CSI] After permute x : {x}")
         x = self.initial_conv(x)
-        print(f"📡 [CSI] After initial_conv x: {x}")
+        #print(f"📡 [CSI] After initial_conv x: {x}")
         x = self.dense_block(x)
-        print(f"📡 [CSI] After DenseBlock x: {x}")
+        #print(f"📡 [CSI] After DenseBlock x: {x}")
         x = self.transition(x)
-        print(f"📡 [CSI] After Transition x: {x}")
+        #print(f"📡 [CSI] After Transition x: {x}")
         x = self.global_pool(x).squeeze(-1)
-        print(f"📡 [CSI] After GlobalPool + squeeze x: {x}")
+        #print(f"📡 [CSI] After GlobalPool + squeeze x: {x}")
 
         _, (h_n, _) = self.lstm(meta_seq)
         h_n = torch.cat([h_n[-2], h_n[-1]], dim=1)
@@ -67,7 +67,7 @@ class DenseNet1D(nn.Module):
         combined = torch.cat([x, h_n], dim=1)
         combined = self.dropout(combined)  # dropout active in train mode
         output = self.fc(combined)
-        print(f"📡 [output] returning : {output}")
+        #print(f"📡 [output] returning : {output}")
         return output
 
 
