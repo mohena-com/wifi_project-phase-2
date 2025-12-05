@@ -322,12 +322,13 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     learning_rate = float(params.get('lr', 0.0))
     logger.fatal(f"✅Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
-        best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
+        model_fname = f"inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
+        best_model_fname = f"{checkpoint_dir}/{model_fname}"
         #torch.save(best_model_state, best_model_fname)
 
         save_bundle = {
-            "model_state": best_model_state,        # weights
-            "model_fname": best_model_fname,  # filepath 
+            "model_state": best_model_state,       
+            "model_fname": model_fname,  
             "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
             "scaler_mag": scaler_bundle["scaler_mag"],
             "scaler_phase": scaler_bundle["scaler_phase"],
@@ -338,7 +339,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             }
         }
         torch.save(save_bundle, best_model_fname)
-        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} : {save_bundle}")
+        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} ")
  
         logger.fatal(f"✅ SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
@@ -657,6 +658,8 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
             "params": best_overall_model_meta["params"],
             "model_state": best_overall_model_state,        # weights
             "model_fname": final_name,  # filepath 
+            "model_path": final_path,
+            "model_params": best_overall_model_meta["params"],
             "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
             "scaler_mag": scaler_bundle["scaler_mag"],
             "scaler_phase": scaler_bundle["scaler_phase"],
@@ -665,15 +668,10 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 "csi_dim": scaler_bundle["csi_channels"],
                 "num_classes":scaler_bundle["num_classes"]
             }
-        }
-        
-        torch.save(save_bundle, final_path)
-
-
-        torch.save(save_bundle, best_model_fname)
-
-
-        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} : {save_bundle}")
+        }       
+         
+        torch.save(save_bundle, final_name)
+        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {final_name} ")
 
         mlflow.log_artifact(final_path)
         logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
