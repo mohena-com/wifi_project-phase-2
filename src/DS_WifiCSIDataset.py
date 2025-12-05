@@ -196,8 +196,9 @@ class WifiCSIDataset(Dataset):
             mag_mean = X_mag.mean(axis=1, keepdims=True)
             mag_std = X_mag.std(axis=1, keepdims=True) + 1e-8
 
-            X_mag = (X_mag - mag_mean) / mag_std if mag_std != 0 else X_mag - mag_mean
-
+            epsilon = 1e-8
+            X_mag = (X_mag - mag_mean) / (mag_std + epsilon)
+            
             # --- Phase Sanitization ---
             # Unwrap phase column-wise (per subcarrier)
             X_unwrapped_phase = np.unwrap(X_raw_phase, axis=0)
