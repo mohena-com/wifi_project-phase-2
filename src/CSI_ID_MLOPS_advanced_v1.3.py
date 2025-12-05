@@ -342,7 +342,9 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
         logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} ")
  
         logger.fatal(f"✅ SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
-        mlflow.log_artifact(best_model_fname)
+        #mlflow.log_artifact(best_model_fname)
+        mlflow.log_artifact(best_model_fname, artifact_path="checkpoints")
+ 
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
 
     return train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader
@@ -673,7 +675,9 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
         torch.save(save_bundle, final_name)
         logger.fatal(f"🚀 SAVED MODEL + SCALERS → {final_name} ")
 
-        mlflow.log_artifact(final_path)
+        #mlflow.log_artifact(final_path)
+        mlflow.log_artifact(final_path, artifact_path="checkpoints")
+
         logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
 
         # attempt to log a pytorch model with signature for real-world inference
