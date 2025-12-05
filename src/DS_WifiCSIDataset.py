@@ -67,7 +67,7 @@ class WifiCSIDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        m_seq, csi_seq, y = self.samples[idx]
+        m_seq, csi_seq, y = self.samples[idx]-1
         # Use the first subject label in the window (or last, depending on your task)
         subject_label = y["subject"][0]  # or y["subject"][-1]
         return {
@@ -212,9 +212,15 @@ class WifiCSIDataset(Dataset):
 
             # --- Combine Magnitude and Phase ---
             # Final CSI feature matrix: (T, 2*Nsub + 2 labels)
+            '''
             X_csi = np.concatenate(
                 (X_mag, X_sanitized_phase, 
                 X_class_labels[:, None], X_action_labels[:, None]),
+                axis=1, dtype=np.float32
+            ) 
+            '''
+            X_csi = np.concatenate(
+                (X_mag, X_sanitized_phase),
                 axis=1, dtype=np.float32
             ) 
 

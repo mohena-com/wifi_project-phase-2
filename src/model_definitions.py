@@ -23,7 +23,8 @@ print(f"list_weight_decay: {list_weight_decay}")
 print(f"list_epochs: {list_epochs}")
 
 #csi_size = 99
-csi_size = 182  # Updated to 182 to include class and action labels as features
+csi_size = 180  # Updated to 182 to include class and action labels as features
+meta_feature_dim = 11
 n_classes = cr.get_int("num_classes")
 
 var_model_definitions = {
@@ -45,7 +46,7 @@ var_model_definitions = {
         DenseNet1D,
         {
             'csi_channels': [csi_size],
-            'meta_feature_dim': [12],
+            'meta_feature_dim': [meta_feature_dim],
             'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
@@ -59,7 +60,7 @@ var_model_definitions = {
         {
             'in_channels': [csi_size],
             'meta_seq_len': [128],
-            'meta_feature_dim': [12],
+            'meta_feature_dim': [meta_feature_dim],
             'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
@@ -72,7 +73,7 @@ var_model_definitions = {
         MobileNetV3_1D_LSTM,
         {
             'csi_channels': [csi_size],
-            'meta_feature_dim': [12],
+            'meta_feature_dim': [meta_feature_dim],
             'num_classes': [n_classes],
             'lr': list_learning_rate,
             'batch_size': list_batch_size,
