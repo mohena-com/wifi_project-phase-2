@@ -170,6 +170,8 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             if torch.isnan(labels).any() or torch.isinf(labels).any():
                 labels = torch.nan_to_num(labels, nan=0).long()
 
+            '''
+            WifiCSIDataset.py -achevied in this dataset loading
             # simple per-batch normalization for csi_seq (avoid division by zero)
             try:
                 mean = csi_seq.mean(dim=(0, 1), keepdim=True)
@@ -178,6 +180,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
             except Exception:
                 # fallback: skip normalization if shape unexpected
                 pass
+            '''
 
             optimizer.zero_grad()
             try:

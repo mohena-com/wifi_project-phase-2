@@ -192,14 +192,31 @@ class WifiCSIDataset(Dataset):
             X_class_labels = np.array(class_labels, dtype=np.int32)
             X_action_labels = np.array(action_labels, dtype=np.int32)
             
+            # --- Magnitude Normalization (row-level z-score) ---
+            mag_mean = X_mag.mean(axis=1, keepdims=True)
+            mag_std = X_mag.std(axis=1, keepdims=True) + 1e-8
+
+            X_mag = (X_mag - mag_mean) / mag_std if mag_std != 0 else X_mag - mag_mean
+
+            # --- Phase Sanitization ---
+            # Unwrap phase column-wise (per subcarrier)
+            X_unwrapped_phase = np.unwrap(X_raw_phase, axis=0)
+
+            # Remove linear trend / mean-center row-wise
+            phase_mean = X_unwrapped_phase.mean(axis=1, keepdims=True)
+            X_sanitized_phase = X_unwrapped_phase - phase_mean
             # --- CRITICAL STEP: Phase Sanitization (Unwrap and Trend Removal) ---
             # The phase data must be processed column-wise (per subcarrier)
             X_sanitized_phase = self.sanitize_phase(X_raw_phase) # (T, 99)
-            
-            # 4. Combine Magnitude and Sanitized Phase into the final CSI feature matrix
-            # The final matrix X_csi will be (T, 198) 
-            # where T is the number of time steps (rows) and 198 = 99*2
-            X_csi = np.concatenate((X_mag, X_sanitized_phase, X_class_labels[:, None], X_action_labels[:, None]), axis=1, dtype=np.float32)
+
+            # --- Combine Magnitude and Phase ---
+            # Final CSI feature matrix: (T, 2*Nsub + 2 labels)
+            X_csi = np.concatenate(
+                (X_mag, X_sanitized_phase, 
+                X_class_labels[:, None], X_action_labels[:, None]),
+                axis=1, dtype=np.float32
+            ) 
+
 
             self.logger.debug(f"B_01. X_meta: {X_meta.shape} X_csi: {X_csi.shape}")
             # X_csi.shape will now be (T, 198) if the number of subcarriers is 99
