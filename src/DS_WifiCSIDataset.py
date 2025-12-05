@@ -79,7 +79,7 @@ class WifiCSIDataset(Dataset):
 
         # Subject label: 1..30 -> 0..29
         subject_label = int(y["subject"][0]) - 1
-        print("IDX:", idx, "SUB:", subject_label)
+        #print("IDX:", idx, "SUB:", subject_label)
         return {
             "metadata_seq": torch.tensor(m_seq, dtype=torch.float32),
             "csi_seq":      torch.tensor(csi_seq, dtype=torch.float32),
