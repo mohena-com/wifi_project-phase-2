@@ -38,7 +38,18 @@ cr = ConfigReader("csi_id_config.properties")
 
 
 
+
+
 n_classes = cr.get_int("num_classes")
+
+scaler_bundle = {
+    "scaler_meta": None
+    "scaler_mag": None,
+    "scaler_phase": None,
+    "meta_feature_dim": None,
+    "csi_channels": None,
+    "num_classes": n_classes
+}
 
 def setup_logging(log_file_path):
 
@@ -57,28 +68,35 @@ def setup_logging(log_file_path):
     logger.debug("Logger initialized")
     return logger
 
+
+
 def create_model_instance(model_class, model_name, batch, device):
     print(f"Creating model instance for {model_class} / {model_name} ")
         # Model instantiation according to constructor
+
+    
+    scaler_bundle["meta_feature_dim"] = batch["metadata_seq"].shape[2]
+    scaler_bundle["csi_channels"] = batch["csi_seq"].shape[2]
+
     model = None
     if model_name == "CSILSTMNet":
         model = model_class(
             csi_input_size=batch["csi_seq"].shape[2],
             meta_input_size=batch["metadata_seq"].shape[2],
             window_size=batch["metadata_seq"].shape[1],
-            num_classes=n_classes
+            num_classes=scaler_bundle["num_classes"]
         ) 
     elif model_name in ["DenseNet1D", "MobileNetV3_1D_LSTM"]:
         model = model_class(
             csi_channels=batch["csi_seq"].shape[2],
             meta_feature_dim=batch["metadata_seq"].shape[2],
-            num_classes=n_classes
+            num_classes=scaler_bundle["num_classes"]
         ) 
     elif model_name == "EfficientNet1DLSTM":
         model = model_class(
             csi_input_channels=batch["csi_seq"].shape[2],
             meta_input_size=batch["metadata_seq"].shape[-1],
-            num_classes=n_classes
+            num_classes=scaler_bundle["num_classes"]
         ) 
     else:
         raise ValueError("Unknown model")
@@ -311,7 +329,23 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
     logger.fatal(f"✅Training complete. Best Val Acc: {best_val_acc:.4f} at epoch {best_epoch}.")
     if best_model_state is not None:
         best_model_fname = f"{checkpoint_dir}/inner_best_model_{make_run_name(params)}_best_epoch_{best_epoch}.pt"
-        torch.save(best_model_state, best_model_fname)
+        #torch.save(best_model_state, best_model_fname)
+
+        save_bundle = {
+            "model_state": best_model_state,        # weights
+            "model_fname": best_model_fname,  # filepath 
+            "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
+            "scaler_mag": scaler_bundle["scaler_mag"],
+            "scaler_phase": scaler_bundle["scaler_phase"],
+            "feature_info": {
+                "meta_dim": scaler_bundle["meta_feature_dim"],
+                "csi_dim": scaler_bundle["csi_channels"],
+                "num_classes":scaler_bundle["num_classes"]
+            }
+        }
+        torch.save(save_bundle, best_model_fname)
+        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} : {save_bundle}")
+ 
         logger.fatal(f"✅ SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         mlflow.log_artifact(best_model_fname)
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
@@ -485,6 +519,10 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     # 4) Attach scalers to both train & test
     train_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
     test_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
+    
+    scaler_bundle["scaler_meta"]  = scaler_meta
+    scaler_bundle["scaler_mag"]   = scaler_mag
+    scaler_bundle["scaler_phase"] = scaler_phase
 
     logger.debug(f"📡Train dataset loaded: {len(train_dataset)}")
     logger.debug(f"📡Test dataset loaded : {len(test_dataset)}")
@@ -618,6 +656,31 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
             "params": best_overall_model_meta["params"]
         }
         torch.save(payload, final_path)
+
+        save_bundle = {
+            "state_dict": best_overall_model_state,
+            "model_name": best_overall_model_meta["model_name"],
+            "params": best_overall_model_meta["params"]
+            "model_state": best_overall_model_state,        # weights
+            "model_fname": final_name,  # filepath 
+            "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
+            "scaler_mag": scaler_bundle["scaler_mag"],
+            "scaler_phase": scaler_bundle["scaler_phase"],
+            "feature_info": {
+                "meta_dim": scaler_bundle["meta_feature_dim"],
+                "csi_dim": scaler_bundle["csi_channels"],
+                "num_classes":scaler_bundle["num_classes"]
+            }
+        }
+        
+        torch.save(save_bundle, final_path)
+
+
+        torch.save(save_bundle, best_model_fname)
+
+
+        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {best_model_fname} : {save_bundle}")
+
         mlflow.log_artifact(final_path)
         logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
 
