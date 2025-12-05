@@ -45,7 +45,7 @@ class DenseNet1D(nn.Module):
 
         # Dropout before final classifier
         self.dropout = nn.Dropout(p=dropout_p)
-
+        
         self.fc = nn.Linear(128 + 64*2, num_classes)
 
     def forward(self, csi_seq, meta_seq):
