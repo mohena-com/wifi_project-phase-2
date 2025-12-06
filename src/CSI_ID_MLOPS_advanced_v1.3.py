@@ -343,7 +343,7 @@ def train_and_evaluate(model_class, model_name, train_dataset, test_dataset, dev
  
         logger.fatal(f"✅ SAVED BEST MODEL {best_model_fname} USING LEARNING RATE {learning_rate}")
         #mlflow.log_artifact(best_model_fname)
-        mlflow.log_artifact(best_model_fname, artifact_path="checkpoints")
+        mlflow.log_artifact(best_model_fname )
  
         do_signature_logging(model, model_name, csi_seq, meta_seq, params, logger, device)
 
@@ -677,7 +677,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
         logger.fatal(f"🚀 SAVED OVERALL BEST MODEL + SCALERS → {final_name} ")
 
         #mlflow.log_artifact(final_path)
-        mlflow.log_artifact(model_name, artifact_path="checkpoints")
+        mlflow.log_artifact(model_name)
 
         logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
 
