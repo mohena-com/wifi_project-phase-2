@@ -525,7 +525,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     # 3) Build scalers from TRAIN dataset only
     scaler_meta = build_scaler_meta(train_dataset)
     scaler_mag, scaler_phase = build_scalers_csi_mag_phase(train_dataset)
-    print(f"🚀 Built scalers from training data: meta={scaler_meta}, mag={scaler_mag}, phase={scaler_phase} ")
+    print(f"🚀 Built scalers from training data: meta={type(scaler_meta)}, mag={type(scaler_mag)}, phase={type(scaler_phase)} ")
     scaler_bundle["scaler_meta"]  = scaler_meta
     scaler_bundle["scaler_mag"]   = scaler_mag
     scaler_bundle["scaler_phase"] = scaler_phase
