@@ -495,6 +495,7 @@ def save_bundle_as_checkpoint(save_bundle, checkpoint_dir, params, logger):
         "scaler_mag": save_bundle["scaler_mag"],
         "scaler_phase": save_bundle["scaler_phase"],
     }
+    print(f"🚀 SAVING SCALERS → {scaler_bundle_only} ")
     import pickle
     with open(scaler_path, "wb") as f:
         pickle.dump(scaler_bundle_only, f)
