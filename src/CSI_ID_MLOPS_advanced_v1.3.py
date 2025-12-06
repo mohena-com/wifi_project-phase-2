@@ -513,6 +513,18 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     scaler_meta = build_scaler_meta(train_dataset)
     scaler_mag, scaler_phase = build_scalers_csi_mag_phase(train_dataset)
 
+    scaler_path = f"{checkpoint_dir}/scalers_{make_run_name(params)}.pkl"   
+
+    scaler_bundle_only = {
+        "scaler_meta": scaler_meta,
+        "scaler_mag": scaler_mag,
+        "scaler_phase": scaler_phase,
+    }
+    import pickle
+    with open(scaler_path, "wb") as f:
+        pickle.dump(scaler_bundle_only, f)
+    logger.fatal(f"🚀 SAVED SCALERS → {scaler_path} ")
+
     # 4) Attach scalers to both train & test
     train_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
     test_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
