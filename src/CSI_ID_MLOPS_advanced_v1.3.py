@@ -487,6 +487,18 @@ def make_run_name(params):
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
+def save_bundle_as_checkpoint(save_bundle, checkpoint_dir, params):
+    scaler_path = f"{checkpoint_dir}/scalers_{make_run_name(params)}.pkl"   
+
+    scaler_bundle_only = {
+        "scaler_meta": save_bundle["scaler_meta"],
+        "scaler_mag": save_bundle["scaler_mag"],
+        "scaler_phase": save_bundle["scaler_phase"],
+    }
+    import pickle
+    with open(scaler_path, "wb") as f:
+        pickle.dump(scaler_bundle_only, f)
+    logger.fatal(f"🚀 SAVED SCALERS → {scaler_path} ")
 
 
 def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_filename, device):
@@ -513,36 +525,19 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     scaler_meta = build_scaler_meta(train_dataset)
     scaler_mag, scaler_phase = build_scalers_csi_mag_phase(train_dataset)
 
-    scaler_path = f"{checkpoint_dir}/scalers_{make_run_name(params)}.pkl"   
-
-    scaler_bundle_only = {
-        "scaler_meta": scaler_meta,
-        "scaler_mag": scaler_mag,
-        "scaler_phase": scaler_phase,
-    }
-    import pickle
-    with open(scaler_path, "wb") as f:
-        pickle.dump(scaler_bundle_only, f)
-    logger.fatal(f"🚀 SAVED SCALERS → {scaler_path} ")
+    scaler_bundle["scaler_meta"]  = scaler_meta
+    scaler_bundle["scaler_mag"]   = scaler_mag
+    scaler_bundle["scaler_phase"] = scaler_phase
+    
 
     # 4) Attach scalers to both train & test
     train_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
     test_dataset.set_scalers(scaler_meta, scaler_mag, scaler_phase)
     
-    scaler_bundle["scaler_meta"]  = scaler_meta
-    scaler_bundle["scaler_mag"]   = scaler_mag
-    scaler_bundle["scaler_phase"] = scaler_phase
+    
 
     logger.debug(f"📡Train dataset loaded: {len(train_dataset)}")
     logger.debug(f"📡Test dataset loaded : {len(test_dataset)}")
-
-    # --- Dataset loading (as in DS_WifiCSIDataset.py) ---
-    #dataset = WifiCSIDataset(logger, filelist, window_size=128, stride=64)
-    #logger.critical(f"Dataset loaded with {len(dataset)} samples")
-
-    #train_size = int(0.8 * len(dataset))
-    #test_size = len(dataset) - train_size
-    #train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
     dataset = None  # free memory
 
@@ -582,6 +577,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 params['model_name'] = model_name
             
                 logger.info(f"START RUN MLFLOW : {make_run_name(params)}")                
+                save_bundle_as_checkpoint(scaler_bundle, checkpoint_dir, params)
                     
                 with mlflow.start_run(run_name=f"{make_run_name(params)}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader = train_and_evaluate(
