@@ -645,6 +645,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
     # single final save/log of best overall model (if any)
     if best_overall.get("val_acc", -1) >= 0 and best_overall_model_state is not None:
         final_name = make_run_name(best_overall["params"])
+        model_name = f"best_overall_model_final_{final_name}_valacc{best_overall['val_acc']:.4f}.pt"
         final_path = f"{checkpoint_dir}/best_overall_model_final_{final_name}_valacc{best_overall['val_acc']:.4f}.pt"
         # save state + metadata so you can reconstruct model later
         payload = {
@@ -659,7 +660,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
             "model_name": best_overall_model_meta["model_name"],
             "params": best_overall_model_meta["params"],
             "model_state": best_overall_model_state,        # weights
-            "model_fname": final_name,  # filepath 
+            "model_fname": model_name,  
             "model_path": final_path,
             "model_params": best_overall_model_meta["params"],
             "scaler_meta": scaler_bundle["scaler_meta"],            # train mean/std
@@ -672,8 +673,8 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
             }
         }       
          
-        torch.save(save_bundle, final_name)
-        logger.fatal(f"🚀 SAVED MODEL + SCALERS → {final_name} ")
+        torch.save(save_bundle, model_name)
+        logger.fatal(f"🚀 SAVED OVERALL BEST MODEL + SCALERS → {final_name} ")
 
         #mlflow.log_artifact(final_path)
         mlflow.log_artifact(final_path, artifact_path="checkpoints")
