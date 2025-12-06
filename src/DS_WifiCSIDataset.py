@@ -246,7 +246,7 @@ def build_scaler_meta(train_dataset):
         all_meta.append(m_seq)
 
     all_meta = np.vstack(all_meta)  # (total_rows, n_meta)
-
+    print(f" build_scaler_meta:  Metadata   = {all_meta}")   
     scaler_meta = StandardScaler().fit(all_meta)
     print("✔ scaler_meta created successfully")
 
@@ -277,9 +277,11 @@ def build_scalers_csi_mag_phase(train_dataset):
 
     all_mag = np.vstack(all_mag)      # (total_frames, n_sc)
     all_phase = np.vstack(all_phase)  # (total_frames, n_sc)
+    print(f" build_scalers_csi_mag_phase:  Magnitude   = {all_mag}, Phase   = {all_phase}")   
 
     scaler_mag = StandardScaler().fit(all_mag)
     scaler_phase = StandardScaler().fit(all_phase)
+    print(f" build_scalers_csi_mag_phase:  scaler_mag = {scaler_mag}, scaler_phase = {scaler_phase}")   
 
     print("✔ scaler_mag and scaler_phase created successfully")
     print(f"   Magnitude dims = {n_sc}, Phase dims = {n_sc}")
