@@ -677,7 +677,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
         logger.fatal(f"🚀 SAVED OVERALL BEST MODEL + SCALERS → {final_name} ")
 
         #mlflow.log_artifact(final_path)
-        mlflow.log_artifact(final_path, artifact_path="checkpoints")
+        mlflow.log_artifact(model_name, artifact_path="checkpoints")
 
         logger.fatal(f"SAVED & LOGGED SINGLE BEST OVERALL MODEL: {final_path}")
 
