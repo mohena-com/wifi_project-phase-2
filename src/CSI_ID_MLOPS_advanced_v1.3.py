@@ -487,7 +487,7 @@ def make_run_name(params):
     run_name = f"{model_name}_lr{lr_str}_bs{bs}_{opt}_wd{wd_str}_ep{epochs}"
     return run_name
 
-def save_bundle_as_checkpoint(save_bundle, checkpoint_dir, params):
+def save_bundle_as_checkpoint(save_bundle, checkpoint_dir, params, logger):
     scaler_path = f"{checkpoint_dir}/scalers_{make_run_name(params)}.pkl"   
 
     scaler_bundle_only = {
@@ -577,7 +577,7 @@ def run_mlop_pipeline(cr, exp_path, plot_path, log_path, checkpoint_dir, log_fil
                 params['model_name'] = model_name
             
                 logger.info(f"START RUN MLFLOW : {make_run_name(params)}")                
-                save_bundle_as_checkpoint(scaler_bundle, checkpoint_dir, params)
+                save_bundle_as_checkpoint(scaler_bundle, checkpoint_dir, params, logger)
                     
                 with mlflow.start_run(run_name=f"{make_run_name(params)}", nested=True) as child_run:
                     train_losses, val_losses, train_accs, val_accs, best_model_state, best_val_acc, best_epoch, learning_rate, model, test_loader = train_and_evaluate(
