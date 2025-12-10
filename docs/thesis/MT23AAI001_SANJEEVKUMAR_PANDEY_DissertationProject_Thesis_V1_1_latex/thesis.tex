@@ -1,0 +1,113 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[left=1.5in,right=0.8in,top=1in,bottom=1.5in]{geometry}
+\usepackage{tikz} 
+\usetikzlibrary{arrows.meta, shapes.misc, shapes.symbols, backgrounds, fit, positioning, shapes.geometric, arrows}
+\usepackage[table]{xcolor}  
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\graphicspath{ {images/} }
+\usepackage{lipsum}  
+\usepackage{float}
+\usepackage[]{biblatex}
+\usepackage{amsmath}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{bm}
+\addbibresource{references.bib}
+\usepackage{setspace}
+\usepackage[justification=centering]{caption}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage[list=true]{subcaption}
+\usepackage[export]{adjustbox}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+\usepackage{wrapfig}
+% \usepackage{svg}
+% \linespread{1.5}
+\thispagestyle{empty}
+% \pagestyle{fancyplain}
+
+
+
+\title{Final Year project Report}
+\author{Name of Student}
+\date{\today}
+
+\begin{document}
+
+    \input{titlepage.tex}
+    \input{copyrightpage.tex}
+    \begin{onehalfspacing}
+        \input{declaration.tex}
+        \input{acknolodgment.tex}
+        
+        \pagenumbering{roman}
+        \cleardoublepage
+        \addcontentsline{toc}{chapter}{Abstract}        
+        \input{sections/abstract.tex}
+        \cleardoublepage
+        \addcontentsline{toc}{chapter}{\listfigurename}
+        \listoffigures
+        \cleardoublepage
+        \addcontentsline{toc}{chapter}{\listtablename}
+        \listoftables
+
+        \tableofcontents
+
+% \addcontentsline{toc}{chapter}{Abstract}
+% \addcontentsline{toc}{chapter}{\listfigurename}\listoffigures
+
+
+% \addcontentsline{toc}{section}{\listtablename}\listoftables
+        
+        \pagebreak
+        
+        \pagenumbering{arabic}
+        % \pagestyle{fancyplain}
+        \chapter{Introduction}
+        \input{sections/introduction.tex}
+        \pagebreak
+
+        \chapter{Literature Review - Classification}
+        \input{sections/literature.tex}
+        \pagebreak
+        
+        \chapter{Methodology}
+        \input{sections/methodology.tex}
+        \pagebreak
+        
+        \chapter{Results and Discussions}
+        \input{sections/results.tex}
+        \pagebreak
+
+        \chapter{Hardware and Software
+Environment and Source Code}
+        \input{sections/Hardware Implementation.tex}
+        \pagebreak
+
+        %\chapter{Segmentation}
+        %\input{sections/segmentation.tex}
+        %\pagebreak
+
+        %\chapter{Inference Pipeline Using %the Best Performing Model}
+        %\input{sections/inferencing.tex}
+        %\pagebreak
+        
+
+        \chapter{Summary and Conclusions}
+        \input{sections/summary.tex}
+        \pagebreak
+        
+
+        \input{Publication.tex}
+        \pagebreak
+
+    \end{onehalfspacing}
+    \printbibliography
+%\bibliographysytle{IEEEtranN}
+%\bibliography{Bibliography}
+
+\end{document} 

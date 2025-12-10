@@ -1,0 +1,116 @@
+
+
+A consistent and well-defined computational environment was essential for ensuring reproducibility, stability, and fairness during the comparative evaluation of the four deep learning architectures. All experiments—including preprocessing, training, validation, and MLflow-based tracking—were executed on a single Apple Silicon system. Tables \ref{tab:hardware} and \ref{tab:software} summarise the key hardware and software configurations.
+
+\section{Hardware Specifications}
+
+\begin{table}[H]
+\centering
+\caption{Hardware Configuration Used for Model Training and Validation}
+\label{tab:hardware}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Component} & \textbf{Specification} \\ \hline
+System & Apple MacBook (Apple Silicon) \\ \hline
+Processor & Apple M4 \\ \hline
+Unified Memory & 24 GB \\ \hline
+GPU Backend & Apple GPU with Metal (MPS) \\ \hline
+Storage & NVMe SSD \\ \hline
+Operating System & macOS (latest version) \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Software Environment}
+
+The complete machine learning workflow was executed using Python~3.11 and a curated set of libraries to ensure cross-framework compatibility and stable acceleration on Apple Silicon. The environment was managed using a pinned \texttt{requirements.txt} file.
+
+\begin{table}[H]
+\centering
+\caption{Key Software and Library Versions}
+\label{tab:software}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Software Component} & \textbf{Version / Constraint} \\ \hline
+Python & 3.11 \\ \hline
+NumPy & $\geq$1.24.3, $<$1.26 \\ \hline
+Pandas & 2.0.3 \\ \hline
+SciPy & 1.11.3 \\ \hline
+h5py & 3.9.0 \\ \hline
+Scikit-Learn & 1.3.0 \\ \hline
+TensorFlow & 2.15.0 \\ \hline
+tensorflow-metal & 1.1.0 \\ \hline
+PyTorch & 2.3.0 \\ \hline
+Torchvision & 0.18.0 \\ \hline
+Torchaudio & 2.3.0 \\ \hline
+Matplotlib & 3.7.2 \\ \hline
+Seaborn & 0.12.2 \\ \hline
+Joblib & 1.3.2 \\ \hline
+MLflow & 2.22.1 \\ \hline
+psutil & $\geq$5.9.5, $<$6.0.0 \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Environment Summary}
+
+The Apple M4 hardware, combined with Python~3.11 and a tightly controlled software stack, ensured consistent and reproducible execution of the training pipeline. Integration with MLflow further strengthened experiment governance, enabling robust comparison of all four candidate models under identical computational conditions.
+
+\section{Project Source Code and Repository Structure}
+
+All implementation work carried out for this dissertation is publicly available in a structured GitHub repository. 
+The source code for the complete Phase~2 pipeline---including dataset loaders, deep neural network architectures, 
+training scripts, MLOps automation utilities, and configuration files---is located at:
+
+\begin{center}
+\texttt{https://github.com/mohena-com/wifi\_project-phase-2/tree/dev\_1.0/src/phase2}
+\end{center}
+
+This directory forms the core of the project and contains all modules used for data handling, model design, 
+experiment configuration, MLflow tracking, and inference. Table~\ref{tab:phase2files} summarises the 
+key files within the \texttt{phase2} module along with their primary roles.
+
+
+
+\begin{table}[H]
+\centering
+\caption{Summary of Important Source Files in the \texttt{phase2} Directory}
+\label{tab:phase2files}
+\begin{tabularx}{0.95\textwidth}{|l|X|}
+\hline
+\textbf{File Name} & \textbf{Description} \\ \hline
+
+CSI\_ID\_MLOPS\_advanced\_v1.3.py 
+& Main MLOps-enabled training script with end-to-end automation \\ \hline
+
+DL\_CSILSTMNet.py 
+& Implementation of the CNN--LSTM hybrid model \\ \hline
+
+DL\_DenseNet1D.py 
+& Definition of the DenseNet1D architecture \\ \hline
+
+DL\_EfficientNet1DLSTM.py 
+& EfficientNet1D + LSTM combined architecture \\ \hline
+
+DL\_MobileNetV3.py 
+& Implementation of MobileNetV3 (1D adapted) \\ \hline
+
+DS\_WifiCSIDataset.py 
+& Custom dataset loader for Wi-Fi CSI frames and metadata \\ \hline
+
+config\_reader.py 
+& Utility for reading configuration properties and hyperparameters \\ \hline
+
+csi\_id\_config.properties 
+& Centralised configuration file for model, training, and dataset parameters \\ \hline
+
+model\_definitions.py 
+& Consolidated definitions of all neural network classes for ease of experimentation \\ \hline
+
+\end{tabularx}
+\end{table}
+
+
+The structure is intentionally modular to support iterative experimentation and systematic comparison of four 
+deep learning architectures. Each model file is decoupled from dataset utilities and training logic, enabling 
+plug-and-play experimentation. The primary MLOps script orchestrates configuration loading, model selection, 
+MLflow logging, training execution, and evaluation, thereby enforcing reproducibility and consistency across 
+all experimental runs.

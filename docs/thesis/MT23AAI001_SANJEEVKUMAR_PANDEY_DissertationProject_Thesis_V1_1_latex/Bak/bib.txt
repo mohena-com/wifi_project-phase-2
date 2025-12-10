@@ -1,0 +1,1550 @@
+@article{HCC,
+  title={Hepatocellular carcinoma: a review},
+  author={Balogh, Julius and others},
+  journal={Journal of Hepatocellular Carcinoma},
+  pages={41--53},
+  year={2016},
+  publisher={Taylor \& Francis}
+}
+
+@article{DL,
+  title={Deep learning vs. traditional computer vision},
+  author={O’Mahony, Niall and others},
+  booktitle={Advances in Computer Vision: Proceedings of the 2019 Computer Vision Conference (CVC), Volume 1 1},
+  pages={128--144},
+  year={2020},
+  organization={Springer}
+}
+
+@article{HCC_intAF,
+  title={Hepatocellular carcinoma in sub-Saharan Africa},
+  author={Kedar Mukthinuthalapati, VV Pavan and others},
+  journal={JCO Global Oncology},
+  volume={7},
+  pages={756--766},
+  year={2021},
+  publisher={Wolters Kluwer Health}
+}
+
+@INPROCEEDINGS{BreakHis,
+   title={Breast cancer histopathological image classification using convolutional neural networks},
+  author={Spanhol, Fabio Alexandre and others},
+  booktitle={International Joint Conference on Neural Networks (IJCNN)},
+  pages={2560--2567},
+  year={2016}
+}
+
+
+@article{tcga,
+  title={TCGA-LIHC dataset},
+  author={Erickson B and others},
+  journal={Radiology data from the cancergenome atlas liver hepatocellular Carcinoma [TCGA-LIHC] collection. Cancer Imag Arch},
+  year={2021}
+}
+
+@article{Labels,
+ title={Deep learning-based classification of liver cancer histopathology images using only global labels},
+ author={Sun, Chunli and others},
+journal={IEEE journal of biomedical and health informatics},
+volume={24},
+number={6},
+pages={1643--1651},
+year={2019},
+publisher={IEEE}
+}
+
+@article{Macenko,
+  title={A method for normalizing histology slides for quantitative analysis},
+  author={Macenko, Marc and others},
+  journal={IEEE International Symposium on Biomedical Imaging: From Nano to Macro},
+  volume={},
+  pages={1107-1110},
+  year={2009},
+  publisher={IEEE}
+  
+}
+@article{CNN,
+author = {Jaswal, Deepika and others},
+year = {2014},
+pages = {1661-1668},
+title = {Image classification using convolutional neural networks},
+volume = {5},
+journal = {International Journal of Scientific and Engineering Research},
+}
+
+@inproceedings{EL,
+  title={Ensemble learning techniques and its efficiency in machine learning: A survey},
+  author={Rincy, Thomas N and Gupta, Roopam},
+  booktitle={2nd International Conference on Data, Engineering and Applications (IDEA)},
+  pages={1--6},
+  year={2020},
+}
+
+@InProceedings{Inception-V3,
+  title={Rethinking the inception architecture for computer vision},
+  author={Szegedy, Christian and others},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern recognition},
+  pages={2818--2826},
+  year={2016}
+}
+
+ 
+
+@inproceedings{he2016deep,
+  title={Deep residual learning for image recognition},
+  author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  booktitle={IEEE conference on Computer Vision and Pattern recognition},
+  pages={770--778},
+  year={2016}
+}
+
+@inproceedings{hussain2018study,
+  title={A study on CNN transfer learning for image classification},
+  author={Hussain, Mahbub and others},
+  booktitle={UK Workshop on Computational Intelligence},
+  pages={191--202},
+  year={2018},
+  organization={Springer}
+}
+
+@inproceedings{AlexNet,
+ author = {Krizhevsky, Alex and others},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {F. Pereira and others},
+ publisher = {Curran Associates, Inc.},
+ title = {ImageNet classification with deep convolutional neural networks},
+ volume = {25},
+  year = {2012}
+}
+
+ 
+@inproceedings{VGG,
+  author    = {Karen Simonyan and
+               others},
+  editor    = {Yoshua Bengio and
+               Yann LeCun},
+  title     = {Very deep convolutional networks for large-sale image rcognition},
+  booktitle = {3rd International Conference on Learning Representations, {ICLR} 2015,
+               San Diego, CA, USA, May 7-9, 2015, Conference Track Proceedings},
+  year      = {2015},
+}
+
+@INPROCEEDINGS{ResNet,
+  author={He, Kaiming and others},
+  booktitle={IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+  title={Deep residual learning for image recognition}, 
+  year={2016},
+  volume={},
+  number={},
+  pages={770-778},
+  doi={10.1109/CVPR.2016.90}}
+
+
+@inproceedings{Inception_v1,
+  title={Going deeper with convolutions},
+  author={Szegedy, Christian and others},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={1--9},
+  year={2015}
+}
+
+@InProceedings{Inception_v2,
+title={Batch normalization: Accelerating deep network training by reducing internal covariate shift},
+author={Ioffe, Sergey and Szegedy, Christian},
+booktitle={International Conference on Machine Learning},
+pages={448--456},
+year={2015}
+}
+
+@InProceedings{Inception_v3,
+  title={Rethinking the inception architecture for computer vision},
+  author={Szegedy, Christian and others},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={2818--2826},
+  year={2016}
+}
+
+@article{EL_2,
+title={Image recognition using convolutional neural network combined with ensemble learning algorithm},
+  author={Mo, Weilong and others},
+  booktitle={Journal of Physics: Conference Series},
+  volume={1237},
+  number={2},
+  pages={022026},
+  year={2019},
+  organization={IOP Publishing}
+}
+
+@InProceedings{EL_3,
+  title={DeepMEN: Multi-model ensemble network for B-lymphoblast cell classification},
+  author={Xiao, Fenrui and others},
+  booktitle={ISBI 2019 C-NMC Challenge: Classification in Cancer Cell Imaging: Select Proceedings},
+  pages={83--93},
+  year={2019},
+  organization={Springer}
+}
+
+@INPROCEEDINGS{EL_1,
+ title={Deep ensemble learning for skin lesion classification from dermoscopic images},
+author={Shahin, Ahmed H and others},
+  booktitle={9th Cairo International Biomedical Engineering Conference (CIBEC)},
+  pages={150--153},
+  year={2018}
+}
+
+ @misc{TimelyDiagnosis,  title={Current management of hepatocellular carcinoma},
+  author={Crissien, Ana Maria and Frenette, Catherine},
+  journal={Gastroenterology \& hepatology},
+  volume={10},
+  number={3},
+  pages={153},
+  year={2014},
+  publisher={Millenium Medical Publishing}
+ }
+ 
+@Article{Breast_EL,
+  title={Breast cancer histopathology image classification using an ensemble of deep learning models},
+  author={Hameed, Zabit and others},
+  journal={Sensors},
+  volume={20},
+  number={16},
+  pages={4373},
+  year={2020},
+  publisher={MDPI}
+}
+
+@ARTICLE{Loss_of_info,
+ title={Deep learning-based classification of liver cancer histopathology images using only global labels},
+ author={Sun, Chunli and others},
+journal={IEEE journal of biomedical and health informatics},
+volume={24},
+number={6},
+pages={1643--1651},
+year={2019},
+publisher={IEEE}
+}
+
+
+@article{Pytorch,
+ title={Pytorch: An imperative style, high-performance deep learning library},
+  author={Paszke, Adam and others},
+  journal={Advances in Neural Information Processing Systems},
+  volume={32},
+  year={2019}
+}
+
+@article{SIFT,   title={Distinctive image features from scale-invariant keypoints},
+  author={Lowe, David G},
+  journal={International Lournal of Computer Vision},
+  volume={60},
+  pages={91--110},
+  year={2004},
+  publisher={Springer}
+  }
+
+@ARTICLE{SVM,
+  title={Support vector machines},
+  author={Hearst, Marti A. and others},
+  journal={IEEE Intelligent Systems and Their Applications},
+  volume={13},
+  number={4},
+  pages={18--28},
+  year={1998},
+  publisher={IEEE}
+  }
+
+  @article{path_1,   title={Diagnostic concordance among pathologists interpreting breast biopsy specimens},
+  author={Elmore, Joann G and others},
+  journal={Jama},
+  volume={313},
+  number={11},
+  pages={1122--1132},
+  year={2015},
+  publisher={American Medical Association}
+  }
+
+  @article{path_2,   title={Error reduction in surgical pathology},
+  author={Nakhleh, Raouf E},
+  journal={Archives of Pathology \& Laboratory Medicine},
+  volume={130},
+  number={5},
+  pages={630--632},
+  year={2006}
+  }
+
+  @article{path_3,   title={Clinical impact and frequency of anatomic pathology errors in cancer diagnoses},
+  author={Raab, Stephen S and others},
+  journal={Cancer: Interdisciplinary International Journal of the American Cancer Society},
+  volume={104},
+  number={10},
+  pages={2205--2213},
+  year={2005},
+  publisher={Wiley Online Library}
+  }
+
+  @article{timely_diagnosis,   title={Diagnostic challenges in primary hepatocellular carcinoma: case reports and review of the literature},
+  author={Pazgan-Simon, Monika and others},
+  journal={Case Reports in Oncological Medicine},
+  volume={2015},
+  year={2015},
+  publisher={Hindawi}
+}
+
+  @ARTICLE{muller,
+  title={An analysis on ensemble learning optimized medical image classification with deep convolutional neural networks},
+  author={M{\"u}ller, Dominik and Soto-Rey, I{\~n}aki and Kramer, Frank},
+  journal={Ieee Access},
+  volume={10},
+  pages={66467--66480},
+  year={2022},
+  publisher={IEEE}
+  }
+
+  @article{Moon,  title={Computer-aided diagnosis of breast ultrasound images using ensemble learning from convolutional neural networks},
+  author={Moon, Woo Kyung and others},
+  journal={Computer Methods and Programs in Biomedicine},
+  volume={190},
+  pages={105361},
+  year={2020},
+  publisher={Elsevier}
+  }
+
+  @article{ Input_size,   title={Convolutional neural networks: an overview and application in radiology},
+  author={Yamashita, Rikiya and others},
+  journal={Insights into Imaging},
+  volume={9},
+  pages={611--629},
+  year={2018},
+  publisher={Springer}
+ }
+
+  @article{Patches,
+  title={Efficient multiple instance convolutional neural networks for gigapixel resolution image classification},
+  author={Hou, Le and others},
+  journal={arXiv preprint arXiv:1504.07947},
+  volume={7},
+  pages={174--182},
+  year={2015}
+}
+@article{staining_abnormalities,   
+title={Hematoxylin and eosin staining of intact tissues via delipidation and ultrasound},
+  author={Li, Yawu and others},
+  journal={Scientific Reports},
+  volume={8},
+  number={1},
+  pages={12259},
+  year={2018},
+  publisher={Nature Publishing Group UK London}
+  }
+
+@article{Averaging,
+  title={Ensemble deep learning: A review},
+  author={Ganaie, Mudasir A and others},
+  journal={Engineering Applications of Artificial Intelligence},
+  volume={115},
+  pages={105151},
+  year={2022},
+  publisher={Elsevier}
+}
+
+@article{Comparison,  
+title={Comparative analysis of image classification algorithms based on traditional machine learning and deep learning},
+  author={Wang, Pin and Fan, En and Wang, Peng},
+  journal={Pattern Recognition Letters},
+  volume={141},
+  pages={61--67},
+  year={2021},
+  publisher={Elsevier} 
+  }
+
+@article{Max_Pooling,
+  title={Avg-topk: A new pooling method for convolutional neural networks},
+  author={{\"O}zdemir, C{\"u}neyt},
+  journal={Expert Systems with Applications},
+  volume={223},
+  pages={119892},
+  year={2023},
+  publisher={Elsevier}
+}
+
+@INPROCEEDINGS{backprop,
+  title={Theory of the backpropagation neural network},
+  author={Hecht-Nielsen, Robert},
+  booktitle={Neural Networks for Perception},
+  pages={65--93},
+  year={1992},
+  publisher={Elsevier}
+}
+
+@article{optimisation,
+  title={An overview of gradient descent optimization algorithms},
+  author={Ruder, Sebastian},
+  journal={arXiv preprint arXiv:1609.04747},
+  year={2016}
+}
+
+@article{Llovet_2021, title={Hepatocellular carcinoma}, 
+volume={7},  
+number={1}, 
+journal={Nature Reviews Disease Primers}, 
+publisher={Springer Science and Business Media LLC}, 
+author={Llovet, Josep M. and others}, 
+pages={1--28},
+year={2021}
+} 
+
+@article{gold_standard,   
+  title={Liver biopsy for assessment of chronic liver diseases: a synopsis},
+  author={Chowdhury, Aqib B and others},
+  journal={Clinical and Experimental Medicine},
+  pages={1--13},
+  year={2022},
+  publisher={Springer}
+  }
+
+@article{biomarker,   title={A method to reuse archived H\&E stained histology slides for a multiplex protein biomarker analysis},
+  author={Hinton, James P and others},
+  journal={Methods and Protocols},
+  volume={2},
+  number={4},
+  pages={86},
+  year={2019},
+  publisher={MDPI} }
+
+@INPROCEEDINGS{SIFT_SVM,
+   title={Image classification based on SIFT and SVM},
+  author={Li, Qilong and Wang, Xiaohong},
+  booktitle={2018 IEEE/ACIS 17th International Conference on Computer and Information Science (ICIS)},
+  pages={762--765},
+  year={2018},
+  organization={IEEE}
+  }
+  
+@INPROCEEDINGS{image_SVM,
+   title={Research on Multi-feature Fusion for Support Vector Machine Image Classification Algorithm},
+  author={Deng, Lixia and others},
+  booktitle={2021 IEEE International Conference on Electronic Technology, Communication and Information (ICETCI)},
+  pages={516--519},
+  year={2021},
+  organization={IEEE}
+  }
+
+@article{shi2009survey,
+  title={Survey on neural networks used for medical image processing},
+  author={Shi, Zhenghao and others},
+  journal={International Journal of Computational Science},
+  volume={3},
+  number={1},
+  pages={86},
+  year={2009},
+  publisher={NIH Public Access}
+}
+
+@INPROCEEDINGS{Breast_ALex,
+  title={Breast cancer histopathology image classification using AlexNet},
+  author={Titoriya, Ankit and Sachdeva, Shelly},
+  booktitle={2019 4th International Conference on Information Systems and Computer Networks (ISCON)},
+  pages={708--712},
+  year={2019},
+  organization={IEEE}
+}
+
+  
+  
+@article{SCC,   
+title={Head and neck cancer detection in digitized whole-slide histology using convolutional neural networks},
+  author={Halicek, Martin and others},
+  journal={Scientific Reports},
+  volume={9},
+  number={1},
+  pages={14043},
+  year={2019},
+  publisher={Nature Publishing Group UK London}
+}
+
+@INPROCEEDINGS{Saric,
+  title={CNN-based method for lung cancer detection in whole slide histopathology images},
+  author={{\v{S}}ari{\'c}, Matko and Russo, Mladen and Stella, Maja and Sikora, Marjan},
+  booktitle={4th IEEE International Conference on Smart and Sustainable Technologies (SpliTech)},
+  pages={1--4},
+  year={2019}
+  }
+
+  @article{Zhang,   title={Breast cancer histopathological image classification based on convolutional neural networks},
+  author={Zhang, Jianxin and Wei, Xiangguo and Che, Chao and Zhang, Qiang and Wei, Xiaopeng},
+  journal={Journal of Medical Imaging and Health Informatics},
+  volume={9},
+  number={4},
+  pages={735--743},
+  year={2019},
+  publisher={American Scientific Publishers}
+  }
+
+  @INPROCEEDINGS{Titoriya,
+  title={Breast cancer histopathology image classification using AlexNet},
+ author={Titoriya, Ankit and Sachdeva, Shelly},
+  booktitle={4th IEEE International Conference on Information Systems and Computer Networks (ISCON)},
+  pages={708--712},
+  year={2019}
+}
+
+  @article{mangal,
+  title={Convolution neural networks for diagnosing colon and lung cancer histopathological images},
+  author={Mangal, Sanidhya and others},
+  journal={arXiv preprint arXiv:2009.03878},
+  year={2020}
+}
+
+@article{Sun,   
+title={Deep learning-based classification of liver cancer histopathology images using only global labels},
+  author={Sun, Chunli and others},
+  journal={IEEE Journal of Biomedical and Health Informatics},
+  volume={24},
+  number={6},
+  pages={1643--1651},
+  year={2019},
+  publisher={IEEE}
+}
+
+@article{Abdeltawab,   title={A pyramidal deep learning pipeline for kidney whole-slide histology images classification},
+  author={Abdeltawab, Hisham and others},
+  journal={Scientific Reports},
+  volume={11},
+  number={1},
+  pages={20189},
+  year={2021},
+  publisher={Nature Publishing Group UK London}
+  }
+
+@article{Yan,  
+title={Breast cancer histopathological image classification using a hybrid deep neural network},
+  author={Yan, Rui and others},
+  journal={Methods},
+  volume={173},
+  pages={52--60},
+  year={2020}
+}
+
+@article{Wang,
+   title={Breast cancer histopathological image classification using a hybrid deep neural network},
+  author={Yan, Rui and others},
+  journal={Methods},
+  volume={173},
+  pages={52--60},
+  year={2020},
+  publisher={Elsevier}
+}
+
+  @article{Y_zeng,   
+  title={Application of transfer learning and ensemble learning in image-level classification for breast histopathology},
+  author={Zheng, Yuchao and others},
+  journal={Intelligent Medicine},
+  year={2022},
+  publisher={Elsevier}
+}
+
+  @article{kassani,
+    title={Classification of histopathological biopsy images using ensemble of deep learning networks},
+  author={Kassani, Sara Hosseinzadeh and others},
+  journal={arXiv preprint arXiv:1909.11870},
+  year={2019}
+}
+
+@article{Ferlay,  
+title={Cancer incidence and mortality worldwide: sources, methods and major patterns in GLOBOCAN 2012},
+  author={Ferlay, Jacques and others},
+  journal={International Journal of Cancer},
+  volume={136},
+  number={5},
+  pages={E359--E386},
+  year={2015},
+  publisher={Wiley Online Library} 
+  }
+
+ @misc{Key,
+    title        = {Key statistics about liver cancer},
+    author       = {American Cancer Society},
+    year         = {2023},
+    note         = {\url{https://www.cancer.org/cancer/liver-cancer/about/what-is-key-statistics.html}}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+@ARTICLE{El-Serag2007-kz,
+  title    = "Hepatocellular Carcinoma: Epidemiology and Molecular Carcinogenesis",
+  author   = "El-Serag, Hashem B and Rudolph, K Lenhard",
+  journal  = "Gastroenterology",
+  volume   =  132,
+  number   =  7,
+  pages    = "2557--2576",
+  month    =  jun,
+  year     =  2007,
+  address  = "United States",
+  language = "en"
+}
+
+
+@article{DBLP:journals/corr/RonnebergerFB15,
+  author    = {Olaf Ronneberger and
+               others},
+  title     = {U-Net: Convolutional Networks for Biomedical Image Segmentation},
+  journal   = {CoRR},
+  volume    = {abs/1505.04597},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1505.04597},
+  eprinttype = {arXiv},
+  eprint    = {1505.04597},
+  timestamp = {Mon, 13 Aug 2018 16:46:52 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/RonnebergerFB15.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{american, 
+title={Key Statistics About Liver Cancer}, 
+url={https://www.cancer.org/cancer/liver-cancer/about/what-is-key-statistics.html}, 
+journal={American Cancer Society}, 
+publisher={The American Cancer Society}
+} 
+
+@article{Munien2021,
+  title={Classification of hematoxylin and eosin-stained breast cancer histology microscopy images using transfer learning with EfficientNets},
+  author={Munien, Chanale{\"a} and Viriri, Serestina},
+  journal={Computational Intelligence and Neuroscience},
+  volume={2021},
+  year={2021},
+  publisher={Hindawi}
+}
+
+@ARTICLE{Veta2014-qi,
+  title    = "Breast Cancer Histopathology Image Analysis: A Review",
+  author   = "Veta, Mitko and others",
+  abstract = "This paper presents an overview of methods that have been
+              proposed for the analysis of breast cancer histopathology images.
+              This research area has become particularly relevant with the
+              advent of whole slide imaging (WSI) scanners, which can perform
+              cost-effective and high-throughput histopathology slide
+              digitization, and which aim at replacing the optical microscope
+              as the primary tool used by pathologist. Breast cancer is the
+              most prevalent form of cancers among women, and image analysis
+              methods that target this disease have a huge potential to reduce
+              the workload in a typical pathology lab and to improve the
+              quality of the interpretation. This paper is meant as an
+              introduction for nonexperts. It starts with an overview of the
+              tissue preparation, staining and slide digitization processes
+              followed by a discussion of the different image processing
+              techniques and applications, ranging from analysis of tissue
+              staining to computer-aided diagnosis, and prognosis of breast
+              cancer patients.",
+  journal  = "IEEE Trans Biomed Eng",
+  volume   =  61,
+  number   =  5,
+  pages    = "1400--1411",
+  month    =  may,
+  year     =  2014,
+  address  = "United States",
+  language = "en"
+}
+
+
+
+
+
+@ARTICLE{Raab2005-im,
+  title    = "Clinical Impact and Frequency of Anatomic Pathology Errors in Cancer Diagnoses",
+  author   = "Raab, Stephen S and others",
+  abstract = "BACKGROUND: To the authors' knowledge, the frequency and clinical
+              impact of errors in the anatomic pathology diagnosis of cancer
+              have been poorly characterized to date. METHODS: The authors
+              examined errors in patients who underwent anatomic pathology
+              tests to determine the presence or absence of cancer or
+              precancerous lesions in four hospitals. They analyzed 1 year of
+              retrospective errors detected through a standardized
+              cytologic-histologic correlation process (in which patient
+              same-site cytologic and histologic specimens were compared).
+              Medical record reviews were performed to determine patient
+              outcomes. The authors also measured the institutional frequency,
+              cause (i.e., pathologist interpretation or sampling), and
+              clinical impact of diagnostic cancer errors. RESULTS: The
+              frequency of errors in cancer diagnosis was found to be dependent
+              on the institution (P < 0.001) and ranged from 1.79-9.42\% and
+              from 4.87-11.8\% of all correlated gynecologic and nongynecologic
+              cases, respectively. A statistically significant association was
+              found between institution and error cause (P < 0.001); the cause
+              of errors resulting from pathologic misinterpretation ranged from
+              5.0-50.7\% (the remainder were due to clinical sampling). A
+              statistically significant association was found between
+              institution and assignment of the clinical impact of error (P <
+              0.001); the aggregated data demonstrated that for gynecologic and
+              nongynecologic errors, 45\% and 39\%, respectively, were
+              associated with harm. The pairwise kappa statistic for
+              interobserver agreement on cause of error ranged from
+              0.118-0.737. CONCLUSIONS: Errors in cancer diagnosis are reported
+              to occur in up to 11.8\% of all reviewed cytologic-histologic
+              specimen pairs. To the authors' knowledge, little agreement
+              exists regarding whether pathology errors are secondary to
+              misinterpretation or poor clinical sampling of tissues and
+              whether pathology errors result in serious harm.",
+  journal  = "Cancer",
+  volume   =  104,
+  number   =  10,
+  pages    = "2205--2213",
+  month    =  nov,
+  year     =  2005,
+  address  = "United States",
+  language = "en"
+}
+
+
+
+
+
+@ARTICLE{Elmore2015-fd,
+  title    = "Diagnostic Concordance Among Pathologists Interpreting Breast Biopsy Specimens",
+  author   = "Elmore, Joann G and others",
+  abstract = "IMPORTANCE: A breast pathology diagnosis provides the basis for
+              clinical treatment and management decisions; however, its
+              accuracy is inadequately understood. OBJECTIVES: To quantify the
+              magnitude of diagnostic disagreement among pathologists compared
+              with a consensus panel reference diagnosis and to evaluate
+              associated patient and pathologist characteristics. DESIGN,
+              SETTING, AND PARTICIPANTS: Study of pathologists who interpret
+              breast biopsies in clinical practices in 8 US states. EXPOSURES:
+              Participants independently interpreted slides between November
+              2011 and May 2014 from test sets of 60 breast biopsies (240 total
+              cases, 1 slide per case), including 23 cases of invasive breast
+              cancer, 73 ductal carcinoma in situ (DCIS), 72 with atypical
+              hyperplasia (atypia), and 72 benign cases without atypia.
+              Participants were blinded to the interpretations of other study
+              pathologists and consensus panel members. Among the 3 consensus
+              panel members, unanimous agreement of their independent diagnoses
+              was 75\%, and concordance with the consensus-derived reference
+              diagnoses was 90.3\%. MAIN OUTCOMES AND MEASURES: The proportions
+              of diagnoses overinterpreted and underinterpreted relative to the
+              consensus-derived reference diagnoses were assessed. RESULTS:
+              Sixty-five percent of invited, responding pathologists were
+              eligible and consented to participate. Of these, 91\% (N = 115)
+              completed the study, providing 6900 individual case diagnoses.
+              Compared with the consensus-derived reference diagnosis, the
+              overall concordance rate of diagnostic interpretations of
+              participating pathologists was 75.3\% (95\% CI, 73.4\%-77.0\%;
+              5194 of 6900 interpretations). Among invasive carcinoma cases
+              (663 interpretations), 96\% (95\% CI, 94\%-97\%) were concordant,
+              and 4\% (95\% CI, 3\%-6\%) were underinterpreted; among DCIS
+              cases (2097 interpretations), 84\% (95\% CI, 82\%-86\%) were
+              concordant, 3\% (95\% CI, 2\%-4\%) were overinterpreted, and 13\%
+              (95\% CI, 12\%-15\%) were underinterpreted; among atypia cases
+              (2070 interpretations), 48\% (95\% CI, 44\%-52\%) were
+              concordant, 17\% (95\% CI, 15\%-21\%) were overinterpreted, and
+              35\% (95\% CI, 31\%-39\%) were underinterpreted; and among benign
+              cases without atypia (2070 interpretations), 87\% (95\% CI,
+              85\%-89\%) were concordant and 13\% (95\% CI, 11\%-15\%) were
+              overinterpreted. Disagreement with the reference diagnosis was
+              statistically significantly higher among biopsies from women with
+              higher (n = 122) vs lower (n = 118) breast density on prior
+              mammograms (overall concordance rate, 73\% [95\% CI, 71\%-75\%]
+              for higher vs 77\% [95\% CI, 75\%-80\%] for lower, P < .001), and
+              among pathologists who interpreted lower weekly case volumes (P <
+              .001) or worked in smaller practices (P = .034) or nonacademic
+              settings (P = .007). CONCLUSIONS AND RELEVANCE: In this study of
+              pathologists, in which diagnostic interpretation was based on a
+              single breast biopsy slide, overall agreement between the
+              individual pathologists' interpretations and the expert
+              consensus-derived reference diagnoses was 75.3\%, with the
+              highest level of concordance for invasive carcinoma and lower
+              levels of concordance for DCIS and atypia. Further research is
+              needed to understand the relationship of these findings with
+              patient management.",
+  journal  = "JAMA",
+  volume   =  313,
+  number   =  11,
+  pages    = "1122--1132",
+  month    =  mar,
+  year     =  2015,
+  address  = "United States",
+  language = "en"
+}
+
+
+
+@ARTICLE{Nakhleh2006-fb,
+  title    = "Error Reduction in Surgical Pathology",
+  author   = "Nakhleh, Raouf E",
+  abstract = "CONTEXT: Because of its complex nature, surgical pathology
+              practice is inherently error prone. Currently, there is pressure
+              to reduce errors in medicine, including pathology. OBJECTIVE: To
+              review factors that contribute to errors and to discuss
+              error-reduction strategies. DESIGN: Literature review. RESULTS:
+              Multiple factors contribute to errors in medicine, including
+              variable input, complexity, inconsistency, tight coupling, human
+              intervention, time constraints, and a hierarchical culture.
+              Strategies that may reduce errors include reducing reliance on
+              memory, improving information access, error-proofing processes,
+              decreasing reliance on vigilance, standardizing tasks and
+              language, reducing the number of handoffs, simplifying processes,
+              adjusting work schedules and environment, providing adequate
+              training, and placing the correct people in the correct jobs.
+              CONCLUSIONS: Surgical pathology is a complex system with ample
+              opportunity for error. Significant error reduction is unlikely to
+              occur without a sustained comprehensive program of quality
+              control and quality assurance. Incremental adoption of
+              information technology and automation along with improved
+              training in patient safety and quality management can help reduce
+              errors.",
+  journal  = "Arch Pathol Lab Med",
+  volume   =  130,
+  number   =  5,
+  pages    = "630--632",
+  month    =  may,
+  year     =  2006,
+  address  = "United States",
+  language = "en"
+}
+
+
+@inproceedings{NIPS2012_c399862d,
+ author = {Krizhevsky, Alex and others},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {F. Pereira and C.J. Burges and L. Bottou and K.Q. Weinberger},
+ publisher = {Curran Associates, Inc.},
+ title = {ImageNet Classification with Deep Convolutional Neural Networks},
+ volume = {25},
+ year = {2012}
+}
+
+
+@inproceedings{ResNet50,
+  title={Deep residual learning for image recognition},
+  author={He, Kaiming and others},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={770--778},
+  year={2016}
+}
+
+@inproceedings{DenseNet121,
+  title={Densely connected convolutional networks},
+  author={Huang, Gao and others},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={4700--4708},
+  year={2017}
+}
+@article{VGG16,
+  title={Very Deep Convolutional Networks for Large-Scale Image Recognition},
+  author={Simonyan, Karen and Zisserman, Andrew},
+  journal={arXiv preprint arXiv:1409.1556},
+  year={2014}
+}
+@inproceedings{EfficientNet,
+  title={Efficientnet: Rethinking model scaling for convolutional neural networks},
+  author={Tan, Mingxing and Le, Quoc},
+  booktitle={International conference on machine learning},
+  pages={6105--6114},
+  year={2019},
+  organization={PMLR}
+}
+
+
+@article{global,
+  title={Deep Learning-Based Classification of Liver Cancer Histopathology Images Using Only Global Labels},
+  author={Sun, Chunli and Xu, Ao and Liu, Dong and Xiong, Zhiwei and Zhao, Feng and Ding, Weiping},
+  journal={IEEE journal of biomedical and health informatics},
+  volume={24},
+  number={6},
+  pages={1643--1651},
+  year={2019},
+  publisher={IEEE},
+}
+
+
+
+
+@article{Chen2020,
+  title={Classification and mutation prediction based on histopathology H\&E images in liver cancer using deep learning},
+  author={Chen, Mingyu and others},
+  journal={NPJ precision oncology},
+  volume={4},
+  number={1},
+  pages={14},
+  year={2020},
+  publisher={Nature Publishing Group UK London}
+}
+
+
+
+ @ARTICLE{Chen2022-vy,
+  title    = "Classification of Multi-Differentiated Liver Cancer Pathological Images Based on Deep Learning Attention Mechanism",
+  author   = "Chen, Chen and Chen, Cheng and Ma, Mingrui and Ma, Xiaojian and
+              Lv, Xiaoyi and Dong, Xiaogang and Yan, Ziwei and Zhu, Min and
+              Chen, Jiajia",
+  abstract = "PURPOSE: Liver cancer is one of the most common malignant tumors
+              in the world, ranking fifth in malignant tumors. The degree of
+              differentiation can reflect the degree of malignancy. The degree
+              of malignancy of liver cancer can be divided into three types:
+              poorly differentiated, moderately differentiated, and well
+              differentiated. Diagnosis and treatment of different levels of
+              differentiation are crucial to the survival rate and survival
+              time of patients. As the gold standard for liver cancer
+              diagnosis, histopathological images can accurately distinguish
+              liver cancers of different levels of differentiation. Therefore,
+              the study of intelligent classification of histopathological
+              images is of great significance to patients with liver cancer. At
+              present, the classification of histopathological images of liver
+              cancer with different degrees of differentiation has
+              disadvantages such as time-consuming, labor-intensive, and large
+              manual investment. In this context, the importance of intelligent
+              classification of histopathological images is obvious. METHODS:
+              Based on the development of a complete data acquisition scheme,
+              this paper applies the SENet deep learning model to the
+              intelligent classification of all types of differentiated liver
+              cancer histopathological images for the first time, and compares
+              it with the four deep learning models of VGG16, ResNet50,
+              ResNet\_CBAM, and SKNet. The evaluation indexes adopted in this
+              paper include confusion matrix, Precision, recall, F1 Score, etc.
+              These evaluation indexes can be used to evaluate the model in a
+              very comprehensive and accurate way. RESULTS: Five different deep
+              learning classification models are applied to collect the data
+              set and evaluate model. The experimental results show that the
+              SENet model has achieved the best classification effect with an
+              accuracy of 95.27\%. The model also has good reliability and
+              generalization ability. The experiment proves that the SENet deep
+              learning model has a good application prospect in the intelligent
+              classification of histopathological images. CONCLUSIONS: This
+              study also proves that deep learning has great application value
+              in solving the time-consuming and laborious problems existing in
+              traditional manual film reading, and it has certain practical
+              significance for the intelligent classification research of other
+              cancer histopathological images.",
+  journal  = "BMC Med Inform Decis Mak",
+  volume   =  22,
+  number   =  1,
+  pages    = "176",
+  month    =  jul,
+  year     =  2022,
+  address  = "England",
+  keywords = "Degree of differentiation of the whole type; Histopathological
+              images of liver cancer; Intelligent classification; SENet",
+  language = "en"
+}
+
+
+
+
+
+@ARTICLE{TaloM,
+  title     = "Automated Classification of Histopathology Images Using Transfer Learning",
+  author    = "Talo, Muhammed",
+  abstract  = "Early and accurate diagnosis of diseases can often save lives.
+               Diagnosis of diseases from tissue samples is done manually by
+               pathologists. Diagnostics process is usually time consuming and
+               expensive. Hence, automated analysis of tissue samples from
+               histopathology images has critical importance for early
+               diagnosis and treatment. The computer aided systems can improve
+               the quality of diagnoses and give pathologists a second opinion
+               for critical cases. In this study, a deep learning based
+               transfer learning approach has been proposed to classify
+               histopathology images automatically. Two well-known and current
+               pre-trained convolutional neural network (CNN) models, ResNet-50
+               and DenseNet-161, have been trained and tested using color and
+               grayscale images. The DenseNet-161 tested on grayscale images
+               and obtained the best classification accuracy of 97.89\%.
+               Additionally, ResNet-50 pre-trained model was tested on the
+               color images of the Kimia Path24 dataset and achieved the
+               highest classification accuracy of 98.87\%. According to the
+               obtained results, it may be said that the proposed pre-trained
+               models can be used for fast and accurate classification of
+               histopathology images and assist pathologists in their daily
+               clinical tasks.",
+  journal   = "Artif. Intell. Med.",
+  publisher = "Elsevier BV",
+  volume    =  101,
+  number    =  101743,
+  pages     = "101743",
+  month     =  nov,
+  year      =  2019,
+  keywords  = "CNN; Deep learning; Histopathology; Medical image
+               classification; Transfer learning",
+  language  = "en"
+}
+
+@article{DBLP:journals/corr/BabaieKSMZKRT17,
+  author    = {Morteza Babaie and
+               Shivam Kalra and
+               Aditya Sriram and
+               Christopher Mitcheltree and
+               Shujin Zhu and
+               Amin Khatami and
+               Shahryar Rahnamayan and
+               Hamid R. Tizhoosh},
+  title     = {Classification and Retrieval of Digital Pathology Scans: {A} New Dataset},
+  journal   = {CoRR},
+  volume    = {abs/1705.07522},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1705.07522},
+  eprinttype = {arXiv},
+  eprint    = {1705.07522},
+  timestamp = {Mon, 13 Aug 2018 16:48:01 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/BabaieKSMZKRT17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@ARTICLE{Aresta2019-kj,
+  title    = "BACH: Grand Challenge on Breast Cancer Histology Images",
+  author   = "Aresta, Guilherme and Ara{\'u}jo, Teresa and Kwok, Scotty and
+              Chennamsetty, Sai Saketh and Safwan, Mohammed and Alex, Varghese
+              and Marami, Bahram and Prastawa, Marcel and Chan, Monica and
+              Donovan, Michael and Fernandez, Gerardo and Zeineh, Jack and
+              Kohl, Matthias and Walz, Christoph and Ludwig, Florian and
+              Braunewell, Stefan and Baust, Maximilian and Vu, Quoc Dang and
+              To, Minh Nguyen Nhat and Kim, Eal and Kwak, Jin Tae and Galal,
+              Sameh and Sanchez-Freire, Veronica and Brancati, Nadia and
+              Frucci, Maria and Riccio, Daniel and Wang, Yaqi and Sun, Lingling
+              and Ma, Kaiqiang and Fang, Jiannan and Kone, Ismael and Boulmane,
+              Lahsen and Campilho, Aur{\'e}lio and Eloy, Catarina and
+              Pol{\'o}nia, Ant{\'o}nio and Aguiar, Paulo",
+  abstract = "Breast cancer is the most common invasive cancer in women,
+              affecting more than 10\% of women worldwide. Microscopic analysis
+              of a biopsy remains one of the most important methods to diagnose
+              the type of breast cancer. This requires specialized analysis by
+              pathologists, in a task that i) is highly time- and
+              cost-consuming and ii) often leads to nonconsensual results. The
+              relevance and potential of automatic classification algorithms
+              using hematoxylin-eosin stained histopathological images has
+              already been demonstrated, but the reported results are still
+              sub-optimal for clinical use. With the goal of advancing the
+              state-of-the-art in automatic classification, the Grand Challenge
+              on BreAst Cancer Histology images (BACH) was organized in
+              conjunction with the 15th International Conference on Image
+              Analysis and Recognition (ICIAR 2018). BACH aimed at the
+              classification and localization of clinically relevant
+              histopathological classes in microscopy and whole-slide images
+              from a large annotated dataset, specifically compiled and made
+              publicly available for the challenge. Following a positive
+              response from the scientific community, a total of 64
+              submissions, out of 677 registrations, effectively entered the
+              competition. The submitted algorithms improved the
+              state-of-the-art in automatic classification of breast cancer
+              with microscopy images to an accuracy of 87\%. Convolutional
+              neuronal networks were the most successful methodology in the
+              BACH challenge. Detailed analysis of the collective results
+              allowed the identification of remaining challenges in the field
+              and recommendations for future developments. The BACH dataset
+              remains publicly available as to promote further improvements to
+              the field of automatic classification in digital pathology.",
+  journal  = "Med Image Anal",
+  volume   =  56,
+  pages    = "122--139",
+  month    =  may,
+  year     =  2019,
+  address  = "Netherlands",
+  keywords = "Breast cancer; Challenge; Comparative study; Deep learning;
+              Digital pathology; Histology",
+  language = "en"
+}
+
+
+
+@inproceedings{color_norm,
+  title={A Method For Normalizing Histology Slides For Quantitative Analysis},
+  author={Macenko, Marc and Niethammer, Marc and Marron, James S and Borland, David and Woosley, John T and Guan, Xiaojun and Schmitt, Charles and Thomas, Nancy E},
+  booktitle={2009 IEEE international symposium on biomedical imaging: from nano to macro},
+  pages={1107--1110},
+  year={2009},
+  organization={IEEE},
+}
+
+
+
+@misc{colon2019,
+  url = {https://arxiv.org/abs/1912.12142},
+  author = {Borkowski, Andrew A. and Bui, Marilyn M. and Thomas, L. Brannon and Wilson, Catherine P. and DeLand, Lauren A. and Mastorides, Stephen M.},
+  keywords = {Image and Video Processing (eess.IV), Computer Vision and Pattern Recognition (cs.CV), Quantitative Methods (q-bio.QM), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences},
+  title = {Lung and Colon Cancer Histopathological Image Dataset (LC25000)},
+  publisher = {arXiv},
+  year = {2019},
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+
+
+
+
+@incollection{NEURIPS2019_9015,
+title = {PyTorch: An Imperative Style, High-Performance Deep Learning Library},
+author = {Paszke, Adam and others},
+booktitle = {Advances in Neural Information Processing Systems 32},
+pages = {8024--8035},
+year = {2019},
+publisher = {Curran Associates, Inc.}
+}
+
+
+@inproceedings{Bridle1989ProbabilisticIO,
+  title={Probabilistic Interpretation of Feedforward Classification Network Outputs, with Relationships to Statistical Pattern Recognition},
+  author={John Scott Bridle},
+  booktitle={NATO Neurocomputing},
+  year={1989},
+}
+
+
+
+
+
+
+
+@article{TALUKDER2022117695,
+title = {Machine Learning-Based Lung and Colon Cancer Detection Using Deep Feature Extraction and Ensemble Learning},
+journal = {Expert Systems with Applications},
+volume = {205},
+pages = {117695},
+year = {2022},
+issn = {0957-4174},
+url = {https://www.sciencedirect.com/science/article/pii/S0957417422009873},
+author = {Md. Alamin Talukder and Md. Manowarul Islam and Md Ashraf Uddin and Arnisha Akhter and Khondokar Fida Hasan and Mohammad Ali Moni},
+keywords = {Feature extraction, Transfer learning, Machine learning, Ensemble learning, Lung cancer, Colon cancer},
+abstract = {Cancer is a fatal disease caused by a combination of genetic diseases and a variety of biochemical abnormalities. Lung and colon cancer have emerged as two of the leading causes of death and disability in humans. The histopathological detection of such malignancies is usually the most important component in determining the best course of action. Early detection of the ailment on either front considerably decreases the likelihood of mortality. Machine learning and deep learning techniques can be utilized to speed up such cancer detection, allowing researchers to study a large number of patients in a much shorter amount of time and at a lower cost. In this research work, we introduced a hybrid ensemble feature extraction model to efficiently identify lung and colon cancer. It integrates deep feature extraction and ensemble learning with high-performance filtering for cancer image datasets. The model is evaluated on histopathological (LC25000) lung and colon datasets. According to the study findings, our hybrid model can detect lung, colon, and (lung and colon) cancer with accuracy rates of 99.05\%, 100\%, and 99.30\%, respectively. The study’s findings show that our proposed strategy outperforms existing models significantly. Thus, these models could be applicable in clinics to support the doctor in the diagnosis of cancers.}
+}
+
+
+
+@article{BHATTACHARYA2023104692,
+title = {Deep Feature Selection Using Adaptive $\beta$-Hill Climbing Aided Whale Optimization Algorithm For Lung and Colon Cancer Detection},
+journal = {Biomedical Signal Processing and Control},
+volume = {83},
+pages = {104692},
+year = {2023},
+issn = {1746-8094},
+url = {https://www.sciencedirect.com/science/article/pii/S1746809423001258},
+author = {Agnish Bhattacharya and Biswajit Saha and Soham Chattopadhyay and Ram Sarkar},
+keywords = {Lung cancer, Colon cancer, Medical image analysis, Feature selection, Whale optimization algorithm, Histopathology images},
+abstract = {One of the most frightening and talked-about diseases in the modern world is cancer. Huge amounts of research are conducted worldwide to make this ailment less fearsome, be it by finding its cure, discovering ways to detect it in much earlier stages to reduce the mortality rate, or identifying precautions for humans to avoid it. The availability of large collections of biomedical and clinical data has ushered in the use of computer vision for cancer detection, especially for two of its most common types, lung and colon carcinomas. In this work, we present a framework wherein both deep learning and meta-heuristic approaches have been used for the prediction of colon or lung cancer, or both, from histopathological images with near-perfect precision. Initially, deep learning models, namely ResNet-18 for 2-class classification and EfficientNet-b4-widese for 3-class and 5-class classification, have been trained on the LC25000 dataset, followed by the extraction of deep features. The feature vector obtained from a deep learning model may have some redundancy. Hence, the selection of the most useful features has been done with the application of our proposed hybrid meta-heuristic optimization algorithm, AdBet-WOA (Whale optimization algorithm with integrated Adaptive β-Hill Climbing local search), utilizing which the Support Vector Machine (SVM) classifier classifies the colon cancer test data, lung cancer test data, and both combined with an accuracy of 99.99\%, 99.97\%, and 99.96\%, respectively, matching the benchmark results comprehensively. For comparison, we have used a few independent as well as hybrid optimization algorithms. Our proposed approach succeeds greatly in reducing the number of features and also leads to better classification performance, as indicated by the obtained results. The relevant codes for our proposed approach are publicly available at: https://github.com/raj-1411/AdBet-WOA}
+}
+
+
+
+
+@article{yahia2022enhancement,
+  title={An Enhancement Technique to Diagnose Colon and Lung Cancer by using Double CLAHE and Deep Learning},
+  author={yahia Ibrahim, Nora and Talaat, Amira Samy},
+  journal={International Journal of Advanced Computer Science and Applications},
+  volume={13},
+  number={8},
+  year={2022},
+  publisher={Science and Information (SAI) Organization Limited}
+}
+
+
+
+
+
+@Article{s21030748,
+AUTHOR = {Masud, Mehedi and Sikder, Niloy and Nahid, Abdullah-Al and Bairagi, Anupam Kumar and AlZain, Mohammed A.},
+TITLE = {A Machine Learning Approach to Diagnosing Lung and Colon Cancer Using a Deep Learning-Based Classification Framework},
+JOURNAL = {Sensors},
+VOLUME = {21},
+YEAR = {2021},
+NUMBER = {3},
+ARTICLE-NUMBER = {748},
+URL = {https://www.mdpi.com/1424-8220/21/3/748},
+PubMedID = {33499364},
+ISSN = {1424-8220},
+ABSTRACT = {The field of Medicine and Healthcare has attained revolutionary advancements in the last forty years. Within this period, the actual reasons behind numerous diseases were unveiled, novel diagnostic methods were designed, and new medicines were developed. Even after all these achievements, diseases like cancer continue to haunt us since we are still vulnerable to them. Cancer is the second leading cause of death globally; about one in every six people die suffering from it. Among many types of cancers, the lung and colon variants are the most common and deadliest ones. Together, they account for more than 25\% of all cancer cases. However, identifying the disease at an early stage significantly improves the chances of survival. Cancer diagnosis can be automated by using the potential of Artificial Intelligence (AI), which allows us to assess more cases in less time and cost. With the help of modern Deep Learning (DL) and Digital Image Processing (DIP) techniques, this paper inscribes a classification framework to differentiate among five types of lung and colon tissues (two benign and three malignant) by analyzing their histopathological images. The acquired results show that the proposed framework can identify cancer tissues with a maximum of 96.33\% accuracy. Implementation of this model will help medical professionals to develop an automatic and reliable system capable of identifying various types of lung and colon cancers.}
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@ARTICLE{bishop2015,
+  title   = "The pathology laboratory and the pathologist in the era of
+             personalized medicine",
+  author  = "Bishop, J A and Rekhtman, N and Chun, J and Wakely, P E",
+  journal = "Archives of pathology \& laboratory medicine",
+  volume  =  139,
+  pages   = "609--619",
+  year    =  2015
+}
+
+
+
+@ARTICLE{weinreb2016,
+  title   = "Digital pathology: a powerful new tool for precision medicine",
+  author  = "Weinreb, I and Liang, Y",
+  journal = "npj Precision Oncology",
+  volume  =  1,
+  number  =  1,
+  pages   = "1--6",
+  year    =  2016
+}
+@article{hassell2014,
+  title={Digital imaging in pathology: whole-slide imaging and beyond},
+  author={Ghaznavi, Farzad and Evans, Andrew and Madabhushi, Anant and Feldman, Michael},
+  journal={Annual Review of Pathology: Mechanisms of Disease},
+  volume={8},
+  pages={331--359},
+  year={2013},
+  publisher={Annual Reviews}
+}
+
+
+
+
+@article{DBLP:ml_cv,
+  author    = {Niall O' Mahony and
+               Sean Campbell and
+               Anderson Carvalho and
+               Suman Harapanahalli and
+               Gustavo Adolfo Velasco{-}Hern{\'{a}}ndez and
+               Lenka Krpalkova and
+               Daniel Riordan and
+               Joseph Walsh},
+  title     = {Deep Learning vs. Traditional Computer Vision},
+  journal   = {CoRR},
+  volume    = {abs/1910.13796},
+  year      = {2019},
+  url       = {http://arxiv.org/abs/1910.13796},
+  eprinttype = {arXiv},
+  eprint    = {1910.13796},
+  timestamp = {Fri, 01 Nov 2019 15:20:29 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1910-13796.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+a service of  Schloss Dagstuhl - Leibniz Center for Informatics	homebrowsesearchaboutnfdi
+
+
+
+@InProceedings{Spanhol2016CL,
+author={Spanhol, F. A. and others},
+title={Breast cancer histopathological image classification using Convolutional Neural Networks},
+booktitle={2016 International Joint Conference on Neural Networks (IJCNN)},
+series={2016 International Joint Conference on Neural Networks (IJCNN)},
+year={2016},
+pages={2560-2567},
+issn={2161-4407},
+doi={10.1109/IJCNN.2016.7727519},
+url={https://doi.org/10.1109/IJCNN.2016.7727519}
+}
+
+
+@article{kingma2014adam,
+  title={Adam: A method for stochastic optimization},
+  author={Kingma, Diederik P and Ba, Jimmy},
+  journal={arXiv preprint arXiv:1412.6980},
+  year={2014}
+}
+
+
+@article{duchi2011adaptive,
+  title={Adaptive subgradient methods for online learning and stochastic optimization.},
+  author={Duchi, John and others},
+  journal={Journal of machine learning research},
+  volume={12},
+  number={7},
+  year={2011}
+}
+
+
+@article{pan2010survey,
+  title={A survey on transfer learning},
+  author={Pan, Sinno Jialin and Yang, Qiang},
+  journal={IEEE Transactions on knowledge and data engineering},
+  volume={22},
+  number={10},
+  pages={1345--1359},
+  year={2010},
+  publisher={IEEE}
+}
+
+
+@inproceedings{kornblith2019better,
+  title={Do better imagenet models transfer better?},
+  author={Kornblith, Simon and others},
+  booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition},
+  pages={2661--2671},
+  year={2019}
+}
+
+
+
+
+
+
+@article{SHALLU2018247,
+title = {Breast cancer histology images classification: Training from scratch or transfer learning?},
+journal = {ICT Express},
+volume = {4},
+number = {4},
+pages = {247-254},
+year = {2018},
+issn = {2405-9595},
+doi = {https://doi.org/10.1016/j.icte.2018.10.007},
+url = {https://www.sciencedirect.com/science/article/pii/S2405959518304934},
+author = { Shallu and Rajesh Mehra},
+keywords = {Breast cancer, Histopathological images, Convolutional neural network, Full training, Transfer learning},
+abstract = {We demonstrated the ability of transfer learning in comparison with the fully-trained network on the histopathological imaging modality by considering three pre-trained networks: VGG16, VGG19, and ResNet50 and analyzed their behavior for magnification independent breast cancer classification. Concurrently, we examined the effect of training–testing data size on the performance of considered networks. A fine-tuned pre-trained VGG16 with logistic regression classifier yielded the best performance with 92.60\% accuracy, 95.65\% area under ROC curve (AUC), and 95.95\% accuracy precision score (APS) for 90\%–10\% training–testing data splitting. Layer-wise fine-tuning and different weight initialization schemes can be a future aspect of this study.}
+}
+
+
+
+
+@Article{app10103359,
+AUTHOR = {Kandel, Ibrahem and others},
+TITLE = {How Deeply to Fine-Tune a Convolutional Neural Network: A Case Study Using a Histopathology Dataset},
+JOURNAL = {Applied Sciences},
+VOLUME = {10},
+YEAR = {2020},
+NUMBER = {10},
+ARTICLE-NUMBER = {3359},
+URL = {https://www.mdpi.com/2076-3417/10/10/3359},
+ISSN = {2076-3417},
+DOI = {10.3390/app10103359}
+}
+
+
+@ARTICLE{TALO2019176,
+  title     = "Application of deep transfer learning for automated brain
+               abnormality classification using {MR} images",
+  author    = "Talo, Muhammed and Baloglu, Ulas Baran and Y{\i}ld{\i}r{\i}m,
+               {\"O}zal and Rajendra Acharya, U",
+  journal   = "Cogn. Syst. Res.",
+  publisher = "Elsevier BV",
+  volume    =  54,
+  pages     = "176--188",
+  month     =  may,
+  year      =  2019,
+  language  = "en"
+}
+
+
+
+
+
+
+@article{DBLP:journals/corr/YosinskiCBL14,
+  title={How transferable are features in deep neural networks?},
+  author={Yosinski, Jason and Clune, Jeff and Bengio, Yoshua and Lipson, Hod},
+  journal={Advances in neural information processing systems},
+  volume={27},
+  year={2014}
+}
+
+
+
+
+
+@article{Sarhan2022,
+  title={Multi-phase Fine-Tuning: A New Fine-Tuning Approach for Sign Language Recognition},
+  author={Sarhan, Noha and others},
+  volume={36},
+  number={1},
+  pages={91--98},
+  year={2022},
+  publisher={Springer}
+}
+
+@misc{ENSEMBLING1,
+  doi = {10.48550/ARXIV.1909.11870},
+  url = {https://arxiv.org/abs/1909.11870},
+  author = {Kassani, Sara Hosseinzadeh and Kassani, Peyman Hosseinzadeh and Wesolowski, Michal J. and Schneider, Kevin A. and Deters, Ralph},
+  keywords = {Image and Video Processing (eess.IV), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {Classification of Histopathological Biopsy Images Using Ensemble of Deep Learning Networks},
+  publisher = {arXiv},
+  year = {2019},
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+@article{cortes1995support,
+  title={Support-vector networks},
+  author={Cortes, Corinna and others},
+  journal={Machine learning},
+  volume={20},
+  number={3},
+  pages={273--297},
+  year={1995},
+  publisher={Springer}
+}
+
+
+
+
+@article{ciresan2012deep,
+  title={Deep neural networks segment neuronal membranes in electron microscopy images},
+  author={Ciresan, Dan and Giusti, Alessandro and Gambardella, Luca and Schmidhuber, J{\"u}rgen},
+  journal={Advances in neural information processing systems},
+  volume={25},
+  year={2012}
+}
+
+
+@article{shelhamer2016fully,
+  title={Fully convolutional networks for semantic segmentation. CoRR, abs/1605.06211},
+  author={Shelhamer, E and others},
+  journal={arXiv preprint arXiv:1605.06211},
+  year={2016}
+}
+
+
+@article{badrinarayanan2015segnet,
+  title={Segnet: A deep convolutional encoder-decoder architecture for robust semantic pixel-wise labelling},
+  author={Badrinarayanan, Vijay and others},
+  journal={arXiv preprint},
+  volume={arXiv:1505.07293},
+  year={2015}
+}
+
+@article{chanchal2021efficient,
+  title={Efficient and robust deep learning architecture for segmentation of kidney and breast histopathology images},
+  author={Chanchal, Amit Kumar and Kumar, Aman and Lal, Shyam and Kini, Jyoti},
+  journal={Computers \& Electrical Engineering},
+  volume={92},
+  pages={107177},
+  year={2021},
+  publisher={Elsevier}
+}
+
+
+
+@article{chanchal2022deep,
+  title={Deep structured residual encoder-decoder network with a novel loss function for nuclei segmentation of kidney and breast histopathology images},
+  author={Chanchal, Amit Kumar and others},
+  journal={Multimedia Tools and Applications},
+  volume={81},
+  number={7},
+  pages={9201--9224},
+  year={2022},
+  publisher={Springer}
+}
+
+@article{fan2020ma,
+  title={Ma-net: A multi-scale attention network for liver and tumor segmentation},
+  author={Fan, Tongle and Wang, Guanglei and Li, Yan and Wang, Hongrui},
+  journal={IEEE Access},
+  volume={8},
+  pages={179656--179665},
+  year={2020},
+  publisher={IEEE}
+}
+
+
+@inproceedings{zhou2018unet++,
+  title={Unet++: A nested u-net architecture for medical image segmentation},
+  author={Zhou, Zongwei and others},
+  booktitle={Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support: 4th International Workshop, DLMIA 2018, and 8th International Workshop, ML-CDS, September 20, 2018, Proceedings 4},
+  pages={3--11},
+  year={2018},
+  organization={Springer}
+}
+
+
+@inproceedings{arora2018optimization,
+  title={On the optimization of deep networks: Implicit acceleration by overparameterization},
+  author={Arora, Sanjeev and others},
+  booktitle={International Conference on Machine Learning},
+  pages={244--253},
+  year={2018},
+  organization={PMLR}
+}
+
+
+@MISC{noauthor_undated-xa,
+  title        = "Zynq {UltraScale+} {MPSoC} {ZCU104} Evaluation Kit",
+  booktitle    = "Xilinx",
+  abstract     = "The ZCU104 Evaluation Kit enables designers to jumpstart
+                  designs for video conferencing, surveillance, Advanced Driver
+                  Assisted Systems (ADAS) and streaming and encoding
+                  applications.",
+  howpublished = "\url{https://www.xilinx.com/products/boards-and-kits/zcu104.html}",
+  note         = "Accessed: 2023-5-4",
+  language     = "en"
+}
+@MISC{noauthor_undated-ir,
+  title       = "{README.Md} at 1.4 · {Xilinx/Vitis-AI-Tutorials}",
+  abstract    = "Contribute to Xilinx/Vitis-AI-Tutorials development by
+                 creating an account on GitHub.",
+  institution = "Github",
+  language    = "en"
+}
+
+
+@MISC{Raspberry_Pi_Ltd_undated-nt,
+  title        = "Raspberry pi 4",
+  booktitle    = "Raspberry Pi",
+  author       = "{Raspberry Pi Ltd}",
+  abstract     = "Your tiny, dual-display, desktop computer …and robot brains,
+                  smart home hub, media centre, networked AI core, factory
+                  controller, and much more.",
+  howpublished = "\url{https://www.raspberrypi.com/products/raspberry-pi-4-model-b/}",
+  note         = "Accessed: 2023-5-4",
+  language     = "en"
+}
+
+@article{BreastNet,
+  title={BreastNet: A novel convolutional neural network model through histopathological images for the diagnosis of breast cancer},
+  author={To{\u{g}}a{\c{c}}ar, Mesut and others},
+  journal={Physica A: Statistical Mechanics and its Applications},
+  volume={545},
+  pages={123592},
+  year={2020},
+  publisher={Elsevier}
+}
+
+@article{LiverNet,
+  title={LiverNet: efficient and robust deep learning model for automatic diagnosis of sub-types of liver hepatocellular carcinoma cancer from H\&E stained liver histopathology images},
+  author={Aatresh, Anirudh Ashok and others},
+  journal={International journal of computer assisted radiology and surgery},
+  volume={16},
+  pages={1549--1563},
+  year={2021},
+  publisher={Springer}
+}
+
+@article{5288526,
+  title={A survey on transfer learning},
+  author={Pan, Sinno Jialin and Yang, Qiang},
+  journal={IEEE Transactions on knowledge and data engineering},
+  volume={22},
+  number={10},
+  pages={1345--1359},
+  year={2010},
+  publisher={IEEE}
+}
+
+@inproceedings{Wang2020Pay,
+  title={Pay attention to features, transfer learn faster CNNs},
+  author={Wang, Kafeng and others},
+  booktitle={International conference on learning representations},
+  year={2020}
+}
+
+@misc{our_github,
+author={Ajinkya Deshpande and Deep Gupta},
+title={Raspberrypi-Implementation of EfficientNetb0 for TCGA},
+url={https://github.com/AjinkyaDeshpande39/Raspberrypi-implementation-of-EfficientNetb0-for-TCGA}
+}
