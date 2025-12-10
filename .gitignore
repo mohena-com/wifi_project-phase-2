@@ -1,0 +1,12 @@
+# Ignore all PyTorch model files
+src/*.pt
+
+# Ignore mlruns directory
+src/mlruns/
+
+# Ignore Python cache directories
+src/__pycache__/
+
+.DS_Store
+meta.yaml
+DenseNet1D*
