@@ -1,3 +1,3 @@
 # wifi_project
-HAR using CSI
+Human Biometric Id identification using HAR Wi-Fi CSI Dataset
 Data Set - https://drive.google.com/drive/folders/1ZM16bjTbTZipfEoIkpJjFVTNntdFQhh4?usp=drive_link
