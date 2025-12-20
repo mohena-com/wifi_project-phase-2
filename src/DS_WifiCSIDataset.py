@@ -128,7 +128,7 @@ class WifiCSIDataset(Dataset):
              
             return a, b, c
         return None, None, None
-
+'''
     def sanitize_phase(self, raw_phase_matrix):
         """
         Applies phase unwrapping and linear trend removal to the raw phase matrix.
@@ -157,7 +157,7 @@ class WifiCSIDataset(Dataset):
             sanitized_phase[:, subcarrier_index] = unwrapped_phase - linear_trend
 
         return sanitized_phase
-
+'''
     def load_csv_as_numpy(self, filename):
         """
         Loads a single CSV and returns:
