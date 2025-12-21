@@ -128,36 +128,7 @@ class WifiCSIDataset(Dataset):
              
             return a, b, c
         return None, None, None
-        '''
-    def sanitize_phase(self, raw_phase_matrix):
-        """
-        Applies phase unwrapping and linear trend removal to the raw phase matrix.
-
-        Args:
-            raw_phase_matrix (np.ndarray): Array of shape (Time_Steps, Subcarriers).
-
-        Returns:
-            np.ndarray: Sanitized phase data.
-        """
-        T, N = raw_phase_matrix.shape
-        sanitized_phase = np.zeros_like(raw_phase_matrix, dtype=np.float32)
-        time_index = np.arange(T)
-
-        # Process each subcarrier column-wise
-        for subcarrier_index in range(N):
-            raw_phase = raw_phase_matrix[:, subcarrier_index]
-
-            # 1. Phase Unwrapping
-            unwrapped_phase = unwrap(raw_phase)
-
-            # 2. Linear Trend Removal (Sanitization)
-            p = np.polyfit(time_index, unwrapped_phase, 1)
-            linear_trend = np.polyval(p, time_index)
-
-            sanitized_phase[:, subcarrier_index] = unwrapped_phase - linear_trend
-
-        return sanitized_phase
-        '''
+        
     def load_csv_as_numpy(self, filename):
         """
         Loads a single CSV and returns:
